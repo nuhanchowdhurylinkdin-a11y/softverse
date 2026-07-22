@@ -19,6 +19,8 @@ class PrimaryButton extends StatelessWidget {
   final double letterSpacing;
   final bool isLoading;
   final String loadingLabel;
+  final IconData? icon;
+  final double iconSize;
 
   const PrimaryButton({
     super.key,
@@ -37,6 +39,8 @@ class PrimaryButton extends StatelessWidget {
     this.letterSpacing = 0,
     this.isLoading = false,
     this.loadingLabel = 'Submitting...',
+    this.icon,
+    this.iconSize = 20,
   });
 
   @override
@@ -88,13 +92,22 @@ class PrimaryButton extends StatelessWidget {
                         ),
                       ],
                     )
-                  : Text(
-                      label,
-                      style: getTextStyle(
-                        fontSize: fontSize,
-                        fontWeight: fontWeight,
-                        color: textColor,
-                      ).copyWith(letterSpacing: letterSpacing),
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // if (icon != null) ...[
+                        //   Icon(icon, size: iconSize.sp, color: textColor),
+                        //   SizedBox(width: 6.w),
+                        // ],
+                        Text(
+                          label,
+                          style: getTextStyle(
+                            fontSize: fontSize,
+                            fontWeight: fontWeight,
+                            color: textColor,
+                          ).copyWith(letterSpacing: letterSpacing),
+                        ),
+                      ],
                     ),
             ),
           ),

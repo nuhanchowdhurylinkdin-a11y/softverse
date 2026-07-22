@@ -35,3 +35,4 @@ flutter:
     - .env
     - assets/logo/
     - assets/icon/
+    - assets/images/walkthrough/

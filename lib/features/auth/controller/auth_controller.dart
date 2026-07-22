@@ -26,9 +26,9 @@ class AuthController extends GetxController {
 
   void toggleObscureConfirmNewPassword() => obscureConfirmNewPassword.toggle();
 
-  void login() {}
+  void login() => Get.offAllNamed(AppRoute.getWalkthroughScreen());
 
-  void register() {}
+  void register() => Get.offAllNamed(AppRoute.getWalkthroughScreen());
 
   void goToForgotPassword() => Get.toNamed(AppRoute.getForgetPasswordScreen());
 

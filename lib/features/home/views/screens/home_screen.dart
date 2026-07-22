@@ -1,84 +1,80 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 
-import '../../../../core/common/styles/global_text_style.dart';
-import '../../../../core/controller/theme_controller.dart';
-import '../../../../core/utils/theme/app_colors_extension.dart';
+import '../../../../core/common/widgets/floating_icon_button.dart';
+import '../../../../core/utils/constants/colors.dart';
 import '../../controller/home_controller.dart';
+import '../../widgets/category_tabs.dart';
+import '../../widgets/order_summary_card.dart';
+import '../../widgets/order_tab_selector.dart';
+import '../../widgets/pos_app_bar.dart';
+import '../../widgets/product_row.dart';
+import '../../widgets/table_order_card.dart';
 
 class HomeScreen extends GetView<HomeController> {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final c = context.appColors;
-    final themeCtrl = Get.find<ThemeController>();
-
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: c.cardBg,
-        elevation: 0,
-        title: Text(
-          'Softverse',
-          style: getTextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w700,
-            color: c.textPrimary,
-          ),
-        ),
-        centerTitle: true,
-        actions: [
-          Obx(() => IconButton(
-                onPressed: themeCtrl.toggle,
-                icon: Icon(themeCtrl.icon, color: c.textPrimary),
-              )),
-        ],
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Stack(
           children: [
-            Text(
-              'Counter',
-              style: getTextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: c.textSecondary,
-              ),
-            ),
-            SizedBox(height: 8.h),
-            Obx(() => Text(
-                  '${controller.counter.value}',
-                  style: getTextStyle(
-                    fontSize: 64,
-                    fontWeight: FontWeight.w700,
-                    color: c.textPrimary,
-                  ),
-                )),
-            SizedBox(height: 32.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            Column(
               children: [
-                _CounterButton(
-                  icon: Icons.remove,
-                  onTap: controller.decrement,
-                  color: const Color(0xFFEF4444),
-                ),
-                SizedBox(width: 16.w),
-                _CounterButton(
-                  icon: Icons.refresh,
-                  onTap: controller.reset,
-                  color: c.textSecondary,
-                ),
-                SizedBox(width: 16.w),
-                _CounterButton(
-                  icon: Icons.add,
-                  onTap: controller.increment,
-                  color: const Color(0xFF0F58BD),
+                PosAppBar(title: 'POS-1'),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.all(16.w),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Obx(
+                          () => OrderTabSelector(
+                            isOrderSelected: controller.isOrderTabSelected.value,
+                            onOrderTap: controller.selectOrderTab,
+                            onTableTap: controller.selectTableTab,
+                          ),
+                        ),
+                        SizedBox(height: 16.h),
+                        Obx(
+                          () => controller.isOrderTabSelected.value
+                              ? _OrderTabBody(controller: controller)
+                              : _TableTabBody(controller: controller),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
+            ),
+            Obx(
+              () => controller.isOrderTabSelected.value
+                  ? Positioned(
+                      right: 16.w,
+                      bottom: 16.h,
+                      child: Column(
+                        children: [
+                          FloatingIconButton(
+                            icon: Iconsax.search_normal,
+                            backgroundColor: AppColors.chipBackground,
+                            iconColor: AppColors.onboardingBackground,
+                            onTap: controller.openSearch,
+                          ),
+                          SizedBox(height: 15.h),
+                          FloatingIconButton(
+                            icon: Iconsax.scan,
+                            backgroundColor: AppColors.onboardingBackground,
+                            iconColor: Colors.white,
+                            onTap: controller.openScan,
+                          ),
+                        ],
+                      ),
+                    )
+                  : const SizedBox.shrink(),
             ),
           ],
         ),
@@ -87,31 +83,65 @@ class HomeScreen extends GetView<HomeController> {
   }
 }
 
-class _CounterButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  final Color color;
+class _OrderTabBody extends StatelessWidget {
+  final HomeController controller;
 
-  const _CounterButton({
-    required this.icon,
-    required this.onTap,
-    required this.color,
-  });
+  const _OrderTabBody({required this.controller});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 56.w,
-        height: 56.w,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(16.r),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        OrderSummaryCard(
+          orderId: controller.orderId,
+          itemCount: controller.orderItemCount,
+          total: controller.orderTotal,
+          onCheckout: controller.checkout,
         ),
-        alignment: Alignment.center,
-        child: Icon(icon, color: Colors.white, size: 28.sp),
-      ),
+        SizedBox(height: 16.h),
+        Obx(
+          () => CategoryTabs(
+            categories: controller.categories,
+            selectedIndex: controller.selectedCategoryIndex.value,
+            onSelected: controller.selectCategory,
+          ),
+        ),
+        SizedBox(height: 16.h),
+        ...controller.products.map(
+          (product) => Padding(
+            padding: EdgeInsets.only(bottom: 10.h),
+            child: ProductRow(
+              product: product,
+              onAdd: () => controller.addToCart(product),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TableTabBody extends StatelessWidget {
+  final HomeController controller;
+
+  const _TableTabBody({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: controller.tableOrders
+          .map(
+            (tableOrder) => Padding(
+              padding: EdgeInsets.only(bottom: 24.h),
+              child: TableOrderCard(
+                tableOrder: tableOrder,
+                onOpenOrder: () => controller.openTableOrder(tableOrder),
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 }
