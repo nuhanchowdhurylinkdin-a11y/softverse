@@ -25,6 +25,8 @@ class AppTextField extends StatelessWidget {
   final EdgeInsetsGeometry? contentPadding;
   final FormFieldValidator<String>? validator;
   final ValueChanged<String>? onChanged;
+  final int maxLines;
+  final TextAlignVertical? textAlignVertical;
 
   const AppTextField({
     super.key,
@@ -46,21 +48,24 @@ class AppTextField extends StatelessWidget {
     this.contentPadding,
     this.validator,
     this.onChanged,
+    this.maxLines = 1,
+    this.textAlignVertical,
   });
 
   @override
   Widget build(BuildContext context) {
     final InputBorder border = switch (borderStyle) {
       AppTextFieldBorder.outline => OutlineInputBorder(
-          borderRadius: BorderRadius.circular(borderRadius.r),
-          borderSide: BorderSide(color: borderColor),
-        ),
-      AppTextFieldBorder.underline =>
-        UnderlineInputBorder(borderSide: BorderSide(color: borderColor)),
+        borderRadius: BorderRadius.circular(borderRadius.r),
+        borderSide: BorderSide(color: borderColor),
+      ),
+      AppTextFieldBorder.underline => UnderlineInputBorder(
+        borderSide: BorderSide(color: borderColor),
+      ),
       AppTextFieldBorder.none => OutlineInputBorder(
-          borderRadius: BorderRadius.circular(borderRadius.r),
-          borderSide: BorderSide.none,
-        ),
+        borderRadius: BorderRadius.circular(borderRadius.r),
+        borderSide: BorderSide.none,
+      ),
     };
 
     return Column(
@@ -83,6 +88,8 @@ class AppTextField extends StatelessWidget {
           keyboardType: keyboardType,
           validator: validator,
           onChanged: onChanged,
+          maxLines: maxLines,
+          textAlignVertical: textAlignVertical,
           style: getTextStyle(fontSize: fontSize, color: textColor),
           decoration: InputDecoration(
             hintText: hintText,
@@ -92,7 +99,8 @@ class AppTextField extends StatelessWidget {
             prefixIcon: prefixIcon,
             suffixIcon: suffixIcon,
             isDense: true,
-            contentPadding: contentPadding ?? EdgeInsets.symmetric(vertical: 8.h),
+            contentPadding:
+                contentPadding ?? EdgeInsets.symmetric(vertical: 8.h),
             border: border,
             enabledBorder: border,
             focusedBorder: border,

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 import '../../../core/utils/constants/colors.dart';
+import '../../../core/utils/constants/product_images.dart';
 import '../models/cart_item.dart';
 import '../models/payment_method.dart';
 
@@ -24,7 +25,7 @@ class CheckoutController extends GetxController {
     const CartItem(
       name: 'A4Ttech Keyboard',
       price: 800,
-      icon: Iconsax.keyboard,
+      imageUrl: ProductImages.keyboard,
       quantity: 1,
       bundle: BundleInfo(
         name: 'Mouse + Keyboard',
@@ -34,8 +35,8 @@ class CheckoutController extends GetxController {
         subtotal: 1740,
       ),
     ),
-    const CartItem(name: 'A4Ttech Mouse', price: 400, icon: Icons.mouse, quantity: 1),
-    const CartItem(name: 'HP Monitor', price: 18000, icon: Iconsax.monitor, quantity: 1),
+    const CartItem(name: 'A4Ttech Mouse', price: 400, imageUrl: ProductImages.mouse, quantity: 1),
+    const CartItem(name: 'HP Monitor', price: 18000, imageUrl: ProductImages.monitor, quantity: 1),
   ].obs;
 
   final paymentMethods = const [

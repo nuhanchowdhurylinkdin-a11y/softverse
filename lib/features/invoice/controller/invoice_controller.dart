@@ -1,10 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 
+import '../../../core/utils/constants/product_images.dart';
+import '../../../routes/app_routes.dart';
 import '../../checkout/models/cart_item.dart';
 import '../../transaction/models/transaction_record.dart';
-import '../../../routes/app_routes.dart';
 
 class InvoiceController extends GetxController {
   final invoiceNumber = 'INV 00012'.obs;
@@ -21,7 +20,7 @@ class InvoiceController extends GetxController {
     CartItem(
       name: 'A4Ttech Keyboard',
       price: 800,
-      icon: Iconsax.keyboard,
+      imageUrl: ProductImages.keyboard,
       quantity: 1,
       bundle: BundleInfo(
         name: 'Mouse + Keyboard',
@@ -31,8 +30,8 @@ class InvoiceController extends GetxController {
         subtotal: 1740,
       ),
     ),
-    CartItem(name: 'A4Ttech Mouse', price: 400, icon: Icons.mouse, quantity: 1),
-    CartItem(name: 'HP Monitor', price: 18000, icon: Iconsax.monitor, quantity: 1),
+    CartItem(name: 'A4Ttech Mouse', price: 400, imageUrl: ProductImages.mouse, quantity: 1),
+    CartItem(name: 'HP Monitor', price: 18000, imageUrl: ProductImages.monitor, quantity: 1),
   ];
 
   double get subtotal {

@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 class BundleInfo {
   final String name;
   final double price;
@@ -19,14 +17,14 @@ class BundleInfo {
 class CartItem {
   final String name;
   final double price;
-  final IconData icon;
+  final String imageUrl;
   final int quantity;
   final BundleInfo? bundle;
 
   const CartItem({
     required this.name,
     required this.price,
-    required this.icon,
+    required this.imageUrl,
     required this.quantity,
     this.bundle,
   });
@@ -35,7 +33,7 @@ class CartItem {
     return CartItem(
       name: name,
       price: price,
-      icon: icon,
+      imageUrl: imageUrl,
       quantity: quantity ?? this.quantity,
       bundle: bundle,
     );

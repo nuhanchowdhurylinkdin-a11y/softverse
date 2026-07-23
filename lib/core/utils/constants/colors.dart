@@ -70,4 +70,13 @@ class AppColors {
   static const Color checkboxGradientEnd = Color(0xD60151FF);
 
   static const Color installmentBadgeText = Color(0xFF8A38F5);
+
+  static const Color shiftButtonGradientStart = Color(0xFF699EFF);
+  static const Color shiftButtonGradientEnd = Color(0xFF2F65C8);
+
+  static const Color itemColorGray = Color(0xFFD9D9D9);
+  static const Color itemColorPink = Color(0xFFD95DA3);
+  static const Color itemColorMint = Color(0xFFDDF9EF);
+  static const Color itemColorTeal = Color(0xFF188299);
+  static const Color itemColorPurple = Color(0xFF8B69E2);
 }

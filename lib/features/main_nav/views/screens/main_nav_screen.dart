@@ -3,9 +3,10 @@ import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 import '../../../../core/common/widgets/app_bottom_nav.dart';
-import '../../../../core/common/widgets/coming_soon_view.dart';
 import '../../../checkout/views/screens/checkout_screen.dart';
 import '../../../home/views/screens/home_screen.dart';
+import '../../../inventory/views/screens/inventory_screen.dart';
+import '../../../more/views/screens/more_screen.dart';
 import '../../../transaction/views/screens/transaction_screen.dart';
 import '../../controller/main_nav_controller.dart';
 
@@ -24,18 +25,16 @@ class MainNavScreen extends GetView<MainNavController> {
     HomeScreen(),
     CheckoutScreen(),
     TransactionScreen(),
-    ComingSoonView(label: 'Inventory'),
-    ComingSoonView(label: 'More'),
+    InventoryScreen(),
+    MoreScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Obx(
-        () => IndexedStack(
-          index: controller.currentIndex.value,
-          children: _tabs,
-        ),
+        () =>
+            IndexedStack(index: controller.currentIndex.value, children: _tabs),
       ),
       bottomNavigationBar: Obx(
         () => AppBottomNav(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/common/styles/global_text_style.dart';
+import '../../../core/common/widgets/product_image.dart';
 import '../../../core/common/widgets/quantity_stepper.dart';
 import '../../../core/utils/constants/colors.dart';
 import '../models/cart_item.dart';
@@ -37,20 +38,7 @@ class CartItemCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 55.w,
-                height: 55.w,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: AppColors.chipBackground,
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                child: Icon(
-                  item.icon,
-                  size: 28.sp,
-                  color: AppColors.chipInactiveText,
-                ),
-              ),
+              ProductImage(imageUrl: item.imageUrl),
               SizedBox(width: 12.w),
               Expanded(
                 child: Column(

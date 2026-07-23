@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 
+import '../../../core/utils/constants/product_images.dart';
 import '../models/product.dart';
 import '../models/table_order.dart';
 
@@ -29,14 +28,14 @@ class HomeController extends GetxController {
   ];
 
   final products = const [
-    Product(name: 'A4Ttech Keyboard', price: 800, stockCount: 97, icon: Iconsax.keyboard),
-    Product(name: 'A4Ttech Keyboard', price: 800, stockCount: 97, icon: Iconsax.keyboard),
-    Product(name: 'A4Ttech Mouse', price: 400, stockCount: 97, icon: Icons.mouse),
-    Product(name: 'A4Ttech Mouse', price: 400, stockCount: 97, icon: Icons.mouse),
-    Product(name: 'HP Monitor', price: 18000, stockCount: 97, icon: Iconsax.monitor),
-    Product(name: 'HP Monitor', price: 18000, stockCount: 97, icon: Iconsax.monitor),
-    Product(name: 'HP Monitor', price: 18000, stockCount: 97, icon: Iconsax.monitor),
-    Product(name: 'HP Monitor', price: 18000, stockCount: 97, icon: Iconsax.monitor),
+    Product(name: 'A4Ttech Keyboard', price: 800, stockCount: 97, imageUrl: ProductImages.keyboard),
+    Product(name: 'A4Ttech Keyboard', price: 800, stockCount: 97, imageUrl: ProductImages.keyboard),
+    Product(name: 'A4Ttech Mouse', price: 400, stockCount: 97, imageUrl: ProductImages.mouse),
+    Product(name: 'A4Ttech Mouse', price: 400, stockCount: 97, imageUrl: ProductImages.mouse),
+    Product(name: 'HP Monitor', price: 18000, stockCount: 97, imageUrl: ProductImages.monitor),
+    Product(name: 'HP Monitor', price: 18000, stockCount: 97, imageUrl: ProductImages.monitor),
+    Product(name: 'HP Monitor', price: 18000, stockCount: 97, imageUrl: ProductImages.monitor),
+    Product(name: 'HP Monitor', price: 18000, stockCount: 97, imageUrl: ProductImages.monitor),
   ];
 
   final tableOrders = const [

@@ -38,8 +38,14 @@ class AppHelperFunctions {
     return 'Notice';
   }
 
-  static String getFormattedDate(DateTime date,
-      {String format = 'dd MMM yyyy'}) {
+  static String getFormattedDate(
+    DateTime date, {
+    String format = 'dd MMM yyyy',
+  }) {
     return DateFormat(format).format(date);
+  }
+
+  static String getFormattedMoney(double value) {
+    return NumberFormat('#,##0.00').format(value);
   }
 }

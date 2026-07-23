@@ -1,15 +1,13 @@
-import 'package:flutter/material.dart';
-
 class Product {
   final String name;
   final double price;
   final int stockCount;
-  final IconData icon;
+  final String imageUrl;
 
   const Product({
     required this.name,
     required this.price,
     required this.stockCount,
-    required this.icon,
+    required this.imageUrl,
   });
 }
