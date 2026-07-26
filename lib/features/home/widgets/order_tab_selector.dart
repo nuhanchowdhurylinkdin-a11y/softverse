@@ -26,8 +26,12 @@ class OrderTabSelector extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Expanded(child: _buildTab(context, 'Order', isOrderSelected, onOrderTap)),
-          Expanded(child: _buildTab(context, 'Table', !isOrderSelected, onTableTap)),
+          Expanded(
+            child: _buildTab(context, 'Order', isOrderSelected, onOrderTap),
+          ),
+          Expanded(
+            child: _buildTab(context, 'Table', !isOrderSelected, onTableTap),
+          ),
         ],
       ),
     );

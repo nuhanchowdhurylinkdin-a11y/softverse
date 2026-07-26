@@ -3,13 +3,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
+import '../../../../core/common/styles/global_text_style.dart';
 import '../../../../core/common/widgets/floating_icon_button.dart';
 import '../../../../core/utils/constants/colors.dart';
+import '../../../general/controller/general_controller.dart';
 import '../../controller/home_controller.dart';
 import '../../widgets/category_tabs.dart';
 import '../../widgets/order_summary_card.dart';
 import '../../widgets/order_tab_selector.dart';
-import '../../widgets/pos_app_bar.dart';
+import '../../widgets/product_grid_card.dart';
 import '../../widgets/product_row.dart';
 import '../../widgets/table_order_card.dart';
 
@@ -20,36 +22,64 @@ class HomeScreen extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        centerTitle: false,
+        toolbarHeight: 58.h,
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [AppColors.posHeaderStart, AppColors.posHeaderEnd],
+            ),
+          ),
+        ),
+        title: Text(
+          'POS-1',
+          style: getTextStyle(
+            fontSize: 21.9,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
+        ),
+        actions: [
+          Icon(Iconsax.clock, color: Colors.white, size: 26.sp),
+          SizedBox(width: 15.w),
+          Icon(Iconsax.notification, color: Colors.white, size: 26.sp),
+          SizedBox(width: 16.w),
+        ],
+      ),
       body: SafeArea(
+        top: false,
         child: Stack(
           children: [
-            Column(
-              children: [
-                PosAppBar(title: 'POS-1'),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.all(16.w),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Obx(
-                          () => OrderTabSelector(
-                            isOrderSelected: controller.isOrderTabSelected.value,
-                            onOrderTap: controller.selectOrderTab,
-                            onTableTap: controller.selectTableTab,
-                          ),
-                        ),
-                        SizedBox(height: 16.h),
-                        Obx(
-                          () => controller.isOrderTabSelected.value
-                              ? _OrderTabBody(controller: controller)
-                              : _TableTabBody(controller: controller),
-                        ),
-                      ],
+            SingleChildScrollView(
+              padding: EdgeInsets.all(16.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Obx(
+                    () => OrderTabSelector(
+                      isOrderSelected: controller.isOrderTabSelected.value,
+                      onOrderTap: controller.selectOrderTab,
+                      onTableTap: controller.selectTableTab,
                     ),
                   ),
-                ),
-              ],
+                  SizedBox(height: 16.h),
+                  Obx(
+                    () => controller.isOrderTabSelected.value
+                        ? _OrderTabBody(controller: controller)
+                        : _TableTabBody(controller: controller),
+                  ),
+                ],
+              ),
             ),
             Obx(
               () => controller.isOrderTabSelected.value
@@ -108,14 +138,45 @@ class _OrderTabBody extends StatelessWidget {
           ),
         ),
         SizedBox(height: 16.h),
-        ...controller.products.map(
-          (product) => Padding(
-            padding: EdgeInsets.only(bottom: 10.h),
-            child: ProductRow(
-              product: product,
-              onAdd: () => controller.addToCart(product),
-            ),
-          ),
+        GetX<GeneralController>(
+          builder: (generalController) {
+            if (generalController.homeScreenLayout.value ==
+                HomeScreenLayout.grid) {
+              return GridView.builder(
+                shrinkWrap: true,
+                padding: EdgeInsets.zero,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 10.w,
+                  mainAxisSpacing: 10.h,
+                  childAspectRatio: 0.95,
+                ),
+                itemCount: controller.products.length,
+                itemBuilder: (context, index) {
+                  final product = controller.products[index];
+                  return ProductGridCard(
+                    product: product,
+                    onAdd: () => controller.addToCart(product),
+                  );
+                },
+              );
+            }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: controller.products
+                  .map(
+                    (product) => Padding(
+                      padding: EdgeInsets.only(bottom: 10.h),
+                      child: ProductRow(
+                        product: product,
+                        onAdd: () => controller.addToCart(product),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            );
+          },
         ),
       ],
     );

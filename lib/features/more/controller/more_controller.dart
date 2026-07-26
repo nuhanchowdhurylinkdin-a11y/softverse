@@ -12,15 +12,16 @@ class MoreController extends GetxController {
 
   void openItem() => Get.toNamed(AppRoute.getItemsMenuScreen());
 
-  void openCustomer() {}
+  void openCustomer() => Get.toNamed(AppRoute.getViewCustomerScreen());
 
-  void openPrinterSettings() {}
+  void openPrinterSettings() => Get.toNamed(AppRoute.getPrinterListScreen());
 
-  void openAppsSettings() {}
+  void openAppsSettings() => Get.toNamed(AppRoute.getAppsMenuScreen());
 
-  void openGeneralSettings() {}
+  void openGeneralSettings() =>
+      Get.toNamed(AppRoute.getGeneralSettingsScreen());
 
-  void openTaxesSettings() {}
+  void openTaxesSettings() => Get.toNamed(AppRoute.getTaxListScreen());
 
   void openBackOffice() {}
 

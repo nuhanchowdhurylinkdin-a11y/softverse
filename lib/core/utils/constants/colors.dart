@@ -68,6 +68,7 @@ class AppColors {
 
   static const Color checkboxGradientStart = Color(0xFF4881FF);
   static const Color checkboxGradientEnd = Color(0xD60151FF);
+  static const Color checkboxBorder = Color(0xFFD0D5DD);
 
   static const Color installmentBadgeText = Color(0xFF8A38F5);
 

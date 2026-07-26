@@ -7,7 +7,6 @@ import '../../../../core/common/widgets/app_text_field.dart';
 import '../../../../core/common/widgets/primary_button.dart';
 import '../../../../core/utils/constants/colors.dart';
 import '../../controller/cash_management_controller.dart';
-import '../../widgets/shift_header.dart';
 
 class CashManagementScreen extends GetView<CashManagementController> {
   const CashManagementScreen({super.key});
@@ -16,80 +15,105 @@ class CashManagementScreen extends GetView<CashManagementController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        centerTitle: false,
+        toolbarHeight: 69.h,
+        leading: IconButton(
+          onPressed: Get.back,
+          icon: Icon(Icons.arrow_back, color: Colors.white, size: 22.sp),
+        ),
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [AppColors.posHeaderStart, AppColors.posHeaderEnd],
+            ),
+          ),
+        ),
+        title: Text(
+          'CASH MANAGEMENT',
+          style: getTextStyle(
+            fontSize: 21.9,
+            fontWeight: FontWeight.w500,
+            color: Colors.white,
+          ),
+        ),
+      ),
       body: SafeArea(
-        child: Column(
-          children: [
-            const ShiftHeader(title: 'CASH MANAGEMENT'),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.all(16.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _FieldLabel('Amount'),
-                    SizedBox(height: 8.h),
-                    AppTextField(
-                      controller: controller.amountController,
-                      hintText: '0.00',
-                      keyboardType: TextInputType.number,
-                      backgroundColor: AppColors.chipBackground,
-                      borderStyle: AppTextFieldBorder.outline,
-                      borderColor: AppColors.cardBorder,
-                      hintColor: AppColors.chipInactiveText,
-                      textColor: AppColors.authTextDark,
-                      fontSize: 16.4,
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 16.w,
-                        vertical: 16.h,
-                      ),
-                    ),
-                    SizedBox(height: 32.h),
-                    _FieldLabel('Note'),
-                    SizedBox(height: 8.h),
-                    AppTextField(
-                      controller: controller.noteController,
-                      maxLines: 5,
-                      backgroundColor: AppColors.chipBackground,
-                      borderStyle: AppTextFieldBorder.outline,
-                      borderColor: AppColors.cardBorder,
-                      textAlignVertical: TextAlignVertical.top,
-                      contentPadding: EdgeInsets.all(16.w),
-                    ),
-                    SizedBox(height: 64.h),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: PrimaryButton(
-                            label: 'PAY IN',
-                            onPressed: controller.payIn,
-                            backgroundColor: Colors.white,
-                            textColor: AppColors.onboardingBackground,
-                            borderColor: AppColors.onboardingBackground,
-                            height: 60,
-                            fontSize: 16.4,
-                            letterSpacing: 0.16,
-                          ),
-                        ),
-                        SizedBox(width: 16.w),
-                        Expanded(
-                          child: PrimaryButton(
-                            label: 'PAY OUT',
-                            onPressed: controller.payOut,
-                            backgroundColor: Colors.white,
-                            textColor: AppColors.dangerRed,
-                            borderColor: AppColors.dangerRed,
-                            height: 60,
-                            fontSize: 16.4,
-                            letterSpacing: 0.16,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+        top: false,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(16.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _FieldLabel('Amount'),
+              SizedBox(height: 8.h),
+              AppTextField(
+                controller: controller.amountController,
+                hintText: '0.00',
+                keyboardType: TextInputType.number,
+                backgroundColor: AppColors.chipBackground,
+                borderStyle: AppTextFieldBorder.outline,
+                borderColor: AppColors.cardBorder,
+                hintColor: AppColors.chipInactiveText,
+                textColor: AppColors.authTextDark,
+                fontSize: 16.4,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16.w,
+                  vertical: 16.h,
                 ),
               ),
-            ),
-          ],
+              SizedBox(height: 32.h),
+              _FieldLabel('Note'),
+              SizedBox(height: 8.h),
+              AppTextField(
+                controller: controller.noteController,
+                maxLines: 5,
+                backgroundColor: AppColors.chipBackground,
+                borderStyle: AppTextFieldBorder.outline,
+                borderColor: AppColors.cardBorder,
+                textAlignVertical: TextAlignVertical.top,
+                contentPadding: EdgeInsets.all(16.w),
+              ),
+              SizedBox(height: 64.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: PrimaryButton(
+                      label: 'PAY IN',
+                      onPressed: controller.payIn,
+                      backgroundColor: Colors.white,
+                      textColor: AppColors.onboardingBackground,
+                      borderColor: AppColors.onboardingBackground,
+                      height: 60,
+                      fontSize: 16.4,
+                      letterSpacing: 0.16,
+                    ),
+                  ),
+                  SizedBox(width: 16.w),
+                  Expanded(
+                    child: PrimaryButton(
+                      label: 'PAY OUT',
+                      onPressed: controller.payOut,
+                      backgroundColor: Colors.white,
+                      textColor: AppColors.dangerRed,
+                      borderColor: AppColors.dangerRed,
+                      height: 60,
+                      fontSize: 16.4,
+                      letterSpacing: 0.16,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

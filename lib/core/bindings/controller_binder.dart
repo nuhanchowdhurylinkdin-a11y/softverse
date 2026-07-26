@@ -1,16 +1,21 @@
 import 'package:get/get.dart';
 
 import '../controller/theme_controller.dart';
+import '../../features/apps/controller/apps_controller.dart';
 import '../../features/auth/controller/auth_controller.dart';
 import '../../features/checkout/controller/checkout_controller.dart';
+import '../../features/customer/controller/customer_controller.dart';
+import '../../features/general/controller/general_controller.dart';
 import '../../features/home/controller/home_controller.dart';
 import '../../features/inventory/controller/inventory_controller.dart';
 import '../../features/invoice/controller/invoice_controller.dart';
 import '../../features/main_nav/controller/main_nav_controller.dart';
 import '../../features/more/controller/more_controller.dart';
 import '../../features/onboarding/controller/onboarding_controller.dart';
+import '../../features/printer/controller/printer_controller.dart';
 import '../../features/shift/controller/shift_controller.dart';
 import '../../features/splash/controller/splash_controller.dart';
+import '../../features/tax/controller/tax_controller.dart';
 import '../../features/transaction/controller/transaction_controller.dart';
 import '../../features/walkthrough/controller/walkthrough_controller.dart';
 
@@ -41,5 +46,10 @@ class ControllerBinder extends Bindings {
     Get.lazyPut<InventoryController>(() => InventoryController(), fenix: true);
     Get.lazyPut<MoreController>(() => MoreController(), fenix: true);
     Get.lazyPut<ShiftController>(() => ShiftController(), fenix: true);
+    Get.lazyPut<CustomerController>(() => CustomerController(), fenix: true);
+    Get.lazyPut<PrinterController>(() => PrinterController(), fenix: true);
+    Get.lazyPut<AppsController>(() => AppsController(), fenix: true);
+    Get.lazyPut<TaxController>(() => TaxController(), fenix: true);
+    Get.lazyPut<GeneralController>(() => GeneralController(), fenix: true);
   }
 }

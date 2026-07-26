@@ -1,13 +1,28 @@
 import 'package:get/get.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 class ScanBarcodeController extends GetxController {
-  final showPermissionPrompt = true.obs;
+  final cameraController = MobileScannerController();
 
-  void allowWhileUsingApp() => showPermissionPrompt.value = false;
+  bool _handled = false;
 
-  void allowOnlyThisTime() => showPermissionPrompt.value = false;
+  void onDetect(BarcodeCapture capture) {
+    if (_handled) return;
 
-  void denyPermission() => showPermissionPrompt.value = false;
+    final rawValue = capture.barcodes.isNotEmpty
+        ? capture.barcodes.first.rawValue
+        : null;
+    if (rawValue == null || rawValue.isEmpty) return;
 
-  void flipCamera() {}
+    _handled = true;
+    Get.back(result: rawValue);
+  }
+
+  void flipCamera() => cameraController.switchCamera();
+
+  @override
+  void onClose() {
+    cameraController.dispose();
+    super.onClose();
+  }
 }

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../../core/common/styles/global_text_style.dart';
 import '../../../../core/utils/constants/colors.dart';
-import '../../../shift/widgets/shift_header.dart';
 import '../../controller/scan_barcode_controller.dart';
 
 class ScanBarcodeScreen extends GetView<ScanBarcodeController> {
@@ -15,70 +15,96 @@ class ScanBarcodeScreen extends GetView<ScanBarcodeController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.featureTitle,
-      body: SafeArea(
-        child: Column(
-          children: [
-            ShiftHeader(
-              title: 'Scan barcode',
-              trailingIcon: Iconsax.refresh_2,
-              onClockTap: controller.flipCamera,
+      appBar: AppBar(
+        centerTitle: false,
+        toolbarHeight: 69.h,
+        leading: IconButton(
+          onPressed: Get.back,
+          icon: Icon(Icons.arrow_back, color: Colors.white, size: 22.sp),
+        ),
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [AppColors.posHeaderStart, AppColors.posHeaderEnd],
             ),
-            Expanded(
-              child: Stack(
-                children: [
-                  Align(
-                    alignment: const Alignment(0, 0.15),
-                    child: SizedBox(
-                      width: 305.w,
-                      height: 120.h,
-                      child: Stack(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.1),
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Container(
-                                    margin: EdgeInsets.only(right: 12.5.w),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: AppColors.dangerRed,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Container(
-                                    margin: EdgeInsets.only(left: 12.5.w),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: AppColors.dangerRed,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Align(
-                            alignment: Alignment.center,
-                            child: Container(height: 1, color: Colors.white),
-                          ),
-                        ],
-                      ),
+          ),
+        ),
+        title: Text(
+          'Scan barcode',
+          style: getTextStyle(
+            fontSize: 21.9,
+            fontWeight: FontWeight.w500,
+            color: Colors.white,
+          ),
+        ),
+        actions: [
+          IconButton(
+            onPressed: controller.flipCamera,
+            icon: Icon(Iconsax.refresh_2, color: Colors.white, size: 26.sp),
+          ),
+        ],
+      ),
+      body: SafeArea(
+        top: false,
+        child: MobileScanner(
+          controller: controller.cameraController,
+          onDetect: controller.onDetect,
+          overlayBuilder: (context, constraints) => const _ViewfinderOverlay(),
+          errorBuilder: (context, error) => _CameraError(error: error),
+        ),
+      ),
+    );
+  }
+}
+
+class _ViewfinderOverlay extends StatelessWidget {
+  const _ViewfinderOverlay();
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: const Alignment(0, 0.15),
+      child: SizedBox(
+        width: 305.w,
+        height: 120.h,
+        child: Stack(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    margin: EdgeInsets.only(right: 12.5.w),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.dangerRed, width: 2),
                     ),
                   ),
-                  Obx(
-                    () => controller.showPermissionPrompt.value
-                        ? Align(
-                            alignment: Alignment.bottomCenter,
-                            child: _PermissionPrompt(controller: controller),
-                          )
-                        : const SizedBox.shrink(),
+                ),
+                Expanded(
+                  child: Container(
+                    margin: EdgeInsets.only(left: 12.5.w),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.dangerRed, width: 2),
+                    ),
                   ),
-                ],
+                ),
+              ],
+            ),
+            const Align(
+              alignment: Alignment.center,
+              child: SizedBox(
+                width: double.infinity,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(color: Colors.white),
+                  child: SizedBox(height: 1),
+                ),
               ),
             ),
           ],
@@ -88,74 +114,27 @@ class ScanBarcodeScreen extends GetView<ScanBarcodeController> {
   }
 }
 
-class _PermissionPrompt extends StatelessWidget {
-  final ScanBarcodeController controller;
+class _CameraError extends StatelessWidget {
+  final MobileScannerException error;
 
-  const _PermissionPrompt({required this.controller});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(24.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Icon(Iconsax.camera, size: 32.sp, color: AppColors.authTextDark),
-          SizedBox(height: 16.h),
-          Text(
-            'Allow Softverse POS to take pictures\nand record video?',
-            style: getTextStyle(fontSize: 14.6, color: AppColors.authTextDark),
-          ),
-          SizedBox(height: 20.h),
-          _PermissionButton(
-            label: 'While using the app',
-            onTap: controller.allowWhileUsingApp,
-          ),
-          SizedBox(height: 8.h),
-          _PermissionButton(
-            label: 'Only this time',
-            onTap: controller.allowOnlyThisTime,
-          ),
-          SizedBox(height: 8.h),
-          _PermissionButton(
-            label: "Don't allow",
-            onTap: controller.denyPermission,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PermissionButton extends StatelessWidget {
-  final String label;
-  final VoidCallback onTap;
-
-  const _PermissionButton({required this.label, required this.onTap});
+  const _CameraError({required this.error});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 44.h,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: AppColors.lightBorder,
-          borderRadius: BorderRadius.circular(50.r),
-        ),
-        child: Text(
-          label,
-          style: getTextStyle(
-            fontSize: 16.4,
-            fontWeight: FontWeight.w500,
-            color: AppColors.onboardingBackground,
-          ).copyWith(letterSpacing: 0.16),
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(24.w),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Iconsax.camera_slash, size: 48.sp, color: Colors.white),
+            SizedBox(height: 16.h),
+            Text(
+              error.errorCode.message,
+              textAlign: TextAlign.center,
+              style: getTextStyle(fontSize: 14.6, color: Colors.white),
+            ),
+          ],
         ),
       ),
     );

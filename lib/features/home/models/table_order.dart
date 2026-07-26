@@ -7,25 +7,25 @@ enum OrderStatus {
   ongoing;
 
   String get label => switch (this) {
-        OrderStatus.complete => 'Complete',
-        OrderStatus.ongoing => 'Ongoing',
-      };
+    OrderStatus.complete => 'Complete',
+    OrderStatus.ongoing => 'Ongoing',
+  };
 
   Color get textColor => switch (this) {
-        OrderStatus.complete => AppColors.stockBadgeText,
-        OrderStatus.ongoing => AppColors.ongoingBadgeText,
-      };
+    OrderStatus.complete => AppColors.stockBadgeText,
+    OrderStatus.ongoing => AppColors.ongoingBadgeText,
+  };
 
   List<Color> get gradient => switch (this) {
-        OrderStatus.complete => [
-            AppColors.completeBadgeStart,
-            AppColors.completeBadgeEnd,
-          ],
-        OrderStatus.ongoing => [
-            AppColors.ongoingBadgeStart,
-            AppColors.ongoingBadgeEnd,
-          ],
-      };
+    OrderStatus.complete => [
+      AppColors.completeBadgeStart,
+      AppColors.completeBadgeEnd,
+    ],
+    OrderStatus.ongoing => [
+      AppColors.ongoingBadgeStart,
+      AppColors.ongoingBadgeEnd,
+    ],
+  };
 }
 
 class TableOrder {

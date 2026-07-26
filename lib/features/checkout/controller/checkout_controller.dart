@@ -4,6 +4,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 import '../../../core/utils/constants/colors.dart';
 import '../../../core/utils/constants/product_images.dart';
+import '../../../routes/app_routes.dart';
 import '../models/cart_item.dart';
 import '../models/payment_method.dart';
 
@@ -35,8 +36,18 @@ class CheckoutController extends GetxController {
         subtotal: 1740,
       ),
     ),
-    const CartItem(name: 'A4Ttech Mouse', price: 400, imageUrl: ProductImages.mouse, quantity: 1),
-    const CartItem(name: 'HP Monitor', price: 18000, imageUrl: ProductImages.monitor, quantity: 1),
+    const CartItem(
+      name: 'A4Ttech Mouse',
+      price: 400,
+      imageUrl: ProductImages.mouse,
+      quantity: 1,
+    ),
+    const CartItem(
+      name: 'HP Monitor',
+      price: 18000,
+      imageUrl: ProductImages.monitor,
+      quantity: 1,
+    ),
   ].obs;
 
   final paymentMethods = const [
@@ -93,15 +104,17 @@ class CheckoutController extends GetxController {
     );
   }
 
-  void selectModifier() => priceAdjustmentMode.value = PriceAdjustmentMode.modifier;
+  void selectModifier() =>
+      priceAdjustmentMode.value = PriceAdjustmentMode.modifier;
 
-  void selectDiscount() => priceAdjustmentMode.value = PriceAdjustmentMode.discount;
+  void selectDiscount() =>
+      priceAdjustmentMode.value = PriceAdjustmentMode.discount;
 
   void setAmountReceived(String value) {
     amountReceived.value = double.tryParse(value) ?? amountReceived.value;
   }
 
-  void addCustomer() {}
+  void addCustomer() => Get.toNamed(AppRoute.getAddCustomerScreen());
 
   void sendToTable() {}
 

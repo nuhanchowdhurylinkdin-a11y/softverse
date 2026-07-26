@@ -8,7 +8,6 @@ import '../../../../core/common/widgets/primary_button.dart';
 import '../../../../core/utils/constants/colors.dart';
 import '../../../../core/utils/helpers/app_helper.dart';
 import '../../controller/close_shift_controller.dart';
-import '../../widgets/shift_header.dart';
 
 class CloseShiftScreen extends GetView<CloseShiftController> {
   const CloseShiftScreen({super.key});
@@ -17,99 +16,121 @@ class CloseShiftScreen extends GetView<CloseShiftController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        centerTitle: false,
+        toolbarHeight: 69.h,
+        leading: IconButton(
+          onPressed: Get.back,
+          icon: Icon(Icons.arrow_back, color: Colors.white, size: 22.sp),
+        ),
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [AppColors.posHeaderStart, AppColors.posHeaderEnd],
+            ),
+          ),
+        ),
+        title: Text(
+          'Close shift',
+          style: getTextStyle(
+            fontSize: 21.9,
+            fontWeight: FontWeight.w500,
+            color: Colors.white,
+          ),
+        ),
+      ),
       body: SafeArea(
-        child: Column(
-          children: [
-            const ShiftHeader(title: 'Close shift'),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.all(16.w),
+        top: false,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(16.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12.r),
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.billCardStart,
+                      AppColors.billCardMid1,
+                      AppColors.billCardMid2,
+                      AppColors.billCardEnd,
+                    ],
+                  ),
+                ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 16.w,
-                        vertical: 8.h,
-                      ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12.r),
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            AppColors.billCardStart,
-                            AppColors.billCardMid1,
-                            AppColors.billCardMid2,
-                            AppColors.billCardEnd,
-                          ],
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          _Row(
-                            label: 'Expected cash amount',
-                            value:
-                                '\$${AppHelperFunctions.getFormattedMoney(controller.shift.expectedCashAmount)}',
-                          ),
-                          SizedBox(height: 6.h),
-                          const DashedDivider(),
-                          SizedBox(height: 6.h),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Actual cash amount',
-                                style: getTextStyle(
-                                  fontSize: 14.6,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              Container(
-                                height: 36.h,
-                                padding: EdgeInsets.symmetric(horizontal: 12.w),
-                                alignment: Alignment.center,
-                                color: Colors.white,
-                                child: Text(
-                                  '\$${AppHelperFunctions.getFormattedMoney(controller.shift.expectedCashAmount)}',
-                                  style: getTextStyle(
-                                    fontSize: 14.6,
-                                    color: AppColors.authTextDark,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 6.h),
-                          const DashedDivider(),
-                          SizedBox(height: 6.h),
-                          _Row(
-                            label: 'Difference',
-                            value:
-                                '\$${AppHelperFunctions.getFormattedMoney(controller.difference)}',
-                            emphasize: true,
-                          ),
-                        ],
-                      ),
+                    _Row(
+                      label: 'Expected cash amount',
+                      value:
+                          '\$${AppHelperFunctions.getFormattedMoney(controller.shift.expectedCashAmount)}',
                     ),
-                    SizedBox(height: 40.h),
-                    Center(
-                      child: PrimaryButton(
-                        label: 'CLOSE SHIFT',
-                        onPressed: controller.closeShift,
-                        backgroundColor: AppColors.dangerRed,
-                        textColor: Colors.white,
-                        width: 190.w,
-                        height: 60,
-                        fontSize: 16.4,
-                        letterSpacing: 0.16,
-                      ),
+                    SizedBox(height: 6.h),
+                    const DashedDivider(),
+                    SizedBox(height: 6.h),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Actual cash amount',
+                          style: getTextStyle(
+                            fontSize: 14.6,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Container(
+                          height: 36.h,
+                          padding: EdgeInsets.symmetric(horizontal: 12.w),
+                          alignment: Alignment.center,
+                          color: Colors.white,
+                          child: Text(
+                            '\$${AppHelperFunctions.getFormattedMoney(controller.shift.expectedCashAmount)}',
+                            style: getTextStyle(
+                              fontSize: 14.6,
+                              color: AppColors.authTextDark,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 6.h),
+                    const DashedDivider(),
+                    SizedBox(height: 6.h),
+                    _Row(
+                      label: 'Difference',
+                      value:
+                          '\$${AppHelperFunctions.getFormattedMoney(controller.difference)}',
+                      emphasize: true,
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
+              SizedBox(height: 40.h),
+              Center(
+                child: PrimaryButton(
+                  label: 'CLOSE SHIFT',
+                  onPressed: controller.closeShift,
+                  backgroundColor: AppColors.dangerRed,
+                  textColor: Colors.white,
+                  width: 190.w,
+                  height: 60,
+                  fontSize: 16.4,
+                  letterSpacing: 0.16,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

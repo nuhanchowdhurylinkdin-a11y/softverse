@@ -65,7 +65,12 @@ class CreateItemController extends GetxController {
 
   void selectShape(int index) => selectedShapeIndex.value = index;
 
-  void openScanBarcode() => Get.toNamed(AppRoute.getScanBarcodeScreen());
+  Future<void> openScanBarcode() async {
+    final result = await Get.toNamed(AppRoute.getScanBarcodeScreen());
+    if (result is String && result.isNotEmpty) {
+      barcodeController.text = result;
+    }
+  }
 
   void choosePhoto() {}
 

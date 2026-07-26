@@ -10,7 +10,6 @@ import '../../controller/checkout_controller.dart';
 import '../../widgets/bill_summary_card.dart';
 import '../../widgets/cart_item_card.dart';
 import '../../widgets/checkout_action_buttons.dart';
-import '../../widgets/checkout_header.dart';
 import '../../widgets/modifier_discount_toggle.dart';
 import '../../widgets/payment_method_grid.dart';
 
@@ -21,15 +20,107 @@ class CheckoutScreen extends GetView<CheckoutController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        centerTitle: false,
+        toolbarHeight: 58.h,
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [AppColors.posHeaderStart, AppColors.posHeaderEnd],
+            ),
+          ),
+        ),
+        title: Text(
+          controller.orderId,
+          style: getTextStyle(
+            fontSize: 16.4,
+            fontWeight: FontWeight.w500,
+            color: Colors.white,
+          ),
+        ),
+        actions: [
+          Icon(Iconsax.clock, color: Colors.white, size: 26.sp),
+          SizedBox(width: 15.w),
+          Icon(Iconsax.notification, color: Colors.white, size: 26.sp),
+          SizedBox(width: 15.w),
+          Icon(Iconsax.more, color: Colors.white, size: 26.sp),
+          SizedBox(width: 16.w),
+        ],
+      ),
       body: SafeArea(
+        top: false,
         child: Stack(
           children: [
             Column(
               children: [
-                CheckoutHeader(
-                  orderId: controller.orderId,
-                  customerName: controller.customerName,
-                  onAddCustomer: controller.addCustomer,
+                Padding(
+                  padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 55.h,
+                          padding: EdgeInsets.symmetric(horizontal: 16.w),
+                          decoration: BoxDecoration(
+                            color: AppColors.chipBackground,
+                            border: Border.all(color: AppColors.cardBorder),
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  controller.customerName,
+                                  style: getTextStyle(
+                                    fontSize: 16.4,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.chipInactiveText,
+                                  ),
+                                ),
+                              ),
+                              Icon(
+                                Iconsax.arrow_down,
+                                size: 22.sp,
+                                color: AppColors.chipInactiveText,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      GestureDetector(
+                        onTap: controller.addCustomer,
+                        child: Container(
+                          width: 55.w,
+                          height: 55.w,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12.r),
+                            gradient: const LinearGradient(
+                              colors: [
+                                AppColors.gradientStart,
+                                AppColors.gradientEnd,
+                              ],
+                            ),
+                          ),
+                          child: Icon(
+                            Iconsax.user_add,
+                            color: Colors.white,
+                            size: 26.sp,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 Expanded(
                   child: SingleChildScrollView(
@@ -50,11 +141,17 @@ class CheckoutScreen extends GetView<CheckoutController> {
                           () => Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              for (var i = 0; i < controller.cartItems.length; i++) ...[
+                              for (
+                                var i = 0;
+                                i < controller.cartItems.length;
+                                i++
+                              ) ...[
                                 CartItemCard(
                                   item: controller.cartItems[i],
-                                  onIncrement: () => controller.incrementQuantity(i),
-                                  onDecrement: () => controller.decrementQuantity(i),
+                                  onIncrement: () =>
+                                      controller.incrementQuantity(i),
+                                  onDecrement: () =>
+                                      controller.decrementQuantity(i),
                                 ),
                                 if (i == 0) ...[
                                   SizedBox(height: 12.h),
@@ -84,9 +181,11 @@ class CheckoutScreen extends GetView<CheckoutController> {
                             tax: controller.tax,
                             taxRate: controller.taxRate,
                             totalAmount: controller.totalAmount,
-                            amountReceivedController: controller.amountReceivedController,
+                            amountReceivedController:
+                                controller.amountReceivedController,
                             changeToReturn: controller.changeToReturn,
-                            onAmountReceivedChanged: controller.setAmountReceived,
+                            onAmountReceivedChanged:
+                                controller.setAmountReceived,
                           ),
                         ),
                         SizedBox(height: 22.h),
