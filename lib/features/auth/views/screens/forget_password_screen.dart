@@ -57,7 +57,7 @@ class ForgetPasswordScreen extends GetView<AuthController> {
                 ),
                 SizedBox(height: 26.h),
                 AppTextField(
-                  hintText: "Email I'D/ Mobile Number",
+                  hintText: 'Email/Mobile Number',
                   controller: controller.emailOrMobileController,
                   backgroundColor: AppColors.fieldBackground,
                   borderStyle: AppTextFieldBorder.none,

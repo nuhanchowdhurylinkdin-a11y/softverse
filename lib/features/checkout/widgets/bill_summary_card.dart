@@ -114,17 +114,18 @@ class _Row extends StatelessWidget {
   final String value;
   final bool emphasize;
 
-  const _Row({required this.label, required this.value, this.emphasize = false});
+  const _Row({
+    required this.label,
+    required this.value,
+    this.emphasize = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: getTextStyle(fontSize: 14.6, color: Colors.white),
-        ),
+        Text(label, style: getTextStyle(fontSize: 14.6, color: Colors.white)),
         Text(
           value,
           style: getTextStyle(

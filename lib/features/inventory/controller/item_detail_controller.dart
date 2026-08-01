@@ -43,5 +43,6 @@ class ItemDetailController extends GetxController {
 
   void toggleActivity() => activityEnabled.toggle();
 
-  void selectModifierOption(int index) => selectedModifierOptionIndex.value = index;
+  void selectModifierOption(int index) =>
+      selectedModifierOptionIndex.value = index;
 }

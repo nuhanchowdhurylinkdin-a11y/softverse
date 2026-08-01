@@ -28,7 +28,11 @@ class DashedDivider extends StatelessWidget {
               count,
               (_) => Padding(
                 padding: EdgeInsets.only(right: dashGap),
-                child: Container(width: dashWidth, height: height, color: color),
+                child: Container(
+                  width: dashWidth,
+                  height: height,
+                  color: color,
+                ),
               ),
             ),
           );

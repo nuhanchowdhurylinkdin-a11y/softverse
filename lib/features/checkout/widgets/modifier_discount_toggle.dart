@@ -48,7 +48,9 @@ class ModifierDiscountToggle extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: selected ? AppColors.authLink : AppColors.chipInactiveText,
+                color: selected
+                    ? AppColors.authLink
+                    : AppColors.chipInactiveText,
               ),
               gradient: selected
                   ? const LinearGradient(

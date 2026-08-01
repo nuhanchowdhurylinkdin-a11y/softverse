@@ -28,7 +28,9 @@ class ToggleFieldRow extends StatelessWidget {
           style: getTextStyle(
             fontSize: 16.4,
             fontWeight: FontWeight.w500,
-            color: boxed ? AppColors.chipInactiveText : AppColors.onboardingBackground,
+            color: boxed
+                ? AppColors.chipInactiveText
+                : AppColors.onboardingBackground,
           ),
         ),
         Switch(

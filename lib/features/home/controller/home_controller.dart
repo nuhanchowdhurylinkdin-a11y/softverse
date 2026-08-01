@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 
 import '../../../core/utils/constants/product_images.dart';
+import '../../checkout/controller/checkout_controller.dart';
+import '../../main_nav/controller/main_nav_controller.dart';
 import '../models/product.dart';
 import '../models/table_order.dart';
 
@@ -9,8 +11,13 @@ class HomeController extends GetxController {
   final selectedCategoryIndex = 0.obs;
 
   final orderId = 'POS-1 Order-1';
-  final orderItemCount = 5;
-  final orderTotal = 15000.0;
+
+  int get orderItemCount => Get.find<CheckoutController>().cartItems.fold(
+    0,
+    (sum, item) => sum + item.quantity,
+  );
+
+  double get orderTotal => Get.find<CheckoutController>().subtotal;
 
   final categories = const [
     'All Item',
@@ -110,9 +117,13 @@ class HomeController extends GetxController {
 
   void selectCategory(int index) => selectedCategoryIndex.value = index;
 
-  void checkout() {}
+  void checkout() => Get.find<MainNavController>().changeTab(1);
 
-  void addToCart(Product product) {}
+  void addToCart(Product product) => Get.find<CheckoutController>().addProduct(
+    name: product.name,
+    price: product.price,
+    imageUrl: product.imageUrl,
+  );
 
   void openSearch() {}
 

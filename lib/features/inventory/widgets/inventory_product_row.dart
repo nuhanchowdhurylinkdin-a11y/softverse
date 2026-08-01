@@ -10,15 +10,19 @@ class InventoryProductRow extends StatelessWidget {
   final InventoryProduct product;
   final VoidCallback onTap;
 
-  const InventoryProductRow({super.key, required this.product, required this.onTap});
+  const InventoryProductRow({
+    super.key,
+    required this.product,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     final Color badgeColor = product.isOutOfStock
         ? AppColors.dangerRed
         : product.isLowStock
-            ? AppColors.checkoutGoldEnd
-            : AppColors.stockBadgeText;
+        ? AppColors.checkoutGoldEnd
+        : AppColors.stockBadgeText;
     final Color badgeBackground = product.isOutOfStock || product.isLowStock
         ? badgeColor.withValues(alpha: 0.2)
         : AppColors.stockBadgeBackground;
@@ -66,7 +70,10 @@ class InventoryProductRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 10.w,
+                    vertical: 4.h,
+                  ),
                   decoration: BoxDecoration(
                     color: badgeBackground,
                     borderRadius: BorderRadius.circular(18.r),

@@ -58,7 +58,7 @@ class ResetPasswordScreen extends GetView<AuthController> {
                 SizedBox(height: 26.h),
                 Obx(
                   () => AppTextField(
-                    hintText: 'New password',
+                    hintText: 'New Password',
                     controller: controller.newPasswordController,
                     obscureText: controller.obscureNewPassword.value,
                     backgroundColor: AppColors.fieldBackground,
@@ -82,7 +82,7 @@ class ResetPasswordScreen extends GetView<AuthController> {
                 SizedBox(height: 15.h),
                 Obx(
                   () => AppTextField(
-                    hintText: 'Confirm new password',
+                    hintText: 'Confirm New Password',
                     controller: controller.confirmNewPasswordController,
                     obscureText: controller.obscureConfirmNewPassword.value,
                     backgroundColor: AppColors.fieldBackground,

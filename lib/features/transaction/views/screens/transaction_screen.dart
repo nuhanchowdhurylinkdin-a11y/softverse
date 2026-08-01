@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 import '../../../../core/common/styles/global_text_style.dart';
+import '../../../../core/common/widgets/app_nav_drawer.dart';
+import '../../../../core/common/widgets/app_text_field.dart';
 import '../../../../core/utils/constants/colors.dart';
 import '../../controller/transaction_controller.dart';
 import '../../widgets/transaction_card.dart';
@@ -15,12 +17,13 @@ class TransactionScreen extends GetView<TransactionController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      drawer: const AppNavDrawer(),
       appBar: AppBar(
         centerTitle: false,
         toolbarHeight: 55.h,
-        automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
+        iconTheme: const IconThemeData(color: Colors.white),
         surfaceTintColor: Colors.transparent,
         shadowColor: Colors.transparent,
         elevation: 0,
@@ -41,7 +44,7 @@ class TransactionScreen extends GetView<TransactionController> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Transection',
+                'Transaction',
                 style: getTextStyle(
                   fontSize: 16.4,
                   fontWeight: FontWeight.w500,
@@ -68,7 +71,7 @@ class TransactionScreen extends GetView<TransactionController> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'All Transections',
+                'All Transactions',
                 style: getTextStyle(
                   fontSize: 16.4,
                   fontWeight: FontWeight.w500,
@@ -76,13 +79,38 @@ class TransactionScreen extends GetView<TransactionController> {
                 ),
               ),
               SizedBox(height: 12.h),
-              ...controller.transactions.map(
-                (transaction) => Padding(
-                  padding: EdgeInsets.only(bottom: 8.h),
-                  child: TransactionCard(
-                    transaction: transaction,
-                    onOpen: () => controller.openTransaction(transaction),
-                  ),
+              AppTextField(
+                hintText: 'Search invoice or customer',
+                onChanged: controller.updateSearchQuery,
+                backgroundColor: AppColors.chipBackground,
+                borderStyle: AppTextFieldBorder.none,
+                borderRadius: 12,
+                prefixIcon: Icon(
+                  Iconsax.search_normal,
+                  size: 20.sp,
+                  color: AppColors.chipInactiveText,
+                ),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 16.w,
+                  vertical: 14.h,
+                ),
+              ),
+              SizedBox(height: 16.h),
+              Obx(
+                () => Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: controller.filteredTransactions
+                      .map(
+                        (transaction) => Padding(
+                          padding: EdgeInsets.only(bottom: 8.h),
+                          child: TransactionCard(
+                            transaction: transaction,
+                            onOpen: () =>
+                                controller.openTransaction(transaction),
+                          ),
+                        ),
+                      )
+                      .toList(),
                 ),
               ),
             ],

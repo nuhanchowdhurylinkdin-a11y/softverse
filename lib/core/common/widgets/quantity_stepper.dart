@@ -37,8 +37,8 @@ class QuantityStepper extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           GestureDetector(
-            onTap: onIncrement,
-            child: Icon(Iconsax.add, size: 18.sp, color: Colors.white),
+            onTap: onDecrement,
+            child: Icon(Iconsax.minus, size: 18.sp, color: Colors.white),
           ),
           Text(
             '$quantity',
@@ -49,8 +49,8 @@ class QuantityStepper extends StatelessWidget {
             ),
           ),
           GestureDetector(
-            onTap: onDecrement,
-            child: Icon(Iconsax.minus, size: 18.sp, color: Colors.white),
+            onTap: onIncrement,
+            child: Icon(Iconsax.add, size: 18.sp, color: Colors.white),
           ),
         ],
       ),

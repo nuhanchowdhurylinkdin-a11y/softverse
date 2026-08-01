@@ -16,79 +16,88 @@ class ProductRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12.r),
-        gradient: const LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [Colors.white, AppColors.rowGradientEnd],
+    return GestureDetector(
+      onTap: onAdd,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: EdgeInsets.all(12.w),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12.r),
+          gradient: const LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [Colors.white, AppColors.rowGradientEnd],
+          ),
         ),
-      ),
-      child: Row(
-        children: [
-          ProductImage(imageUrl: product.imageUrl),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
+          children: [
+            ProductImage(imageUrl: product.imageUrl),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product.name,
+                    style: getTextStyle(
+                      fontSize: 14.6,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.authTextDark,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    '\$${product.price.toStringAsFixed(0)}',
+                    style: getTextStyle(
+                      fontSize: 16.4,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.onboardingBackground,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  product.name,
-                  style: getTextStyle(
-                    fontSize: 14.6,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.authTextDark,
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 10.w,
+                    vertical: 4.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.stockBadgeBackground,
+                    borderRadius: BorderRadius.circular(18.r),
+                  ),
+                  child: Text(
+                    '${product.stockCount} In Stock',
+                    style: getTextStyle(
+                      fontSize: 12.8,
+                      color: AppColors.stockBadgeText,
+                    ),
                   ),
                 ),
-                SizedBox(height: 4.h),
-                Text(
-                  '\$${product.price.toStringAsFixed(0)}',
-                  style: getTextStyle(
+                SizedBox(height: 8.h),
+                IgnorePointer(
+                  child: PrimaryButton(
+                    label: 'Add',
+                    onPressed: onAdd,
+                    icon: Iconsax.shopping_cart,
+                    iconSize: 18,
+                    width: 109.w,
+                    height: 37,
                     fontSize: 16.4,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.onboardingBackground,
+                    textColor: Colors.white,
+                    gradient: const LinearGradient(
+                      colors: [AppColors.gradientStart, AppColors.gradientEnd],
+                    ),
+                    borderRadius: 999,
                   ),
                 ),
               ],
             ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                decoration: BoxDecoration(
-                  color: AppColors.stockBadgeBackground,
-                  borderRadius: BorderRadius.circular(18.r),
-                ),
-                child: Text(
-                  '${product.stockCount} In Stock',
-                  style: getTextStyle(
-                    fontSize: 12.8,
-                    color: AppColors.stockBadgeText,
-                  ),
-                ),
-              ),
-              SizedBox(height: 8.h),
-              PrimaryButton(
-                label: 'Add',
-                onPressed: onAdd,
-                icon: Iconsax.shopping_cart,
-                iconSize: 18,
-                width: 109.w,
-                height: 37,
-                fontSize: 16.4,
-                textColor: Colors.white,
-                gradient: const LinearGradient(
-                  colors: [AppColors.gradientStart, AppColors.gradientEnd],
-                ),
-                borderRadius: 999,
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

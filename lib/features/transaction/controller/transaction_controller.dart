@@ -43,6 +43,22 @@ class TransactionController extends GetxController {
     ),
   ];
 
+  final searchQuery = ''.obs;
+
+  List<TransactionRecord> get filteredTransactions {
+    final query = searchQuery.value.trim().toLowerCase();
+    if (query.isEmpty) return transactions;
+    return transactions
+        .where(
+          (transaction) =>
+              transaction.companyName.toLowerCase().contains(query) ||
+              transaction.invoiceNumber.toLowerCase().contains(query),
+        )
+        .toList();
+  }
+
+  void updateSearchQuery(String value) => searchQuery.value = value;
+
   void openTransaction(TransactionRecord transaction) {
     final invoiceController = Get.find<InvoiceController>();
     invoiceController.invoiceNumber.value = transaction.invoiceNumber;

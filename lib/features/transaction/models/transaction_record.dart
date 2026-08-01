@@ -10,37 +10,37 @@ enum PaymentType {
   refund;
 
   String get label => switch (this) {
-        PaymentType.cash => 'Cash Payment',
-        PaymentType.card => 'Card Payment',
-        PaymentType.due => 'Due Payment',
-        PaymentType.installment => 'Installment',
-        PaymentType.refund => 'Refund',
-      };
+    PaymentType.cash => 'Cash Payment',
+    PaymentType.card => 'Card Payment',
+    PaymentType.due => 'Due Payment',
+    PaymentType.installment => 'Installment',
+    PaymentType.refund => 'Refund',
+  };
 
   Color get textColor => switch (this) {
-        PaymentType.cash => AppColors.stockBadgeText,
-        PaymentType.card => AppColors.checkoutGoldEnd,
-        PaymentType.due => AppColors.dueEnd,
-        PaymentType.installment => AppColors.installmentBadgeText,
-        PaymentType.refund => AppColors.dangerRed,
-      };
+    PaymentType.cash => AppColors.stockBadgeText,
+    PaymentType.card => AppColors.checkoutGoldEnd,
+    PaymentType.due => AppColors.dueEnd,
+    PaymentType.installment => AppColors.installmentBadgeText,
+    PaymentType.refund => AppColors.dangerRed,
+  };
 
   List<Color> get gradient => switch (this) {
-        PaymentType.cash => [
-            AppColors.completeBadgeStart,
-            AppColors.completeBadgeEnd,
-          ],
-        PaymentType.card => [
-            AppColors.ongoingBadgeStart,
-            AppColors.ongoingBadgeEnd,
-          ],
-        PaymentType.due => [AppColors.dueStart, AppColors.dueEnd],
-        PaymentType.installment => [
-            AppColors.installmentStart,
-            AppColors.installmentEnd,
-          ],
-        PaymentType.refund => [AppColors.dangerRed, AppColors.dangerRed],
-      };
+    PaymentType.cash => [
+      AppColors.completeBadgeStart,
+      AppColors.completeBadgeEnd,
+    ],
+    PaymentType.card => [
+      AppColors.ongoingBadgeStart,
+      AppColors.ongoingBadgeEnd,
+    ],
+    PaymentType.due => [AppColors.dueStart, AppColors.dueEnd],
+    PaymentType.installment => [
+      AppColors.installmentStart,
+      AppColors.installmentEnd,
+    ],
+    PaymentType.refund => [AppColors.dangerRed, AppColors.dangerRed],
+  };
 }
 
 class TransactionRecord {

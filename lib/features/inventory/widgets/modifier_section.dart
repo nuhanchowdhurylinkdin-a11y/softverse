@@ -44,7 +44,10 @@ class ModifierSection extends StatelessWidget {
                 GestureDetector(
                   onTap: () => onOptionSelected(index),
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 14.h,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.chipBackground,
                       border: Border.all(color: AppColors.cardBorder),
@@ -68,7 +71,10 @@ class ModifierSection extends StatelessWidget {
                 ),
                 SizedBox(height: 8.h),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 12.h,
+                  ),
                   decoration: BoxDecoration(
                     border: Border.all(color: AppColors.cardBorder),
                     borderRadius: BorderRadius.circular(12.r),

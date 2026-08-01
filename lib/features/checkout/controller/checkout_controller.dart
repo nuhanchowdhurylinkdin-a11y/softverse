@@ -91,6 +91,23 @@ class CheckoutController extends GetxController {
 
   double get changeToReturn => amountReceived.value - totalAmount;
 
+  void addProduct({
+    required String name,
+    required double price,
+    required String imageUrl,
+  }) {
+    final index = cartItems.indexWhere((item) => item.name == name);
+    if (index != -1) {
+      cartItems[index] = cartItems[index].copyWith(
+        quantity: cartItems[index].quantity + 1,
+      );
+    } else {
+      cartItems.add(
+        CartItem(name: name, price: price, imageUrl: imageUrl, quantity: 1),
+      );
+    }
+  }
+
   void incrementQuantity(int index) {
     cartItems[index] = cartItems[index].copyWith(
       quantity: cartItems[index].quantity + 1,

@@ -33,7 +33,11 @@ class DateFieldRow extends StatelessWidget {
                 color: AppColors.chipInactiveText,
               ),
             ),
-            Icon(Iconsax.calendar_1, size: 22.sp, color: AppColors.onboardingBackground),
+            Icon(
+              Iconsax.calendar_1,
+              size: 22.sp,
+              color: AppColors.onboardingBackground,
+            ),
           ],
         ),
       ),

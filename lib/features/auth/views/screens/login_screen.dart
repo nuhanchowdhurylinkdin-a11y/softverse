@@ -27,7 +27,7 @@ class LoginScreen extends GetView<AuthController> {
                 const AppBackButton(),
                 SizedBox(height: 46.h),
                 Text(
-                  'login',
+                  'Login',
                   textAlign: TextAlign.center,
                   style: getTextStyle(
                     fontSize: 32.8,
@@ -51,7 +51,7 @@ class LoginScreen extends GetView<AuthController> {
                 ),
                 SizedBox(height: 11.h),
                 AppTextField(
-                  label: 'password',
+                  label: 'Password',
                   controller: controller.passwordController,
                   obscureText: true,
                   backgroundColor: AppColors.fieldBackground,

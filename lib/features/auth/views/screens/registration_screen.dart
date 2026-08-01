@@ -27,7 +27,7 @@ class RegistrationScreen extends GetView<AuthController> {
                 const AppBackButton(),
                 SizedBox(height: 20.h),
                 Text(
-                  'register',
+                  'Register',
                   textAlign: TextAlign.center,
                   style: getTextStyle(
                     fontSize: 32.8,
@@ -77,7 +77,7 @@ class RegistrationScreen extends GetView<AuthController> {
                 ),
                 SizedBox(height: 11.h),
                 AppTextField(
-                  label: 'create password',
+                  label: 'Create Password',
                   controller: controller.createPasswordController,
                   obscureText: true,
                   backgroundColor: AppColors.fieldBackground,
@@ -90,7 +90,7 @@ class RegistrationScreen extends GetView<AuthController> {
                 ),
                 SizedBox(height: 11.h),
                 AppTextField(
-                  label: 'Confirm password',
+                  label: 'Confirm Password',
                   controller: controller.confirmPasswordController,
                   obscureText: true,
                   backgroundColor: AppColors.fieldBackground,

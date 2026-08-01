@@ -23,11 +23,13 @@ class BarcodeGraphic extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: _widths
-            .map((w) => Container(
-                  width: w.toDouble().w,
-                  height: 36.h,
-                  color: AppColors.authTextDark,
-                ))
+            .map(
+              (w) => Container(
+                width: w.toDouble().w,
+                height: 36.h,
+                color: AppColors.authTextDark,
+              ),
+            )
             .toList(),
       ),
     );
