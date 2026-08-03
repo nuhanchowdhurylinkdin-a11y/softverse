@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 import '../../../core/common/styles/global_text_style.dart';
-import '../../../core/common/widgets/primary_button.dart';
 import '../../../core/common/widgets/product_image.dart';
 import '../../../core/utils/constants/colors.dart';
+import '../../../core/utils/helpers/app_helper.dart';
 import '../models/product.dart';
 
 class ProductGridCard extends StatelessWidget {
@@ -66,27 +65,11 @@ class ProductGridCard extends StatelessWidget {
             ),
             SizedBox(height: 4.h),
             Text(
-              '\$${product.price.toStringAsFixed(0)}',
+              '\$${AppHelperFunctions.getFormattedMoney(product.price)}',
               style: getTextStyle(
                 fontSize: 14.6,
                 fontWeight: FontWeight.w500,
                 color: AppColors.onboardingBackground,
-              ),
-            ),
-            const Spacer(),
-            IgnorePointer(
-              child: PrimaryButton(
-                label: 'Add',
-                onPressed: onAdd,
-                icon: Iconsax.shopping_cart,
-                iconSize: 16,
-                height: 30,
-                fontSize: 14.6,
-                textColor: Colors.white,
-                gradient: const LinearGradient(
-                  colors: [AppColors.gradientStart, AppColors.gradientEnd],
-                ),
-                borderRadius: 999,
               ),
             ),
           ],

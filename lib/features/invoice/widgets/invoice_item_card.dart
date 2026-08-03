@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/common/styles/global_text_style.dart';
 import '../../../core/utils/constants/colors.dart';
+import '../../../core/utils/helpers/app_helper.dart';
 import '../../checkout/models/cart_item.dart';
 
 class InvoiceItemCard extends StatelessWidget {
@@ -118,7 +119,11 @@ class _Row extends StatelessWidget {
   final double value;
   final bool emphasize;
 
-  const _Row({required this.label, required this.value, this.emphasize = false});
+  const _Row({
+    required this.label,
+    required this.value,
+    this.emphasize = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +139,7 @@ class _Row extends StatelessWidget {
           ),
         ),
         Text(
-          '\$${value.toStringAsFixed(2)}',
+          '\$${AppHelperFunctions.getFormattedMoney(value)}',
           style: getTextStyle(
             fontSize: emphasize ? 16.4 : 14.6,
             fontWeight: emphasize ? FontWeight.w500 : FontWeight.w400,

@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/common/styles/global_text_style.dart';
 import '../../../core/common/widgets/product_image.dart';
 import '../../../core/utils/constants/colors.dart';
+import '../../../core/utils/helpers/app_helper.dart';
 import '../models/inventory_product.dart';
 
 class InventoryProductRow extends StatelessWidget {
@@ -85,7 +86,7 @@ class InventoryProductRow extends StatelessWidget {
                 ),
                 SizedBox(height: 8.h),
                 Text(
-                  '\$${product.price.toStringAsFixed(0)}',
+                  '\$${AppHelperFunctions.getFormattedMoney(product.price)}',
                   style: getTextStyle(
                     fontSize: 16.4,
                     fontWeight: FontWeight.w500,

@@ -60,6 +60,14 @@ class InvoiceScreen extends GetView<InvoiceController> {
             icon: Icon(Iconsax.sms, color: Colors.white, size: 26.sp),
           ),
           IconButton(
+            onPressed: controller.exportPdf,
+            icon: Icon(
+              Iconsax.document_download,
+              color: Colors.white,
+              size: 26.sp,
+            ),
+          ),
+          IconButton(
             onPressed: controller.openPrint,
             icon: Icon(Iconsax.printer, color: Colors.white, size: 26.sp),
           ),

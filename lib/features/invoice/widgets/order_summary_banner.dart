@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/common/styles/global_text_style.dart';
 import '../../../core/utils/constants/colors.dart';
+import '../../../core/utils/helpers/app_helper.dart';
 
 class OrderSummaryBanner extends StatelessWidget {
   final String invoiceLabel;
@@ -59,7 +60,7 @@ class OrderSummaryBanner extends StatelessWidget {
             ),
           ),
           Text(
-            '\$ ${price.toStringAsFixed(0)}',
+            '\$ ${AppHelperFunctions.getFormattedMoney(price)}',
             style: getTextStyle(
               fontSize: 21.9,
               fontWeight: FontWeight.w500,

@@ -10,6 +10,7 @@ class CustomerModel {
   final String customerCode;
   final String imageUrl;
   final String note;
+  final double creditLimit;
   final double points;
   final int visitCount;
   final String lastVisitDate;
@@ -26,6 +27,7 @@ class CustomerModel {
     required this.customerCode,
     required this.imageUrl,
     this.note = '',
+    this.creditLimit = 0,
     this.points = 0,
     this.visitCount = 0,
     this.lastVisitDate = '',
@@ -43,6 +45,7 @@ class CustomerModel {
     String? customerCode,
     String? imageUrl,
     String? note,
+    double? creditLimit,
   }) {
     return CustomerModel(
       name: name ?? this.name,
@@ -56,6 +59,7 @@ class CustomerModel {
       customerCode: customerCode ?? this.customerCode,
       imageUrl: imageUrl ?? this.imageUrl,
       note: note ?? this.note,
+      creditLimit: creditLimit ?? this.creditLimit,
       points: points,
       visitCount: visitCount,
       lastVisitDate: lastVisitDate,

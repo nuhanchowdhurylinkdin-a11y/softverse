@@ -5,6 +5,7 @@ import '../../../core/common/styles/global_text_style.dart';
 import '../../../core/common/widgets/product_image.dart';
 import '../../../core/common/widgets/quantity_stepper.dart';
 import '../../../core/utils/constants/colors.dart';
+import '../../../core/utils/helpers/app_helper.dart';
 import '../models/cart_item.dart';
 
 class CartItemCard extends StatelessWidget {
@@ -62,7 +63,7 @@ class CartItemCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '\$${item.price.toStringAsFixed(2)}',
+                '\$${AppHelperFunctions.getFormattedMoney(item.price)}',
                 style: getTextStyle(
                   fontSize: 14.6,
                   color: AppColors.onboardingBackground,
@@ -116,7 +117,7 @@ class _InfoRow extends StatelessWidget {
           ),
         ),
         Text(
-          '\$${value.toStringAsFixed(2)}',
+          '\$${AppHelperFunctions.getFormattedMoney(value)}',
           style: getTextStyle(
             fontSize: emphasize ? 16.4 : 14.6,
             fontWeight: emphasize ? FontWeight.w500 : FontWeight.w400,

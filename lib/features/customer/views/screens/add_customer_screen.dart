@@ -133,6 +133,13 @@ class AddCustomerScreen extends GetView<AddCustomerController> {
               ),
               SizedBox(height: 16.h),
               CustomerFormField(
+                label: 'Credit Limit',
+                controller: controller.creditLimitController,
+                hintText: '18,000.00',
+                keyboardType: TextInputType.number,
+              ),
+              SizedBox(height: 16.h),
+              CustomerFormField(
                 label: 'Note',
                 controller: controller.noteController,
                 maxLines: 5,

@@ -5,6 +5,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../core/common/styles/global_text_style.dart';
 import '../../../core/common/widgets/primary_button.dart';
 import '../../../core/utils/constants/colors.dart';
+import '../../../core/utils/helpers/app_helper.dart';
 
 class OrderSummaryCard extends StatelessWidget {
   final String orderId;
@@ -63,7 +64,7 @@ class OrderSummaryCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '\$ ${total.toStringAsFixed(0)}',
+                '\$ ${AppHelperFunctions.getFormattedMoney(total)}',
                 style: getTextStyle(
                   fontSize: 21.9,
                   fontWeight: FontWeight.w500,

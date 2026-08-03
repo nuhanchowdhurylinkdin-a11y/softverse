@@ -5,6 +5,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 import '../../../../core/common/styles/global_text_style.dart';
 import '../../../../core/utils/constants/colors.dart';
+import '../../../../core/utils/helpers/app_helper.dart';
 import '../../controller/invoice_controller.dart';
 import '../../widgets/order_summary_banner.dart';
 import '../../widgets/payment_type_badge.dart';
@@ -14,9 +15,8 @@ class RefundInvoiceScreen extends GetView<InvoiceController> {
 
   @override
   Widget build(BuildContext context) {
-    final refundedItem = controller.items.firstWhere(
-      (item) => item.bundle != null,
-    );
+    final refundedItem =
+        controller.items[controller.selectedRefundIndex.value ?? 0];
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -100,13 +100,8 @@ class RefundInvoiceScreen extends GetView<InvoiceController> {
               ),
               SizedBox(height: 12.h),
               _Row(
-                label: refundedItem.bundle!.name,
-                value: refundedItem.bundle!.price,
-              ),
-              SizedBox(height: 4.h),
-              _Row(
-                label: refundedItem.bundle!.discountLabel,
-                value: refundedItem.bundle!.discountAmount,
+                label: '${refundedItem.name} x${refundedItem.quantity}',
+                value: refundedItem.price * refundedItem.quantity,
               ),
               SizedBox(height: 16.h),
               GestureDetector(
@@ -147,7 +142,7 @@ class _Row extends StatelessWidget {
           ),
         ),
         Text(
-          '\$${value.toStringAsFixed(2)}',
+          '\$${AppHelperFunctions.getFormattedMoney(value)}',
           style: getTextStyle(
             fontSize: 14.6,
             color: AppColors.onboardingBackground,

@@ -4,7 +4,10 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 import '../../../core/utils/constants/colors.dart';
 import '../../../core/utils/constants/product_images.dart';
+import '../../../core/utils/helpers/app_helper.dart';
 import '../../../routes/app_routes.dart';
+import '../../customer/controller/customer_controller.dart';
+import '../../main_nav/controller/main_nav_controller.dart';
 import '../models/cart_item.dart';
 import '../models/payment_method.dart';
 
@@ -17,7 +20,7 @@ class CheckoutController extends GetxController {
   final priceAdjustmentMode = PriceAdjustmentMode.modifier.obs;
   final amountReceived = 2200.0.obs;
   late final amountReceivedController = TextEditingController(
-    text: amountReceived.value.toStringAsFixed(2),
+    text: AppHelperFunctions.getFormattedMoney(amountReceived.value),
   );
 
   final taxRate = 0.075;
@@ -28,13 +31,6 @@ class CheckoutController extends GetxController {
       price: 800,
       imageUrl: ProductImages.keyboard,
       quantity: 1,
-      bundle: BundleInfo(
-        name: 'Mouse + Keyboard',
-        price: 1100,
-        discountLabel: '20% Discount',
-        discountAmount: 160,
-        subtotal: 1740,
-      ),
     ),
     const CartItem(
       name: 'A4Ttech Mouse',
@@ -128,7 +124,8 @@ class CheckoutController extends GetxController {
       priceAdjustmentMode.value = PriceAdjustmentMode.discount;
 
   void setAmountReceived(String value) {
-    amountReceived.value = double.tryParse(value) ?? amountReceived.value;
+    final normalized = value.replaceAll(',', '');
+    amountReceived.value = double.tryParse(normalized) ?? amountReceived.value;
   }
 
   void addCustomer() => Get.toNamed(AppRoute.getAddCustomerScreen());
@@ -139,11 +136,30 @@ class CheckoutController extends GetxController {
 
   void clearOrder() {}
 
-  void selectPaymentMethod(PaymentMethod method) {}
+  void selectPaymentMethod(PaymentMethod method) {
+    if (method.label != 'Due') return;
+
+    final customer = Get.find<CustomerController>().customer.value;
+    if (totalAmount > customer.creditLimit) {
+      AppHelperFunctions.showErrorSnackBar(
+        'Credit sale denied. ${customer.name} has a \$${AppHelperFunctions.getFormattedMoney(customer.creditLimit)} credit limit.',
+      );
+      return;
+    }
+
+    AppHelperFunctions.showSuccessSnackBar('Credit sale is within limit.');
+  }
 
   void openSearch() {}
 
   void openScan() {}
+
+  void closeCheckout() => Get.find<MainNavController>().changeTab(0);
+
+  Future<void> forceSync() async {
+    await Future<void>.delayed(const Duration(milliseconds: 350));
+    AppHelperFunctions.showSuccessSnackBar('Checkout data synced.');
+  }
 
   @override
   void onClose() {

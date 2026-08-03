@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 
+import '../../../core/utils/helpers/app_helper.dart';
+import '../../../core/utils/helpers/invoice_pdf_exporter.dart';
 import '../../../routes/app_routes.dart';
 import '../../invoice/controller/invoice_controller.dart';
 import '../models/transaction_record.dart';
@@ -71,7 +73,29 @@ class TransactionController extends GetxController {
     }
   }
 
+  Future<void> exportInvoice(TransactionRecord transaction) async {
+    final invoiceController = Get.find<InvoiceController>();
+    final file = await InvoicePdfExporter.exportInvoice(
+      invoiceNumber: transaction.invoiceNumber,
+      customerName: transaction.companyName,
+      orderId: transaction.orderId,
+      items: invoiceController.items,
+      subtotal: invoiceController.subtotal,
+      tax: invoiceController.tax,
+      totalAmount: invoiceController.totalAmount,
+      amountReceived: invoiceController.amountReceived,
+      changeToReturn: invoiceController.changeToReturn,
+    );
+    await InvoicePdfExporter.open(file);
+    AppHelperFunctions.showSuccessSnackBar('Invoice PDF exported.');
+  }
+
   void openFilter() {}
 
   void openNotifications() {}
+
+  Future<void> forceSync() async {
+    await Future<void>.delayed(const Duration(milliseconds: 350));
+    AppHelperFunctions.showSuccessSnackBar('Transactions synced.');
+  }
 }

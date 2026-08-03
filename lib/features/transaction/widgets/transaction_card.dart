@@ -9,11 +9,13 @@ import '../models/transaction_record.dart';
 class TransactionCard extends StatelessWidget {
   final TransactionRecord transaction;
   final VoidCallback onOpen;
+  final VoidCallback onExportPdf;
 
   const TransactionCard({
     super.key,
     required this.transaction,
     required this.onOpen,
+    required this.onExportPdf,
   });
 
   @override
@@ -100,10 +102,16 @@ class TransactionCard extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 12.h),
-                Icon(
-                  Iconsax.arrow_right_3,
-                  size: 20.sp,
-                  color: AppColors.chipInactiveText,
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: BoxConstraints.tight(Size(34.w, 34.w)),
+                  onPressed: onExportPdf,
+                  icon: Icon(
+                    Iconsax.document_download,
+                    size: 20.sp,
+                    color: AppColors.onboardingBackground,
+                  ),
                 ),
               ],
             ),

@@ -6,6 +6,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../../core/common/styles/global_text_style.dart';
 import '../../../../core/common/widgets/product_image.dart';
 import '../../../../core/utils/constants/colors.dart';
+import '../../../../core/utils/helpers/app_helper.dart';
 import '../../controller/customer_controller.dart';
 import '../../widgets/customer_detail_row.dart';
 
@@ -99,6 +100,12 @@ class ViewCustomerScreen extends GetView<CustomerController> {
                 CustomerDetailRow(
                   icon: Iconsax.personalcard,
                   text: customer.customerCode,
+                ),
+                SizedBox(height: 16.h),
+                CustomerDetailRow(
+                  icon: Iconsax.dollar_circle,
+                  text:
+                      'Credit Limit: \$${AppHelperFunctions.getFormattedMoney(customer.creditLimit)}',
                 ),
                 SizedBox(height: 16.h),
                 Text(

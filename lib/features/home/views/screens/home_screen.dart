@@ -62,26 +62,27 @@ class HomeScreen extends GetView<HomeController> {
         top: false,
         child: Stack(
           children: [
-            SingleChildScrollView(
-              padding: EdgeInsets.all(16.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Obx(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(16.w),
+                  child: Obx(
                     () => OrderTabSelector(
                       isOrderSelected: controller.isOrderTabSelected.value,
                       onOrderTap: controller.selectOrderTab,
                       onTableTap: controller.selectTableTab,
                     ),
                   ),
-                  SizedBox(height: 16.h),
-                  Obx(
+                ),
+                Expanded(
+                  child: Obx(
                     () => controller.isOrderTabSelected.value
                         ? _OrderTabBody(controller: controller)
                         : _TableTabBody(controller: controller),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
             Obx(
               () => controller.isOrderTabSelected.value
@@ -125,62 +126,76 @@ class _OrderTabBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Obx(
-          () => OrderSummaryCard(
-            orderId: controller.orderId,
-            itemCount: controller.orderItemCount,
-            total: controller.orderTotal,
-            onCheckout: controller.checkout,
+        Padding(
+          padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
+          child: Obx(
+            () => OrderSummaryCard(
+              orderId: controller.orderId,
+              itemCount: controller.orderItemCount,
+              total: controller.orderTotal,
+              onCheckout: controller.checkout,
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.w),
+          child: Obx(
+            () => CategoryTabs(
+              categories: controller.categories,
+              selectedIndex: controller.selectedCategoryIndex.value,
+              onSelected: controller.selectCategory,
+            ),
           ),
         ),
         SizedBox(height: 16.h),
-        Obx(
-          () => CategoryTabs(
-            categories: controller.categories,
-            selectedIndex: controller.selectedCategoryIndex.value,
-            onSelected: controller.selectCategory,
-          ),
-        ),
-        SizedBox(height: 16.h),
-        GetX<GeneralController>(
-          builder: (generalController) {
-            if (generalController.homeScreenLayout.value ==
-                HomeScreenLayout.grid) {
-              return GridView.builder(
-                shrinkWrap: true,
-                padding: EdgeInsets.zero,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 10.w,
-                  mainAxisSpacing: 10.h,
-                  childAspectRatio: 0.95,
-                ),
-                itemCount: controller.products.length,
-                itemBuilder: (context, index) {
-                  final product = controller.products[index];
-                  return ProductGridCard(
-                    product: product,
-                    onAdd: () => controller.addToCart(product),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: controller.forceSync,
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 96.h),
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: GetX<GeneralController>(
+                builder: (generalController) {
+                  if (generalController.homeScreenLayout.value ==
+                      HomeScreenLayout.grid) {
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      padding: EdgeInsets.zero,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 10.w,
+                        mainAxisSpacing: 10.h,
+                        childAspectRatio: 1.15,
+                      ),
+                      itemCount: controller.products.length,
+                      itemBuilder: (context, index) {
+                        final product = controller.products[index];
+                        return ProductGridCard(
+                          product: product,
+                          onAdd: () => controller.addToCart(product),
+                        );
+                      },
+                    );
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: controller.products
+                        .map(
+                          (product) => Padding(
+                            padding: EdgeInsets.only(bottom: 10.h),
+                            child: ProductRow(
+                              product: product,
+                              onAdd: () => controller.addToCart(product),
+                            ),
+                          ),
+                        )
+                        .toList(),
                   );
                 },
-              );
-            }
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: controller.products
-                  .map(
-                    (product) => Padding(
-                      padding: EdgeInsets.only(bottom: 10.h),
-                      child: ProductRow(
-                        product: product,
-                        onAdd: () => controller.addToCart(product),
-                      ),
-                    ),
-                  )
-                  .toList(),
-            );
-          },
+              ),
+            ),
+          ),
         ),
       ],
     );
@@ -194,19 +209,23 @@ class _TableTabBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: controller.tableOrders
-          .map(
-            (tableOrder) => Padding(
-              padding: EdgeInsets.only(bottom: 24.h),
-              child: TableOrderCard(
-                tableOrder: tableOrder,
-                onOpenOrder: () => controller.openTableOrder(tableOrder),
+    return RefreshIndicator(
+      onRefresh: controller.forceSync,
+      child: ListView(
+        padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: controller.tableOrders
+            .map(
+              (tableOrder) => Padding(
+                padding: EdgeInsets.only(bottom: 24.h),
+                child: TableOrderCard(
+                  tableOrder: tableOrder,
+                  onOpenOrder: () => controller.openTableOrder(tableOrder),
+                ),
               ),
-            ),
-          )
-          .toList(),
+            )
+            .toList(),
+      ),
     );
   }
 }

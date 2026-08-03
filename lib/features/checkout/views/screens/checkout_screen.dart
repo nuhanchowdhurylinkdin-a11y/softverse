@@ -50,6 +50,10 @@ class CheckoutScreen extends GetView<CheckoutController> {
           ),
         ),
         actions: [
+          IconButton(
+            onPressed: controller.closeCheckout,
+            icon: Icon(Iconsax.close_circle, color: Colors.white, size: 26.sp),
+          ),
           Icon(Iconsax.clock, color: Colors.white, size: 26.sp),
           SizedBox(width: 15.w),
           Icon(Iconsax.notification, color: Colors.white, size: 26.sp),
@@ -125,93 +129,98 @@ class CheckoutScreen extends GetView<CheckoutController> {
                   ),
                 ),
                 Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          'Purchase Item',
-                          style: getTextStyle(
-                            fontSize: 16.4,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.authTextDark,
+                  child: RefreshIndicator(
+                    onRefresh: controller.forceSync,
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: EdgeInsets.symmetric(horizontal: 16.w),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            'Purchase Item',
+                            style: getTextStyle(
+                              fontSize: 16.4,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.authTextDark,
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 12.h),
-                        Obx(
-                          () => Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              for (
-                                var i = 0;
-                                i < controller.cartItems.length;
-                                i++
-                              ) ...[
-                                CartItemCard(
-                                  item: controller.cartItems[i],
-                                  onIncrement: () =>
-                                      controller.incrementQuantity(i),
-                                  onDecrement: () =>
-                                      controller.decrementQuantity(i),
-                                ),
-                                if (i == 0) ...[
-                                  SizedBox(height: 12.h),
-                                  ModifierDiscountToggle(
-                                    mode: controller.priceAdjustmentMode.value,
-                                    onModifierTap: controller.selectModifier,
-                                    onDiscountTap: controller.selectDiscount,
+                          SizedBox(height: 12.h),
+                          Obx(
+                            () => Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                for (
+                                  var i = 0;
+                                  i < controller.cartItems.length;
+                                  i++
+                                ) ...[
+                                  CartItemCard(
+                                    item: controller.cartItems[i],
+                                    onIncrement: () =>
+                                        controller.incrementQuantity(i),
+                                    onDecrement: () =>
+                                        controller.decrementQuantity(i),
                                   ),
+                                  if (i == 0) ...[
+                                    SizedBox(height: 12.h),
+                                    ModifierDiscountToggle(
+                                      mode:
+                                          controller.priceAdjustmentMode.value,
+                                      onModifierTap: controller.selectModifier,
+                                      onDiscountTap: controller.selectDiscount,
+                                    ),
+                                  ],
+                                  SizedBox(height: 22.h),
                                 ],
-                                SizedBox(height: 22.h),
                               ],
-                            ],
+                            ),
                           ),
-                        ),
-                        Text(
-                          'Bill Amounts',
-                          style: getTextStyle(
-                            fontSize: 16.4,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.authTextDark,
+                          Text(
+                            'Bill Amounts',
+                            style: getTextStyle(
+                              fontSize: 16.4,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.authTextDark,
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 12.h),
-                        Obx(
-                          () => BillSummaryCard(
-                            subtotal: controller.subtotal,
-                            tax: controller.tax,
-                            taxRate: controller.taxRate,
-                            totalAmount: controller.totalAmount,
-                            amountReceivedController:
-                                controller.amountReceivedController,
-                            changeToReturn: controller.changeToReturn,
-                            onAmountReceivedChanged:
-                                controller.setAmountReceived,
+                          SizedBox(height: 12.h),
+                          Obx(
+                            () => BillSummaryCard(
+                              subtotal: controller.subtotal,
+                              tax: controller.tax,
+                              taxRate: controller.taxRate,
+                              totalAmount: controller.totalAmount,
+                              amountReceivedController:
+                                  controller.amountReceivedController,
+                              changeToReturn: controller.changeToReturn,
+                              onAmountReceivedChanged:
+                                  controller.setAmountReceived,
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 22.h),
-                        CheckoutActionButtons(
-                          onSendToTable: controller.sendToTable,
-                          onSaveOrder: controller.saveOrder,
-                          onClearOrder: controller.clearOrder,
-                        ),
-                        SizedBox(height: 22.h),
-                        Text(
-                          'Payment Method',
-                          style: getTextStyle(
-                            fontSize: 16.4,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.authTextDark,
+                          SizedBox(height: 22.h),
+                          CheckoutActionButtons(
+                            onSendToTable: controller.sendToTable,
+                            onSaveOrder: controller.saveOrder,
+                            onClearOrder: controller.clearOrder,
                           ),
-                        ),
-                        SizedBox(height: 12.h),
-                        PaymentMethodGrid(
-                          methods: controller.paymentMethods,
-                          onSelected: controller.selectPaymentMethod,
-                        ),
-                        SizedBox(height: 16.h),
-                      ],
+                          SizedBox(height: 22.h),
+                          Text(
+                            'Payment Method',
+                            style: getTextStyle(
+                              fontSize: 16.4,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.authTextDark,
+                            ),
+                          ),
+                          SizedBox(height: 12.h),
+                          PaymentMethodGrid(
+                            methods: controller.paymentMethods,
+                            onSelected: controller.selectPaymentMethod,
+                          ),
+                          SizedBox(height: 16.h),
+                        ],
+                      ),
                     ),
                   ),
                 ),

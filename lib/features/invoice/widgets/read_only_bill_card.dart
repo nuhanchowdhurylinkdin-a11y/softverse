@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/common/styles/global_text_style.dart';
 import '../../../core/common/widgets/dashed_divider.dart';
 import '../../../core/utils/constants/colors.dart';
+import '../../../core/utils/helpers/app_helper.dart';
 
 class ReadOnlyBillCard extends StatelessWidget {
   final double subtotal;
@@ -42,31 +43,34 @@ class ReadOnlyBillCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _Row(label: 'Subtotal', value: '\$${subtotal.toStringAsFixed(2)}'),
+          _Row(
+            label: 'Subtotal',
+            value: '\$${AppHelperFunctions.getFormattedMoney(subtotal)}',
+          ),
           SizedBox(height: 8.h),
           _Row(
             label: 'TAX (${(taxRate * 100).toStringAsFixed(1)}%)',
-            value: '\$${tax.toStringAsFixed(2)}',
+            value: '\$${AppHelperFunctions.getFormattedMoney(tax)}',
           ),
           SizedBox(height: 12.h),
           const DashedDivider(),
           SizedBox(height: 12.h),
           _Row(
             label: 'Total Amount',
-            value: '\$${totalAmount.toStringAsFixed(2)}',
+            value: '\$${AppHelperFunctions.getFormattedMoney(totalAmount)}',
             emphasize: true,
           ),
           SizedBox(height: 8.h),
           _Row(
             label: 'Amount Received',
-            value: '\$${amountReceived.toStringAsFixed(2)}',
+            value: '\$${AppHelperFunctions.getFormattedMoney(amountReceived)}',
           ),
           SizedBox(height: 12.h),
           const DashedDivider(),
           SizedBox(height: 12.h),
           _Row(
             label: 'Change to Return',
-            value: '\$${changeToReturn.toStringAsFixed(2)}',
+            value: '\$${AppHelperFunctions.getFormattedMoney(changeToReturn)}',
             emphasize: true,
           ),
         ],
@@ -80,7 +84,11 @@ class _Row extends StatelessWidget {
   final String value;
   final bool emphasize;
 
-  const _Row({required this.label, required this.value, this.emphasize = false});
+  const _Row({
+    required this.label,
+    required this.value,
+    this.emphasize = false,
+  });
 
   @override
   Widget build(BuildContext context) {

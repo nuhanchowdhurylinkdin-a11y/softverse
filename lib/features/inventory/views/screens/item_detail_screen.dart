@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import '../../../../core/common/styles/global_text_style.dart';
 import '../../../../core/common/widgets/product_image.dart';
 import '../../../../core/utils/constants/colors.dart';
+import '../../../../core/utils/helpers/app_helper.dart';
 import '../../controller/item_detail_controller.dart';
 import '../../widgets/barcode_graphic.dart';
 import '../../widgets/date_field_row.dart';
@@ -88,11 +89,13 @@ class ItemDetailScreen extends GetView<ItemDetailController> {
               LabeledRow(label: 'Sold by', value: controller.soldBy),
               LabeledRow(
                 label: 'Price',
-                value: '\$${controller.product.price.toStringAsFixed(0)}',
+                value:
+                    '\$${AppHelperFunctions.getFormattedMoney(controller.product.price)}',
               ),
               LabeledRow(
                 label: 'Cost',
-                value: '\$${controller.product.cost.toStringAsFixed(2)}',
+                value:
+                    '\$${AppHelperFunctions.getFormattedMoney(controller.product.cost)}',
               ),
               SizedBox(height: 10.h),
               Row(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/utils/helpers/app_helper.dart';
 import 'customer_controller.dart';
 
 class EditCustomerController extends GetxController {
@@ -21,6 +22,9 @@ class EditCustomerController extends GetxController {
   late final customerCodeController = TextEditingController(
     text: customer.customerCode,
   );
+  late final creditLimitController = TextEditingController(
+    text: AppHelperFunctions.getFormattedMoney(customer.creditLimit),
+  );
   late final noteController = TextEditingController(text: customer.note);
 
   void save() {
@@ -34,6 +38,9 @@ class EditCustomerController extends GetxController {
       postalCode: postalCodeController.text,
       country: countryController.text,
       customerCode: customerCodeController.text,
+      creditLimit:
+          double.tryParse(creditLimitController.text.replaceAll(',', '')) ??
+          customer.creditLimit,
       note: noteController.text,
     );
     Get.back();
@@ -50,6 +57,7 @@ class EditCustomerController extends GetxController {
     postalCodeController.dispose();
     countryController.dispose();
     customerCodeController.dispose();
+    creditLimitController.dispose();
     noteController.dispose();
     super.onClose();
   }

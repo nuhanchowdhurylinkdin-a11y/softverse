@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/common/styles/global_text_style.dart';
 import '../../../core/common/widgets/dashed_divider.dart';
 import '../../../core/utils/constants/colors.dart';
+import '../../../core/utils/helpers/app_helper.dart';
 
 class BillSummaryCard extends StatelessWidget {
   final double subtotal;
@@ -44,18 +45,21 @@ class BillSummaryCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _Row(label: 'Subtotal', value: '\$${subtotal.toStringAsFixed(2)}'),
+          _Row(
+            label: 'Subtotal',
+            value: '\$${AppHelperFunctions.getFormattedMoney(subtotal)}',
+          ),
           SizedBox(height: 8.h),
           _Row(
             label: 'TAX (${(taxRate * 100).toStringAsFixed(1)}%)',
-            value: '\$${tax.toStringAsFixed(2)}',
+            value: '\$${AppHelperFunctions.getFormattedMoney(tax)}',
           ),
           SizedBox(height: 12.h),
           const DashedDivider(),
           SizedBox(height: 12.h),
           _Row(
             label: 'Total Amount',
-            value: '\$${totalAmount.toStringAsFixed(2)}',
+            value: '\$${AppHelperFunctions.getFormattedMoney(totalAmount)}',
             emphasize: true,
           ),
           SizedBox(height: 12.h),
@@ -100,7 +104,7 @@ class BillSummaryCard extends StatelessWidget {
           SizedBox(height: 12.h),
           _Row(
             label: 'Change to Return',
-            value: '\$${changeToReturn.toStringAsFixed(2)}',
+            value: '\$${AppHelperFunctions.getFormattedMoney(changeToReturn)}',
             emphasize: true,
           ),
         ],

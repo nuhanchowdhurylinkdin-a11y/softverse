@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 
 import '../../../core/utils/constants/product_images.dart';
+import '../../../core/utils/helpers/app_helper.dart';
+import '../../../core/utils/helpers/invoice_pdf_exporter.dart';
 import '../../../routes/app_routes.dart';
 import '../../checkout/models/cart_item.dart';
 import '../../transaction/models/transaction_record.dart';
@@ -22,16 +24,19 @@ class InvoiceController extends GetxController {
       price: 800,
       imageUrl: ProductImages.keyboard,
       quantity: 1,
-      bundle: BundleInfo(
-        name: 'Mouse + Keyboard',
-        price: 1100,
-        discountLabel: '20% Discount',
-        discountAmount: 160,
-        subtotal: 1740,
-      ),
     ),
-    CartItem(name: 'A4Ttech Mouse', price: 400, imageUrl: ProductImages.mouse, quantity: 1),
-    CartItem(name: 'HP Monitor', price: 18000, imageUrl: ProductImages.monitor, quantity: 1),
+    CartItem(
+      name: 'A4Ttech Mouse',
+      price: 400,
+      imageUrl: ProductImages.mouse,
+      quantity: 1,
+    ),
+    CartItem(
+      name: 'HP Monitor',
+      price: 18000,
+      imageUrl: ProductImages.monitor,
+      quantity: 1,
+    ),
   ];
 
   double get subtotal {
@@ -66,4 +71,20 @@ class InvoiceController extends GetxController {
   void openMail() {}
 
   void openPrint() {}
+
+  Future<void> exportPdf() async {
+    final file = await InvoicePdfExporter.exportInvoice(
+      invoiceNumber: invoiceNumber.value,
+      customerName: 'Abs Corporation',
+      orderId: 'POS-1 Order-1',
+      items: items,
+      subtotal: subtotal,
+      tax: tax,
+      totalAmount: totalAmount,
+      amountReceived: amountReceived,
+      changeToReturn: changeToReturn,
+    );
+    await InvoicePdfExporter.open(file);
+    AppHelperFunctions.showSuccessSnackBar('Invoice PDF exported.');
+  }
 }

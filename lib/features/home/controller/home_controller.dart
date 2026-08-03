@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../../../core/utils/helpers/app_helper.dart';
 import '../../../core/utils/constants/product_images.dart';
 import '../../checkout/controller/checkout_controller.dart';
 import '../../main_nav/controller/main_nav_controller.dart';
@@ -128,4 +129,9 @@ class HomeController extends GetxController {
   void openSearch() {}
 
   void openScan() {}
+
+  Future<void> forceSync() async {
+    await Future<void>.delayed(const Duration(milliseconds: 350));
+    AppHelperFunctions.showSuccessSnackBar('Sales data synced.');
+  }
 }

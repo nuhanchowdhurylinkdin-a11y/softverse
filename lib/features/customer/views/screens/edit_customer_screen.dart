@@ -111,6 +111,12 @@ class EditCustomerScreen extends GetView<EditCustomerController> {
               ),
               SizedBox(height: 16.h),
               CustomerFormField(
+                label: 'Credit Limit',
+                controller: controller.creditLimitController,
+                keyboardType: TextInputType.number,
+              ),
+              SizedBox(height: 16.h),
+              CustomerFormField(
                 label: 'Note',
                 controller: controller.noteController,
                 maxLines: 5,

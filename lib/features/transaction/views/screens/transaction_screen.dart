@@ -65,55 +65,61 @@ class TransactionScreen extends GetView<TransactionController> {
       ),
       body: SafeArea(
         top: false,
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(16.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'All Transactions',
-                style: getTextStyle(
-                  fontSize: 16.4,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.onboardingBackground,
+        child: RefreshIndicator(
+          onRefresh: controller.forceSync,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.all(16.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'All Transactions',
+                  style: getTextStyle(
+                    fontSize: 16.4,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.onboardingBackground,
+                  ),
                 ),
-              ),
-              SizedBox(height: 12.h),
-              AppTextField(
-                hintText: 'Search invoice or customer',
-                onChanged: controller.updateSearchQuery,
-                backgroundColor: AppColors.chipBackground,
-                borderStyle: AppTextFieldBorder.none,
-                borderRadius: 12,
-                prefixIcon: Icon(
-                  Iconsax.search_normal,
-                  size: 20.sp,
-                  color: AppColors.chipInactiveText,
+                SizedBox(height: 12.h),
+                AppTextField(
+                  hintText: 'Search invoice or customer',
+                  onChanged: controller.updateSearchQuery,
+                  backgroundColor: AppColors.chipBackground,
+                  borderStyle: AppTextFieldBorder.none,
+                  borderRadius: 12,
+                  prefixIcon: Icon(
+                    Iconsax.search_normal,
+                    size: 20.sp,
+                    color: AppColors.chipInactiveText,
+                  ),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 14.h,
+                  ),
                 ),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 16.w,
-                  vertical: 14.h,
-                ),
-              ),
-              SizedBox(height: 16.h),
-              Obx(
-                () => Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: controller.filteredTransactions
-                      .map(
-                        (transaction) => Padding(
-                          padding: EdgeInsets.only(bottom: 8.h),
-                          child: TransactionCard(
-                            transaction: transaction,
-                            onOpen: () =>
-                                controller.openTransaction(transaction),
+                SizedBox(height: 16.h),
+                Obx(
+                  () => Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: controller.filteredTransactions
+                        .map(
+                          (transaction) => Padding(
+                            padding: EdgeInsets.only(bottom: 8.h),
+                            child: TransactionCard(
+                              transaction: transaction,
+                              onOpen: () =>
+                                  controller.openTransaction(transaction),
+                              onExportPdf: () =>
+                                  controller.exportInvoice(transaction),
+                            ),
                           ),
-                        ),
-                      )
-                      .toList(),
+                        )
+                        .toList(),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

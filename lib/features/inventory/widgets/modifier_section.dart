@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/common/styles/global_text_style.dart';
 import '../../../core/utils/constants/colors.dart';
+import '../../../core/utils/helpers/app_helper.dart';
 import '../models/modifier_group.dart';
 import 'toggle_field_row.dart';
 
@@ -96,7 +97,7 @@ class ModifierSection extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  '\$${product.price.toStringAsFixed(2)}',
+                                  '\$${AppHelperFunctions.getFormattedMoney(product.price)}',
                                   style: getTextStyle(
                                     fontSize: 16.4,
                                     fontWeight: FontWeight.w500,
