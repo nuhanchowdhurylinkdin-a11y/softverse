@@ -49,21 +49,23 @@ class ProductGridCard extends StatelessWidget {
               ),
             ),
             SizedBox(height: 4.h),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 1.h),
-              decoration: BoxDecoration(
-                color: AppColors.stockBadgeBackground,
-                borderRadius: BorderRadius.circular(18.r),
-              ),
-              child: Text(
-                '${product.stockCount} In Stock',
-                style: getTextStyle(
-                  fontSize: 11,
-                  color: AppColors.stockBadgeText,
+            if (product.trackStock) ...[
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 1.h),
+                decoration: BoxDecoration(
+                  color: AppColors.stockBadgeBackground,
+                  borderRadius: BorderRadius.circular(18.r),
+                ),
+                child: Text(
+                  '${product.stockCount} In Stock',
+                  style: getTextStyle(
+                    fontSize: 11,
+                    color: AppColors.stockBadgeText,
+                  ),
                 ),
               ),
-            ),
-            SizedBox(height: 4.h),
+              SizedBox(height: 4.h),
+            ],
             Text(
               '\$${AppHelperFunctions.getFormattedMoney(product.price)}',
               style: getTextStyle(

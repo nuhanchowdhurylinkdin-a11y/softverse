@@ -102,18 +102,21 @@ class RegistrationScreen extends GetView<AuthController> {
                   ),
                 ),
                 SizedBox(height: 36.h),
-                PrimaryButton(
-                  label: 'Sign up',
-                  gradient: const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [AppColors.gradientStart, AppColors.gradientEnd],
+                Obx(
+                  () => PrimaryButton(
+                    label: 'Sign up',
+                    isLoading: controller.isRegisterSubmitting.value,
+                    gradient: const LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [AppColors.gradientStart, AppColors.gradientEnd],
+                    ),
+                    textColor: Colors.white,
+                    height: 51,
+                    fontSize: 16.4,
+                    letterSpacing: 0.08,
+                    onPressed: controller.register,
                   ),
-                  textColor: Colors.white,
-                  height: 51,
-                  fontSize: 16.4,
-                  letterSpacing: 0.08,
-                  onPressed: controller.register,
                 ),
                 SizedBox(height: 21.h),
                 GestureDetector(

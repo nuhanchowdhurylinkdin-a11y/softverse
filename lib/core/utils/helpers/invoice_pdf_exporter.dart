@@ -2,8 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:url_launcher/url_launcher.dart';
-
 import '../../../features/checkout/models/cart_item.dart';
 import 'app_helper.dart';
 
@@ -41,12 +39,7 @@ class InvoicePdfExporter {
   }
 
   static Future<void> open(File file) async {
-    final opened = await launchUrl(Uri.file(file.path));
-    if (!opened) {
-      AppHelperFunctions.showSuccessSnackBar(
-        'Invoice exported to ${file.path}',
-      );
-    }
+    AppHelperFunctions.showSuccessSnackBar('Invoice exported to ${file.path}');
   }
 
   static Uint8List _buildPdf({

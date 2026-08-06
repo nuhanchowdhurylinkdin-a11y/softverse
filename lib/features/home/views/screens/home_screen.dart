@@ -154,8 +154,16 @@ class _OrderTabBody extends StatelessWidget {
             child: SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 96.h),
               physics: const AlwaysScrollableScrollPhysics(),
-              child: GetX<GeneralController>(
-                builder: (generalController) {
+              child: GetX<HomeController>(
+                builder: (homeController) {
+                  final generalController = Get.find<GeneralController>();
+                  final products = homeController.visibleProducts;
+                  if (products.isEmpty) {
+                    return SizedBox(
+                      height: 240.h,
+                      child: const Center(child: Text('No items found')),
+                    );
+                  }
                   if (generalController.homeScreenLayout.value ==
                       HomeScreenLayout.grid) {
                     return GridView.builder(
@@ -168,25 +176,25 @@ class _OrderTabBody extends StatelessWidget {
                         mainAxisSpacing: 10.h,
                         childAspectRatio: 1.15,
                       ),
-                      itemCount: controller.products.length,
+                      itemCount: products.length,
                       itemBuilder: (context, index) {
-                        final product = controller.products[index];
+                        final product = products[index];
                         return ProductGridCard(
                           product: product,
-                          onAdd: () => controller.addToCart(product),
+                          onAdd: () => homeController.addToCart(product),
                         );
                       },
                     );
                   }
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: controller.products
+                    children: products
                         .map(
                           (product) => Padding(
                             padding: EdgeInsets.only(bottom: 10.h),
                             child: ProductRow(
                               product: product,
-                              onAdd: () => controller.addToCart(product),
+                              onAdd: () => homeController.addToCart(product),
                             ),
                           ),
                         )
@@ -214,17 +222,41 @@ class _TableTabBody extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
         physics: const AlwaysScrollableScrollPhysics(),
-        children: controller.tableOrders
-            .map(
-              (tableOrder) => Padding(
-                padding: EdgeInsets.only(bottom: 24.h),
-                child: TableOrderCard(
-                  tableOrder: tableOrder,
-                  onOpenOrder: () => controller.openTableOrder(tableOrder),
+        children: [
+          Obx(() {
+            final tables = controller.visibleTableOrders;
+            if (tables.isEmpty) {
+              return SizedBox(
+                height: 220.h,
+                child: Center(
+                  child: Text(
+                    'No table found',
+                    style: getTextStyle(
+                      fontSize: 16.4,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.chipInactiveText,
+                    ),
+                  ),
                 ),
-              ),
-            )
-            .toList(),
+              );
+            }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: tables
+                  .map(
+                    (tableOrder) => Padding(
+                      padding: EdgeInsets.only(bottom: 24.h),
+                      child: TableOrderCard(
+                        tableOrder: tableOrder,
+                        onOpenOrder: () =>
+                            controller.openTableOrder(tableOrder),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            );
+          }),
+        ],
       ),
     );
   }

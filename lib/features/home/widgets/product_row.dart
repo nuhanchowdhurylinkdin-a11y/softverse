@@ -56,28 +56,21 @@ class ProductRow extends StatelessWidget {
                 ],
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 10.w,
-                    vertical: 4.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.stockBadgeBackground,
-                    borderRadius: BorderRadius.circular(18.r),
-                  ),
-                  child: Text(
-                    '${product.stockCount} In Stock',
-                    style: getTextStyle(
-                      fontSize: 12.8,
-                      color: AppColors.stockBadgeText,
-                    ),
+            if (product.trackStock)
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: AppColors.stockBadgeBackground,
+                  borderRadius: BorderRadius.circular(18.r),
+                ),
+                child: Text(
+                  '${product.stockCount} In Stock',
+                  style: getTextStyle(
+                    fontSize: 12.8,
+                    color: AppColors.stockBadgeText,
                   ),
                 ),
-              ],
-            ),
+              ),
           ],
         ),
       ),

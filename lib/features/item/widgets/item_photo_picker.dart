@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -6,11 +8,13 @@ import '../../../core/common/styles/global_text_style.dart';
 import '../../../core/utils/constants/colors.dart';
 
 class ItemPhotoPicker extends StatelessWidget {
+  final File? selectedImage;
   final VoidCallback onChoosePhoto;
   final VoidCallback onTakePhoto;
 
   const ItemPhotoPicker({
     super.key,
+    this.selectedImage,
     required this.onChoosePhoto,
     required this.onTakePhoto,
   });
@@ -28,16 +32,28 @@ class ItemPhotoPicker extends StatelessWidget {
           Container(
             width: 120.w,
             height: 120.w,
-            alignment: Alignment.center,
+            clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
               color: AppColors.lightBorder,
               borderRadius: BorderRadius.circular(8.r),
             ),
-            child: Icon(
-              Iconsax.image,
-              size: 48.sp,
-              color: AppColors.chipInactiveText,
-            ),
+            child: selectedImage == null
+                ? Icon(
+                    Iconsax.image,
+                    size: 48.sp,
+                    color: AppColors.chipInactiveText,
+                  )
+                : Image.file(
+                    selectedImage!,
+                    width: 120.w,
+                    height: 120.w,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Icon(
+                      Iconsax.image,
+                      size: 48.sp,
+                      color: AppColors.chipInactiveText,
+                    ),
+                  ),
           ),
           SizedBox(width: 20.w),
           Expanded(

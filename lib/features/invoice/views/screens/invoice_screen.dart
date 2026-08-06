@@ -59,12 +59,25 @@ class InvoiceScreen extends GetView<InvoiceController> {
             onPressed: controller.openMail,
             icon: Icon(Iconsax.sms, color: Colors.white, size: 26.sp),
           ),
-          IconButton(
-            onPressed: controller.exportPdf,
-            icon: Icon(
-              Iconsax.document_download,
-              color: Colors.white,
-              size: 26.sp,
+          Obx(
+            () => IconButton(
+              onPressed: controller.isPreparingPdf.value
+                  ? null
+                  : controller.exportPdf,
+              icon: controller.isPreparingPdf.value
+                  ? SizedBox(
+                      width: 20.sp,
+                      height: 20.sp,
+                      child: const CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Icon(
+                      Iconsax.document_download,
+                      color: Colors.white,
+                      size: 26.sp,
+                    ),
             ),
           ),
           IconButton(
@@ -99,10 +112,16 @@ class InvoiceScreen extends GetView<InvoiceController> {
                 ],
               ),
               SizedBox(height: 12.h),
-              ...controller.items.map(
-                (item) => Padding(
-                  padding: EdgeInsets.only(bottom: 12.h),
-                  child: InvoiceItemCard(item: item),
+              Obx(
+                () => Column(
+                  children: controller.items
+                      .map(
+                        (item) => Padding(
+                          padding: EdgeInsets.only(bottom: 12.h),
+                          child: InvoiceItemCard(item: item),
+                        ),
+                      )
+                      .toList(),
                 ),
               ),
               SizedBox(height: 12.h),
@@ -115,27 +134,75 @@ class InvoiceScreen extends GetView<InvoiceController> {
                 ),
               ),
               SizedBox(height: 12.h),
-              ReadOnlyBillCard(
-                subtotal: controller.subtotal,
-                tax: controller.tax,
-                taxRate: controller.taxRate,
-                totalAmount: controller.totalAmount,
-                amountReceived: controller.amountReceived,
-                changeToReturn: controller.changeToReturn,
+              Obx(
+                () => ReadOnlyBillCard(
+                  subtotal: controller.subtotal,
+                  tax: controller.tax,
+                  taxRate: controller.taxRate,
+                  totalAmount: controller.totalAmount,
+                  amountReceived: controller.amountReceived,
+                  changeToReturn: controller.changeToReturn,
+                ),
               ),
               SizedBox(height: 22.h),
-              Center(
-                child: PrimaryButton(
-                  label: 'Refund',
-                  onPressed: controller.goToRefund,
-                  backgroundColor: Colors.white,
-                  textColor: AppColors.dangerRed,
-                  borderColor: AppColors.dangerRed,
-                  width: 109.w,
+              Obx(
+                () => Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    PrimaryButton(
+                      label: 'Refund',
+                      onPressed: controller.goToRefund,
+                      backgroundColor: Colors.white,
+                      textColor: AppColors.dangerRed,
+                      borderColor: AppColors.dangerRed,
+                      width: 109.w,
+                      height: 51,
+                      fontSize: 16.4,
+                      borderRadius: 999,
+                    ),
+                    if ((controller.tableId.value ?? '').isNotEmpty) ...[
+                      SizedBox(width: 12.w),
+                      PrimaryButton(
+                        label: 'Mark Empty',
+                        onPressed: controller.markTableEmpty,
+                        isLoading: controller.isClearingTable.value,
+                        loadingLabel: 'Clearing...',
+                        backgroundColor: Colors.white,
+                        textColor: AppColors.onboardingBackground,
+                        borderColor: AppColors.onboardingBackground,
+                        width: 150.w,
+                        height: 51,
+                        fontSize: 14.6,
+                        borderRadius: 999,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              SizedBox(height: 14.h),
+              Obx(
+                () => PrimaryButton(
+                  label: 'View PDF',
+                  onPressed: controller.exportPdf,
+                  isLoading: controller.isPreparingPdf.value,
+                  loadingLabel: 'Preparing...',
+                  backgroundColor: AppColors.onboardingBackground,
+                  textColor: Colors.white,
                   height: 51,
                   fontSize: 16.4,
                   borderRadius: 999,
                 ),
+              ),
+              SizedBox(height: 12.h),
+              PrimaryButton(
+                label: 'Return Home',
+                onPressed: controller.returnHome,
+                backgroundColor: Colors.white,
+                textColor: AppColors.onboardingBackground,
+                borderColor: AppColors.onboardingBackground,
+                height: 51,
+                fontSize: 16.4,
+                borderRadius: 999,
               ),
             ],
           ),

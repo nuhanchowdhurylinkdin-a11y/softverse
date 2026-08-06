@@ -81,6 +81,20 @@ class MoreScreen extends GetView<MoreController> {
                 onTap: controller.openItem,
               ),
               SizedBox(height: 12.h),
+              Obx(
+                () => controller.tableOptionsEnabled.value
+                    ? MoreMenuTile(
+                        icon: Icons.table_restaurant,
+                        label: 'Tables',
+                        onTap: controller.openTables,
+                      )
+                    : const SizedBox.shrink(),
+              ),
+              Obx(
+                () => controller.tableOptionsEnabled.value
+                    ? SizedBox(height: 12.h)
+                    : const SizedBox.shrink(),
+              ),
               MoreMenuTile(
                 icon: Iconsax.user,
                 label: 'Customer',

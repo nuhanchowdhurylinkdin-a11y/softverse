@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'app.dart';
+import 'core/services/offline_database_service.dart';
 import 'core/services/storage_service.dart';
 
 void main() async {
@@ -17,5 +18,6 @@ void main() async {
   );
   await dotenv.load(fileName: '.env');
   await StorageService.init();
+  await OfflineDatabaseService.init();
   runApp(const MyApp());
 }

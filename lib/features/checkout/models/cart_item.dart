@@ -15,6 +15,7 @@ class BundleInfo {
 }
 
 class CartItem {
+  final String? itemId;
   final String name;
   final double price;
   final String imageUrl;
@@ -22,6 +23,7 @@ class CartItem {
   final BundleInfo? bundle;
 
   const CartItem({
+    this.itemId,
     required this.name,
     required this.price,
     required this.imageUrl,
@@ -29,8 +31,11 @@ class CartItem {
     this.bundle,
   });
 
+  double get lineSubtotal => (bundle?.subtotal ?? price) * quantity;
+
   CartItem copyWith({int? quantity}) {
     return CartItem(
+      itemId: itemId,
       name: name,
       price: price,
       imageUrl: imageUrl,

@@ -1,24 +1,46 @@
-import 'package:get/get.dart';
+import 'dart:io';
 
+import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+
+import '../../../core/services/network_caller.dart';
+import '../../../core/services/storage_service.dart';
+import '../../../core/utils/constants/api_constants.dart';
 import '../../../core/utils/constants/product_images.dart';
 import '../../../core/utils/helpers/app_helper.dart';
 import '../../../core/utils/helpers/invoice_pdf_exporter.dart';
 import '../../../routes/app_routes.dart';
 import '../../checkout/models/cart_item.dart';
 import '../../transaction/models/transaction_record.dart';
+import '../../home/controller/home_controller.dart';
+import '../../main_nav/controller/main_nav_controller.dart';
 
 class InvoiceController extends GetxController {
+  final NetworkCaller _networkCaller = NetworkCaller();
+  final checkoutOrderId = RxnString();
   final invoiceNumber = 'INV 00012'.obs;
   final refundInvoiceNumber = 'RINV 00001';
   final paymentType = PaymentType.cash.obs;
+  final customerName = 'Abs Corporation'.obs;
+  final orderId = 'POS-1 Order-1'.obs;
+  final receiptPdfUrl = RxnString();
+  final tableId = RxnString();
+  final tableName = RxnString();
+  final isClearingTable = false.obs;
+  final isPreparingPdf = false.obs;
+  final localPdfPath = RxnString();
+  final subtotalValue = 0.0.obs;
+  final taxValue = 0.0.obs;
+  final totalValue = 0.0.obs;
+  final amountReceivedValue = 0.0.obs;
+  final changeToReturnValue = 0.0.obs;
 
   final taxRate = 0.075;
-  final amountReceived = 2200.0;
   final refundAmount = 10840.0;
 
   final selectedRefundIndex = Rx<int?>(1);
 
-  final items = const [
+  final items = <CartItem>[
     CartItem(
       name: 'A4Ttech Keyboard',
       price: 800,
@@ -37,21 +59,69 @@ class InvoiceController extends GetxController {
       imageUrl: ProductImages.monitor,
       quantity: 1,
     ),
-  ];
+  ].obs;
 
-  double get subtotal {
-    double total = 0;
-    for (final item in items) {
-      total += (item.bundle?.subtotal ?? item.price) * item.quantity;
-    }
-    return total;
+  double get subtotal => subtotalValue.value == 0
+      ? items.fold<double>(
+          0,
+          (sum, item) =>
+              sum + (item.bundle?.subtotal ?? item.price) * item.quantity,
+        )
+      : subtotalValue.value;
+
+  double get tax => taxValue.value == 0 ? subtotal * taxRate : taxValue.value;
+
+  double get totalAmount =>
+      totalValue.value == 0 ? subtotal + tax : totalValue.value;
+
+  double get amountReceived => amountReceivedValue.value;
+
+  double get changeToReturn => changeToReturnValue.value;
+
+  void loadFromOrder(
+    Map<String, dynamic> order, {
+    String? fallbackTableId,
+    String? fallbackTableName,
+  }) {
+    invoiceNumber.value =
+        order['orderNumber']?.toString() ?? invoiceNumber.value;
+    checkoutOrderId.value = _cleanText(order['id']);
+    customerName.value =
+        order['customerName']?.toString().trim().isNotEmpty == true
+        ? order['customerName'].toString()
+        : 'Not registered';
+    orderId.value = order['orderNumber']?.toString() ?? invoiceNumber.value;
+    receiptPdfUrl.value = order['receiptPdfUrl']?.toString();
+    tableId.value = _cleanText(order['tableId']) ?? _cleanText(fallbackTableId);
+    tableName.value =
+        _cleanText(order['tableName']) ?? _cleanText(fallbackTableName);
+    subtotalValue.value = _toDouble(order['subtotal']);
+    taxValue.value = _toDouble(order['taxAmount']);
+    totalValue.value = _toDouble(order['totalAmount']);
+    amountReceivedValue.value = _toDouble(order['amountReceived']);
+    changeToReturnValue.value = _toDouble(order['changeToReturn']);
+    paymentType.value = _paymentTypeFrom(order['paymentMethod']?.toString());
+
+    final rawItems = order['items'] is List
+        ? List<dynamic>.from(order['items'] as List)
+        : <dynamic>[];
+    items.assignAll(
+      rawItems.whereType<Map>().map((entry) {
+        final item = Map<String, dynamic>.from(entry);
+        return CartItem(
+          itemId: item['itemId']?.toString(),
+          name: item['name']?.toString() ?? 'Item',
+          price: _toDouble(item['unitPrice']),
+          imageUrl: item['imageUrl']?.toString() ?? '',
+          quantity:
+              (_toDouble(item['quantity']) == 0
+                      ? 1
+                      : _toDouble(item['quantity']))
+                  .round(),
+        );
+      }),
+    );
   }
-
-  double get tax => subtotal * taxRate;
-
-  double get totalAmount => subtotal + tax;
-
-  double get changeToReturn => amountReceived - totalAmount;
 
   void selectRefundItem(int index) => selectedRefundIndex.value = index;
 
@@ -70,21 +140,123 @@ class InvoiceController extends GetxController {
 
   void openMail() {}
 
-  void openPrint() {}
+  void openPrint() {
+    AppHelperFunctions.showSuccessSnackBar('Printer preview is ready.');
+  }
+
+  void returnHome() {
+    if (Get.isRegistered<MainNavController>()) {
+      Get.find<MainNavController>().changeTab(0);
+    }
+    Get.offAllNamed(AppRoute.getHomeScreen());
+  }
+
+  Future<void> markTableEmpty() async {
+    final id = tableId.value;
+    if (id == null || id.isEmpty) {
+      AppHelperFunctions.showWarningSnackBar(
+        'This invoice is not linked to a table.',
+      );
+      return;
+    }
+
+    isClearingTable.value = true;
+    final response = await _networkCaller.postRequest(
+      ApiConstants.clearTable(id),
+      body: const {},
+    );
+    isClearingTable.value = false;
+
+    if (!response.isSuccess) {
+      AppHelperFunctions.showErrorSnackBar(response.errorMessage);
+      return;
+    }
+
+    tableId.value = null;
+    tableName.value = null;
+    if (Get.isRegistered<HomeController>()) {
+      await Get.find<HomeController>().fetchTables();
+    }
+    AppHelperFunctions.showSuccessSnackBar('Table marked empty.');
+  }
 
   Future<void> exportPdf() async {
-    final file = await InvoicePdfExporter.exportInvoice(
+    if (isPreparingPdf.value) return;
+
+    isPreparingPdf.value = true;
+    try {
+      final file = await _downloadBackendReceipt() ?? await _createLocalPdf();
+      localPdfPath.value = file.path;
+      Get.toNamed(AppRoute.getReceiptPreviewScreen());
+    } catch (_) {
+      AppHelperFunctions.showErrorSnackBar('Could not prepare receipt PDF.');
+    } finally {
+      isPreparingPdf.value = false;
+    }
+  }
+
+  Future<File> _createLocalPdf() {
+    return InvoicePdfExporter.exportInvoice(
       invoiceNumber: invoiceNumber.value,
-      customerName: 'Abs Corporation',
-      orderId: 'POS-1 Order-1',
-      items: items,
+      customerName: customerName.value,
+      orderId: orderId.value,
+      items: items.toList(),
       subtotal: subtotal,
       tax: tax,
       totalAmount: totalAmount,
       amountReceived: amountReceived,
       changeToReturn: changeToReturn,
     );
-    await InvoicePdfExporter.open(file);
-    AppHelperFunctions.showSuccessSnackBar('Invoice PDF exported.');
+  }
+
+  Future<File?> _downloadBackendReceipt() async {
+    final url = _backendReceiptUrl();
+    final token = StorageService.accessToken;
+    if (url == null || token == null || token.isEmpty) return null;
+
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      final contentType = response.headers['content-type'] ?? '';
+      if (response.statusCode != 200 || !contentType.contains('pdf')) {
+        return null;
+      }
+
+      final filename =
+          '${invoiceNumber.value.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_')}.pdf';
+      final file = File('${Directory.systemTemp.path}/$filename');
+      await file.writeAsBytes(response.bodyBytes, flush: true);
+      return file;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String? _backendReceiptUrl() {
+    final id = checkoutOrderId.value;
+    if (id != null && id.isNotEmpty) return ApiConstants.checkoutReceipt(id);
+    final url = _cleanText(receiptPdfUrl.value);
+    if (url == null) return null;
+    return ApiConstants.resolveAssetUrl(url);
+  }
+
+  double _toDouble(dynamic value) =>
+      double.tryParse(value?.toString() ?? '') ?? 0;
+
+  String? _cleanText(dynamic value) {
+    final text = value?.toString().trim();
+    if (text == null || text.isEmpty || text == 'null') return null;
+    return text;
+  }
+
+  PaymentType _paymentTypeFrom(String? value) {
+    return switch (value) {
+      'card' => PaymentType.card,
+      'due' => PaymentType.due,
+      'installment' => PaymentType.installment,
+      _ => PaymentType.cash,
+    };
   }
 }

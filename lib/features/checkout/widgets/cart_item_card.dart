@@ -63,7 +63,7 @@ class CartItemCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '\$${AppHelperFunctions.getFormattedMoney(item.price)}',
+                '\$${AppHelperFunctions.getFormattedMoney(item.lineSubtotal)}',
                 style: getTextStyle(
                   fontSize: 14.6,
                   color: AppColors.onboardingBackground,

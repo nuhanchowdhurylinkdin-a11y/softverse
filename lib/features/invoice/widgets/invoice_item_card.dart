@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/common/styles/global_text_style.dart';
+import '../../../core/common/widgets/product_image.dart';
 import '../../../core/utils/constants/colors.dart';
 import '../../../core/utils/helpers/app_helper.dart';
 import '../../checkout/models/cart_item.dart';
@@ -44,6 +45,8 @@ class InvoiceItemCard extends StatelessWidget {
                 child: _RadioCircle(selected: selected),
               ),
             ],
+            ProductImage(imageUrl: item.imageUrl, size: 46),
+            SizedBox(width: 12.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

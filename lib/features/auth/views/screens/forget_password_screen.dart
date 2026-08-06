@@ -68,18 +68,21 @@ class ForgetPasswordScreen extends GetView<AuthController> {
                   ),
                 ),
                 SizedBox(height: 29.h),
-                PrimaryButton(
-                  label: 'Continue',
-                  gradient: const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [AppColors.gradientStart, AppColors.gradientEnd],
+                Obx(
+                  () => PrimaryButton(
+                    label: 'Continue',
+                    isLoading: controller.isOtpSubmitting.value,
+                    gradient: const LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [AppColors.gradientStart, AppColors.gradientEnd],
+                    ),
+                    textColor: Colors.white,
+                    height: 55,
+                    borderRadius: 14,
+                    fontSize: 14.6,
+                    onPressed: controller.continueForgotPassword,
                   ),
-                  textColor: Colors.white,
-                  height: 55,
-                  borderRadius: 14,
-                  fontSize: 14.6,
-                  onPressed: controller.continueForgotPassword,
                 ),
                 SizedBox(height: 24.h),
               ],

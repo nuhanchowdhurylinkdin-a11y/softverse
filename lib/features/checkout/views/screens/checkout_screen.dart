@@ -41,12 +41,14 @@ class CheckoutScreen extends GetView<CheckoutController> {
             ),
           ),
         ),
-        title: Text(
-          controller.orderId,
-          style: getTextStyle(
-            fontSize: 16.4,
-            fontWeight: FontWeight.w500,
-            color: Colors.white,
+        title: Obx(
+          () => Text(
+            controller.orderId,
+            style: getTextStyle(
+              fontSize: 16.4,
+              fontWeight: FontWeight.w500,
+              color: Colors.white,
+            ),
           ),
         ),
         actions: [

@@ -1,15 +1,22 @@
 import 'package:get/get.dart';
 
+import '../../../core/services/network_caller.dart';
+import '../../../core/services/offline_database_service.dart';
+import '../../../core/utils/constants/api_constants.dart';
 import '../../../core/utils/helpers/app_helper.dart';
-import '../../../core/utils/constants/product_images.dart';
+import '../../../routes/app_routes.dart';
 import '../../checkout/controller/checkout_controller.dart';
+import '../../invoice/controller/invoice_controller.dart';
 import '../../main_nav/controller/main_nav_controller.dart';
 import '../models/product.dart';
 import '../models/table_order.dart';
 
 class HomeController extends GetxController {
+  final NetworkCaller _networkCaller = NetworkCaller();
   final isOrderTabSelected = true.obs;
   final selectedCategoryIndex = 0.obs;
+  final isLoadingCatalog = false.obs;
+  final isLoadingTables = false.obs;
 
   final orderId = 'POS-1 Order-1';
 
@@ -20,107 +27,70 @@ class HomeController extends GetxController {
 
   double get orderTotal => Get.find<CheckoutController>().subtotal;
 
-  final categories = const [
-    'All Item',
-    'PC Components',
-    'Monitor & Display',
-    'Input Devices',
-    'Audio',
-    'Gaming Accessories',
-    'Networking',
-    'Laptop & Accessories',
-    'Storage Devices',
-    'Printers & Office',
-    'Cables & Adapters',
-    'Software & Licenses',
-  ];
+  final categories = <String>['All Item'].obs;
+  final products = <Product>[].obs;
+  final tableOrders = <TableOrder>[].obs;
 
-  final products = const [
-    Product(
-      name: 'A4Ttech Keyboard',
-      price: 800,
-      stockCount: 97,
-      imageUrl: ProductImages.keyboard,
-    ),
-    Product(
-      name: 'A4Ttech Keyboard',
-      price: 800,
-      stockCount: 97,
-      imageUrl: ProductImages.keyboard,
-    ),
-    Product(
-      name: 'A4Ttech Mouse',
-      price: 400,
-      stockCount: 97,
-      imageUrl: ProductImages.mouse,
-    ),
-    Product(
-      name: 'A4Ttech Mouse',
-      price: 400,
-      stockCount: 97,
-      imageUrl: ProductImages.mouse,
-    ),
-    Product(
-      name: 'HP Monitor',
-      price: 18000,
-      stockCount: 97,
-      imageUrl: ProductImages.monitor,
-    ),
-    Product(
-      name: 'HP Monitor',
-      price: 18000,
-      stockCount: 97,
-      imageUrl: ProductImages.monitor,
-    ),
-    Product(
-      name: 'HP Monitor',
-      price: 18000,
-      stockCount: 97,
-      imageUrl: ProductImages.monitor,
-    ),
-    Product(
-      name: 'HP Monitor',
-      price: 18000,
-      stockCount: 97,
-      imageUrl: ProductImages.monitor,
-    ),
-  ];
+  List<TableOrder> get availableTables => tableOrders
+      .where((table) => table.isAvailable && table.tableId.isNotEmpty)
+      .toList(growable: false);
 
-  final tableOrders = const [
-    TableOrder(
-      tableName: 'Table-1',
-      orderId: 'POS-1 Order-1',
-      customerName: 'Abs Corporation',
-      time: '12.05 pm',
-      status: OrderStatus.complete,
-    ),
-    TableOrder(
-      tableName: 'Table-2',
-      orderId: 'POS-1 Order-5',
-      customerName: 'Not registered',
-      time: '12.05 pm',
-      status: OrderStatus.ongoing,
-    ),
-    TableOrder(
-      tableName: 'Table-3',
-      orderId: 'POS-1 Order-7',
-      customerName: 'XYZ Corporation',
-      time: '12.05 pm',
-      status: OrderStatus.ongoing,
-    ),
-  ];
+  List<TableOrder> get visibleTableOrders =>
+      tableOrders.where((table) => table.hasOrder).toList(growable: false);
 
-  void openTableOrder(TableOrder tableOrder) {}
+  List<Product> get visibleProducts {
+    if (selectedCategoryIndex.value <= 0 ||
+        selectedCategoryIndex.value >= categories.length) {
+      return products;
+    }
+    final selected = categories[selectedCategoryIndex.value];
+    return products
+        .where((product) => product.categoryName == selected)
+        .toList(growable: false);
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    _loadCachedCatalog();
+    _loadCachedTables();
+    forceSync(showMessage: false);
+  }
+
+  Future<void> openTableOrder(TableOrder tableOrder) async {
+    if (!tableOrder.hasOrder) return;
+    if (tableOrder.status == OrderStatus.complete ||
+        tableOrder.status == OrderStatus.paid) {
+      final response = await _networkCaller.getRequest(
+        ApiConstants.checkoutOrder(tableOrder.id!),
+      );
+      if (response.isSuccess && response.responseData is Map) {
+        Get.find<InvoiceController>().loadFromOrder(
+          Map<String, dynamic>.from(response.responseData as Map),
+          fallbackTableId: tableOrder.tableId,
+          fallbackTableName: tableOrder.tableName,
+        );
+        Get.toNamed(AppRoute.getInvoiceScreen());
+      }
+      return;
+    }
+
+    await Get.find<CheckoutController>().loadOrderForCheckout(tableOrder.id!);
+  }
 
   void selectOrderTab() => isOrderTabSelected.value = true;
 
-  void selectTableTab() => isOrderTabSelected.value = false;
+  void selectTableTab() {
+    isOrderTabSelected.value = false;
+    fetchTables();
+  }
 
   void selectCategory(int index) => selectedCategoryIndex.value = index;
 
   void checkout() => Get.find<MainNavController>().changeTab(1);
 
   void addToCart(Product product) => Get.find<CheckoutController>().addProduct(
+    itemId: product.id,
     name: product.name,
     price: product.price,
     imageUrl: product.imageUrl,
@@ -130,8 +100,100 @@ class HomeController extends GetxController {
 
   void openScan() {}
 
-  Future<void> forceSync() async {
-    await Future<void>.delayed(const Duration(milliseconds: 350));
-    AppHelperFunctions.showSuccessSnackBar('Sales data synced.');
+  Future<void> forceSync({bool showMessage = true}) async {
+    await Future.wait([fetchCategories(), fetchItems(), fetchTables()]);
+    if (showMessage) {
+      AppHelperFunctions.showSuccessSnackBar('Sales data synced.');
+    }
+  }
+
+  Future<void> fetchCategories() async {
+    final response = await _networkCaller.getRequest(ApiConstants.categories);
+    if (!response.isSuccess || response.responseData is! List) return;
+    final data = List<dynamic>.from(response.responseData as List);
+    await OfflineDatabaseService.saveCache('categories', data);
+    _applyCategories(data);
+  }
+
+  Future<void> fetchItems() async {
+    isLoadingCatalog.value = true;
+    final response = await _networkCaller.getRequest(ApiConstants.items);
+    isLoadingCatalog.value = false;
+    if (!response.isSuccess || response.responseData is! List) return;
+    final data = List<dynamic>.from(response.responseData as List);
+    await OfflineDatabaseService.saveCache('items', data);
+    _applyItems(data);
+  }
+
+  Future<void> fetchTables() async {
+    isLoadingTables.value = true;
+    final response = await _networkCaller.getRequest(ApiConstants.tables);
+    isLoadingTables.value = false;
+    if (!response.isSuccess || response.responseData is! Map) return;
+    final data = Map<String, dynamic>.from(response.responseData as Map);
+    await OfflineDatabaseService.saveCache('tables', data);
+    _applyTables(data);
+  }
+
+  void _loadCachedCatalog() {
+    final cachedCategories = OfflineDatabaseService.readCache<List<dynamic>>(
+      'categories',
+    );
+    final cachedItems = OfflineDatabaseService.readCache<List<dynamic>>(
+      'items',
+    );
+    if (cachedCategories != null) _applyCategories(cachedCategories);
+    if (cachedItems != null) {
+      _applyItems(cachedItems);
+    }
+  }
+
+  void _loadCachedTables() {
+    final cachedTables = OfflineDatabaseService.readCache<Map<String, dynamic>>(
+      'tables',
+    );
+    if (cachedTables != null) _applyTables(cachedTables);
+  }
+
+  void _applyCategories(List<dynamic> data) {
+    final names =
+        data
+            .whereType<Map>()
+            .map((entry) => entry['name']?.toString())
+            .whereType<String>()
+            .where((name) => name.isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort();
+    categories.assignAll(['All Item', ...names]);
+    if (selectedCategoryIndex.value >= categories.length) {
+      selectedCategoryIndex.value = 0;
+    }
+  }
+
+  void _applyItems(List<dynamic> data) {
+    final mapped = data.whereType<Map>().map((entry) {
+      return Product.fromApi(Map<String, dynamic>.from(entry));
+    }).toList();
+    products.assignAll(mapped);
+  }
+
+  Future<void> addLocalItem(Map<String, dynamic> item) async {
+    final cachedItems =
+        OfflineDatabaseService.readCache<List<dynamic>>('items') ?? <dynamic>[];
+    final nextItems = [item, ...cachedItems];
+    await OfflineDatabaseService.saveCache('items', nextItems);
+    _applyItems(nextItems);
+  }
+
+  void _applyTables(Map<String, dynamic> data) {
+    final rawTables = data['tables'];
+    if (rawTables is! List) return;
+    tableOrders.assignAll(
+      rawTables
+          .whereType<Map>()
+          .map((entry) => TableOrder.fromApi(Map<String, dynamic>.from(entry)))
+          .toList(),
+    );
   }
 }

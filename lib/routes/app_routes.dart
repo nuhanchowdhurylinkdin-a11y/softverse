@@ -21,6 +21,7 @@ import '../features/general/views/screens/home_screen_item_layout_screen.dart';
 import '../features/inventory/controller/item_detail_controller.dart';
 import '../features/inventory/views/screens/item_detail_screen.dart';
 import '../features/invoice/views/screens/invoice_screen.dart';
+import '../features/invoice/views/screens/receipt_preview_screen.dart';
 import '../features/invoice/views/screens/refund_invoice_screen.dart';
 import '../features/invoice/views/screens/refund_screen.dart';
 import '../features/item/controller/create_item_controller.dart';
@@ -52,6 +53,8 @@ import '../features/tax/views/screens/add_tax_screen.dart';
 import '../features/tax/views/screens/apply_tax_items_screen.dart';
 import '../features/tax/views/screens/edit_tax_screen.dart';
 import '../features/tax/views/screens/tax_list_screen.dart';
+import '../features/tables/controller/add_table_controller.dart';
+import '../features/tables/views/screens/add_table_screen.dart';
 import '../features/walkthrough/views/screens/feature_settings_screen.dart';
 import '../features/walkthrough/views/screens/walkthrough_screen.dart';
 
@@ -67,6 +70,7 @@ class AppRoute {
   static String featureSettingsScreen = "/featureSettingsScreen";
   static String homeScreen = "/homeScreen";
   static String invoiceScreen = "/invoiceScreen";
+  static String receiptPreviewScreen = "/receiptPreviewScreen";
   static String refundScreen = "/refundScreen";
   static String refundInvoiceScreen = "/refundInvoiceScreen";
   static String itemDetailScreen = "/itemDetailScreen";
@@ -95,6 +99,7 @@ class AppRoute {
   static String applyTaxItemsScreen = "/applyTaxItemsScreen";
   static String generalSettingsScreen = "/generalSettingsScreen";
   static String homeScreenItemLayoutScreen = "/homeScreenItemLayoutScreen";
+  static String addTableScreen = "/addTableScreen";
 
   static String getSplashScreen() => splashScreen;
   static String getOnboardingScreen() => onboardingScreen;
@@ -107,6 +112,7 @@ class AppRoute {
   static String getFeatureSettingsScreen() => featureSettingsScreen;
   static String getHomeScreen() => homeScreen;
   static String getInvoiceScreen() => invoiceScreen;
+  static String getReceiptPreviewScreen() => receiptPreviewScreen;
   static String getRefundScreen() => refundScreen;
   static String getRefundInvoiceScreen() => refundInvoiceScreen;
   static String getItemDetailScreen() => itemDetailScreen;
@@ -135,6 +141,7 @@ class AppRoute {
   static String getApplyTaxItemsScreen() => applyTaxItemsScreen;
   static String getGeneralSettingsScreen() => generalSettingsScreen;
   static String getHomeScreenItemLayoutScreen() => homeScreenItemLayoutScreen;
+  static String getAddTableScreen() => addTableScreen;
 
   static List<GetPage> routes = [
     GetPage(name: splashScreen, page: () => const SplashScreen()),
@@ -154,6 +161,10 @@ class AppRoute {
     ),
     GetPage(name: homeScreen, page: () => const MainNavScreen()),
     GetPage(name: invoiceScreen, page: () => const InvoiceScreen()),
+    GetPage(
+      name: receiptPreviewScreen,
+      page: () => const ReceiptPreviewScreen(),
+    ),
     GetPage(name: refundScreen, page: () => const RefundScreen()),
     GetPage(name: refundInvoiceScreen, page: () => const RefundInvoiceScreen()),
     GetPage(
@@ -280,6 +291,13 @@ class AppRoute {
     GetPage(
       name: homeScreenItemLayoutScreen,
       page: () => const HomeScreenItemLayoutScreen(),
+    ),
+    GetPage(
+      name: addTableScreen,
+      page: () => const AddTableScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<AddTableController>(() => AddTableController());
+      }),
     ),
   ];
 }

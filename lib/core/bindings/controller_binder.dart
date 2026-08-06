@@ -18,11 +18,13 @@ import '../../features/splash/controller/splash_controller.dart';
 import '../../features/tax/controller/tax_controller.dart';
 import '../../features/transaction/controller/transaction_controller.dart';
 import '../../features/walkthrough/controller/walkthrough_controller.dart';
+import '../services/sync_service.dart';
 
 class ControllerBinder extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut<ThemeController>(() => ThemeController(), fenix: true);
+    Get.putAsync<SyncService>(() => SyncService().init(), permanent: true);
     Get.lazyPut<HomeController>(() => HomeController(), fenix: true);
     // Eager: SplashController's only job is its onInit timer, which a screen
     // that never reads `controller` in build() would otherwise never trigger.

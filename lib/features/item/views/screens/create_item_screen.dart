@@ -8,9 +8,9 @@ import '../../../../core/common/widgets/app_text_field.dart';
 import '../../../../core/common/widgets/primary_button.dart';
 import '../../../../core/utils/constants/colors.dart';
 import '../../../inventory/widgets/date_field_row.dart';
-import '../../../inventory/widgets/modifier_section.dart';
 import '../../../inventory/widgets/toggle_field_row.dart';
 import '../../controller/create_item_controller.dart';
+import '../../widgets/combo_pack_editor_section.dart';
 import '../../widgets/color_shape_picker.dart';
 import '../../widgets/create_item_field.dart';
 import '../../widgets/item_photo_picker.dart';
@@ -76,34 +76,37 @@ class CreateItemScreen extends GetView<CreateItemController> {
                 ),
               ),
               SizedBox(height: 8.h),
-              Container(
-                height: 60.h,
-                padding: EdgeInsets.symmetric(horizontal: 16.w),
-                decoration: BoxDecoration(
-                  color: AppColors.chipBackground,
-                  border: Border.all(color: AppColors.cardBorder),
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    ValueListenableBuilder<TextEditingValue>(
-                      valueListenable: controller.categoryController,
-                      builder: (context, value, _) => Text(
-                        value.text.isEmpty ? 'No Category' : value.text,
-                        style: getTextStyle(
-                          fontSize: 16.4,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.chipInactiveText,
+              GestureDetector(
+                onTap: controller.openCategoryPicker,
+                child: Container(
+                  height: 60.h,
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  decoration: BoxDecoration(
+                    color: AppColors.chipBackground,
+                    border: Border.all(color: AppColors.cardBorder),
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ValueListenableBuilder<TextEditingValue>(
+                        valueListenable: controller.categoryController,
+                        builder: (context, value, _) => Text(
+                          value.text.isEmpty ? 'No Category' : value.text,
+                          style: getTextStyle(
+                            fontSize: 16.4,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.chipInactiveText,
+                          ),
                         ),
                       ),
-                    ),
-                    Icon(
-                      Iconsax.arrow_down_2,
-                      size: 22.sp,
-                      color: AppColors.chipInactiveText,
-                    ),
-                  ],
+                      Icon(
+                        Iconsax.arrow_down_2,
+                        size: 22.sp,
+                        color: AppColors.chipInactiveText,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               SizedBox(height: 24.h),
@@ -248,6 +251,7 @@ class CreateItemScreen extends GetView<CreateItemController> {
                           SizedBox(height: 8.h),
                           DateFieldRow(
                             value: controller.manufacturingDate.value,
+                            onTap: controller.pickManufacturingDate,
                           ),
                           SizedBox(height: 24.h),
                           Text(
@@ -259,7 +263,10 @@ class CreateItemScreen extends GetView<CreateItemController> {
                             ),
                           ),
                           SizedBox(height: 8.h),
-                          DateFieldRow(value: controller.expireDate.value),
+                          DateFieldRow(
+                            value: controller.expireDate.value,
+                            onTap: controller.pickExpireDate,
+                          ),
                           SizedBox(height: 8.h),
                           Text(
                             'Quantity at which you will be notified about Expire Date',
@@ -274,13 +281,15 @@ class CreateItemScreen extends GetView<CreateItemController> {
               ),
               SizedBox(height: 24.h),
               Obx(
-                () => ModifierSection(
-                  group: controller.modifierGroup,
+                () => ComboPackEditorSection(
                   enabled: controller.modifierEnabled.value,
                   onEnabledChanged: (_) => controller.toggleModifier(),
-                  selectedOptionIndex:
-                      controller.selectedModifierOptionIndex.value,
-                  onOptionSelected: controller.selectModifierOption,
+                  comboPacks: controller.comboPacks,
+                  onSelectionToggle: controller.toggleComboPackSelection,
+                  onEdit: (index) =>
+                      controller.openComboPackEditor(index: index),
+                  onDelete: controller.removeComboPack,
+                  onAdd: controller.openComboPackEditor,
                 ),
               ),
               SizedBox(height: 24.h),
@@ -331,22 +340,26 @@ class CreateItemScreen extends GetView<CreateItemController> {
                         onShapeSelected: controller.selectShape,
                       )
                     : ItemPhotoPicker(
+                        selectedImage: controller.selectedImage.value,
                         onChoosePhoto: controller.choosePhoto,
                         onTakePhoto: controller.takePhoto,
                       ),
               ),
               SizedBox(height: 40.h),
               Center(
-                child: PrimaryButton(
-                  label: 'Save',
-                  onPressed: controller.save,
-                  gradient: const LinearGradient(
-                    colors: [AppColors.gradientStart, AppColors.gradientEnd],
+                child: Obx(
+                  () => PrimaryButton(
+                    label: 'Save',
+                    isLoading: controller.isSaving.value,
+                    onPressed: controller.save,
+                    gradient: const LinearGradient(
+                      colors: [AppColors.gradientStart, AppColors.gradientEnd],
+                    ),
+                    textColor: Colors.white,
+                    width: 197.w,
+                    height: 68,
+                    fontSize: 16.4,
                   ),
-                  textColor: Colors.white,
-                  width: 197.w,
-                  height: 68,
-                  fontSize: 16.4,
                 ),
               ),
             ],

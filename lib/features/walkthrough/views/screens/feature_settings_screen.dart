@@ -32,14 +32,18 @@ class FeatureSettingsScreen extends GetView<WalkthroughController> {
                     ),
                   ),
                   const Spacer(),
-                  GestureDetector(
-                    onTap: controller.saveFeatureSettings,
-                    child: Text(
-                      'SAVE',
-                      style: getTextStyle(
-                        fontSize: 12.8,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.onboardingBackground,
+                  Obx(
+                    () => GestureDetector(
+                      onTap: controller.isSavingFeatures.value
+                          ? null
+                          : controller.saveFeatureSettings,
+                      child: Text(
+                        controller.isSavingFeatures.value ? 'SAVING' : 'SAVE',
+                        style: getTextStyle(
+                          fontSize: 12.8,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.onboardingBackground,
+                        ),
                       ),
                     ),
                   ),
@@ -66,10 +70,8 @@ class FeatureSettingsScreen extends GetView<WalkthroughController> {
               Expanded(
                 child: ListView.separated(
                   itemCount: controller.features.length,
-                  separatorBuilder: (_, _) => Divider(
-                    height: 1,
-                    color: AppColors.fieldDivider,
-                  ),
+                  separatorBuilder: (_, _) =>
+                      Divider(height: 1, color: AppColors.fieldDivider),
                   itemBuilder: (context, index) {
                     return Obx(
                       () => FeatureToggleTile(

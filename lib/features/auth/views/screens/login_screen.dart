@@ -75,18 +75,21 @@ class LoginScreen extends GetView<AuthController> {
                   ),
                 ),
                 SizedBox(height: 36.h),
-                PrimaryButton(
-                  label: 'Sign in',
-                  gradient: const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [AppColors.gradientStart, AppColors.gradientEnd],
+                Obx(
+                  () => PrimaryButton(
+                    label: 'Sign in',
+                    isLoading: controller.isLoginSubmitting.value,
+                    gradient: const LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [AppColors.gradientStart, AppColors.gradientEnd],
+                    ),
+                    textColor: Colors.white,
+                    height: 51,
+                    fontSize: 16.4,
+                    letterSpacing: 0.08,
+                    onPressed: controller.login,
                   ),
-                  textColor: Colors.white,
-                  height: 51,
-                  fontSize: 16.4,
-                  letterSpacing: 0.08,
-                  onPressed: controller.login,
                 ),
                 SizedBox(height: 21.h),
                 GestureDetector(

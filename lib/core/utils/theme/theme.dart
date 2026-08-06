@@ -27,7 +27,7 @@ class AppTheme {
     scaffoldBackgroundColor: AppColors.backgroundLight,
     textTheme: AppTextTheme.lightTextTheme,
     elevatedButtonTheme: AppElevatedButtonTheme.lightElevatedButtonTheme,
-    appBarTheme: App_BarTheme.lightAppBarTheme,
+    appBarTheme: AppBarThemeConfig.lightAppBarTheme,
     inputDecorationTheme: AppTextFormFieldTheme.lightInputDecorationTheme,
     extensions: const [AppColorsExtension.light],
   );
@@ -47,7 +47,7 @@ class AppTheme {
     scaffoldBackgroundColor: AppColors.backgroundDark,
     textTheme: AppTextTheme.darkTextTheme,
     elevatedButtonTheme: AppElevatedButtonTheme.darkElevatedButtonTheme,
-    appBarTheme: App_BarTheme.darkAppBarTheme,
+    appBarTheme: AppBarThemeConfig.darkAppBarTheme,
     inputDecorationTheme: AppTextFormFieldTheme.darkInputDecorationTheme,
     extensions: const [AppColorsExtension.dark],
   );

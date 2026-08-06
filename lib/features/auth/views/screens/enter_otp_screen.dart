@@ -58,9 +58,9 @@ class EnterOtpScreen extends GetView<AuthController> {
                 SizedBox(height: 33.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: List.generate(5, (index) {
+                  children: List.generate(6, (index) {
                     return SizedBox(
-                      width: 51.w,
+                      width: 45.w,
                       height: 64.h,
                       child: TextField(
                         controller: controller.otpControllers[index],
@@ -91,41 +91,77 @@ class EnterOtpScreen extends GetView<AuthController> {
                     );
                   }),
                 ),
-                SizedBox(height: 47.h),
-                PrimaryButton(
-                  label: 'Reset Password',
-                  gradient: const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [AppColors.gradientStart, AppColors.gradientEnd],
+                SizedBox(height: 24.h),
+                Obx(
+                  () => Column(
+                    children: [
+                      LinearProgressIndicator(
+                        value: controller.otpSecondsLeft.value / 120,
+                        minHeight: 5.h,
+                        borderRadius: BorderRadius.circular(99.r),
+                        color: AppColors.onboardingBackground,
+                        backgroundColor: AppColors.fieldBackground,
+                      ),
+                      SizedBox(height: 10.h),
+                      Text(
+                        'OTP expires in ${controller.otpTimerLabel}',
+                        textAlign: TextAlign.center,
+                        style: getTextStyle(
+                          fontSize: 11.9,
+                          color: AppColors.mutedText,
+                        ),
+                      ),
+                    ],
                   ),
-                  textColor: Colors.white,
-                  height: 55,
-                  borderRadius: 14,
-                  fontSize: 14.6,
-                  onPressed: controller.submitOtp,
+                ),
+                SizedBox(height: 24.h),
+                Obx(
+                  () => PrimaryButton(
+                    label: controller.currentOtpFlow.value == OtpFlow.signup
+                        ? 'Verify Account'
+                        : 'Reset Password',
+                    isLoading: controller.isOtpSubmitting.value,
+                    gradient: const LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [AppColors.gradientStart, AppColors.gradientEnd],
+                    ),
+                    textColor: Colors.white,
+                    height: 55,
+                    borderRadius: 14,
+                    fontSize: 14.6,
+                    onPressed: controller.submitOtp,
+                  ),
                 ),
                 SizedBox(height: 15.h),
-                GestureDetector(
-                  onTap: controller.resendOtp,
-                  child: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: "Didn't get OTP? ",
-                          style: getTextStyle(
-                            fontSize: 11.9,
-                            color: AppColors.helperText,
+                Obx(
+                  () => GestureDetector(
+                    onTap: controller.canResendOtp
+                        ? controller.resendOtp
+                        : null,
+                    child: Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: "Didn't get OTP? ",
+                            style: getTextStyle(
+                              fontSize: 11.9,
+                              color: AppColors.helperText,
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                          text: 'Resend OTP',
-                          style: getTextStyle(
-                            fontSize: 11.9,
-                            color: AppColors.authLink,
+                          TextSpan(
+                            text: controller.isResendingOtp.value
+                                ? 'Sending...'
+                                : 'Resend OTP',
+                            style: getTextStyle(
+                              fontSize: 11.9,
+                              color: controller.canResendOtp
+                                  ? AppColors.authLink
+                                  : AppColors.mutedText,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
