@@ -68,22 +68,41 @@ class InventoryScreen extends GetView<InventoryController> {
                     ),
                   ),
                 ),
+                SizedBox(height: 10.h),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  child: Obx(
+                    () => CategoryTabs(
+                      categories: controller.filterLabels,
+                      selectedIndex: controller.selectedFilterIndex.value,
+                      onSelected: controller.selectFilter,
+                    ),
+                  ),
+                ),
                 Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.all(16.w),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: controller.products
-                          .map(
-                            (product) => Padding(
-                              padding: EdgeInsets.only(bottom: 10.h),
-                              child: InventoryProductRow(
-                                product: product,
-                                onTap: () => controller.openProduct(product),
-                              ),
+                  child: Obx(
+                    () => RefreshIndicator(
+                      onRefresh: controller.fetchInventory,
+                      child:
+                          controller.isLoading.value &&
+                              controller.products.isEmpty
+                          ? const Center(child: CircularProgressIndicator())
+                          : ListView.builder(
+                              padding: EdgeInsets.all(16.w),
+                              itemCount: controller.visibleProducts.length,
+                              itemBuilder: (context, index) {
+                                final product =
+                                    controller.visibleProducts[index];
+                                return Padding(
+                                  padding: EdgeInsets.only(bottom: 10.h),
+                                  child: InventoryProductRow(
+                                    product: product,
+                                    onTap: () =>
+                                        controller.openProduct(product),
+                                  ),
+                                );
+                              },
                             ),
-                          )
-                          .toList(),
                     ),
                   ),
                 ),

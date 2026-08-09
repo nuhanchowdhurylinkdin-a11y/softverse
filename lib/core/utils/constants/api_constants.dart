@@ -26,6 +26,7 @@ class ApiConstants {
 
   static String get categories => '$baseUrl/categories';
   static String get items => '$baseUrl/items';
+  static String get inventory => '$baseUrl/inventory';
   static String item(String id) => '$baseUrl/items/$id';
   static String get checkout => '$baseUrl/checkout';
   static String checkoutOrder(String id) => '$baseUrl/checkout/$id';

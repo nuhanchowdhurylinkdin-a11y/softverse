@@ -89,12 +89,20 @@ class HomeController extends GetxController {
 
   void checkout() => Get.find<MainNavController>().changeTab(1);
 
-  void addToCart(Product product) => Get.find<CheckoutController>().addProduct(
-    itemId: product.id,
-    name: product.name,
-    price: product.price,
-    imageUrl: product.imageUrl,
-  );
+  void addToCart(Product product) {
+    if (product.isOutOfStock) {
+      AppHelperFunctions.showWarningSnackBar(
+        '${product.name} is out of stock.',
+      );
+      return;
+    }
+    Get.find<CheckoutController>().addProduct(
+      itemId: product.id,
+      name: product.name,
+      price: product.price,
+      imageUrl: product.imageUrl,
+    );
+  }
 
   void openSearch() {}
 
@@ -117,10 +125,14 @@ class HomeController extends GetxController {
 
   Future<void> fetchItems() async {
     isLoadingCatalog.value = true;
-    final response = await _networkCaller.getRequest(ApiConstants.items);
+    final response = await _networkCaller.getRequest(ApiConstants.inventory);
     isLoadingCatalog.value = false;
-    if (!response.isSuccess || response.responseData is! List) return;
-    final data = List<dynamic>.from(response.responseData as List);
+    if (!response.isSuccess) return;
+    final data = response.responseData is Map
+        ? List<dynamic>.from(
+            (response.responseData as Map)['items'] as List? ?? <dynamic>[],
+          )
+        : List<dynamic>.from(response.responseData as List? ?? <dynamic>[]);
     await OfflineDatabaseService.saveCache('items', data);
     _applyItems(data);
   }

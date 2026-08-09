@@ -130,7 +130,7 @@ class ItemDetailScreen extends GetView<ItemDetailController> {
               SizedBox(height: 10.h),
               LabeledRow(
                 label: 'In Stock',
-                value: '${controller.product.inStock}',
+                value: controller.product.stockLabel,
               ),
               LabeledRow(
                 label: 'Low Stock',
