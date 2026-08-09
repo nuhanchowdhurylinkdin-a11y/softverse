@@ -46,3 +46,10 @@ app.*.map.json
 
 # Environment
 .env
+
+
+# Python Virtual Environments
+venv/
+.venv/
+env/
+ENV/

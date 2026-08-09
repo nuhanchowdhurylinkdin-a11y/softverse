@@ -1,0 +1,962 @@
+{
+  "/Users/nuhan/Desktop/softverse_full/softverse/test/widget_test.dart": {
+    "mtime": 1786002508.1927512,
+    "hash": "c4bccca32f2e7eb6f9a1d7a24f8323e7"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/RunnerTests/RunnerTests.swift": {
+    "mtime": 1785563428.3797772,
+    "hash": "a225a382d14d7b16b6f602a5c1d49331"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Runner/Runner-Bridging-Header.h": {
+    "mtime": 1785563428.3795698,
+    "hash": "e07862ac930ed4d8479185d52c6cc66d"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Runner/GeneratedPluginRegistrant.h": {
+    "mtime": 1785563542.90492,
+    "hash": "decb9041b5e91a07e66f4664e5dac408"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Runner/AppDelegate.swift": {
+    "mtime": 1785563428.3776927,
+    "hash": "2bd8469f2a4b701ff582f6574e58b13c"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Runner/GeneratedPluginRegistrant.m": {
+    "mtime": 1786002510.4928048,
+    "hash": "5132e676dd80525c82e9f7507d6a9881"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Runner/SceneDelegate.swift": {
+    "mtime": 1785563428.3796456,
+    "hash": "748d701e783e68faf618c00464257a19"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Flutter/ephemeral/flutter_lldb_helper.py": {
+    "mtime": 1785947006.0944571,
+    "hash": "98fc75412162af387e2e3461e4e58094"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Pods/Target Support Files/url_launcher_ios/url_launcher_ios-umbrella.h": {
+    "mtime": 1785563587.9026332,
+    "hash": "f6dcef36a2fdc35f2623029a02d77d2d"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Pods/Target Support Files/url_launcher_ios/url_launcher_ios-dummy.m": {
+    "mtime": 1785563587.9037955,
+    "hash": "6e9bc88381512585d388751841f5db61"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Pods/Target Support Files/print_bluetooth_thermal/print_bluetooth_thermal-umbrella.h": {
+    "mtime": 1785563587.8947613,
+    "hash": "7e24f681a70b4c4b8b7328ddd8c16c31"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Pods/Target Support Files/print_bluetooth_thermal/print_bluetooth_thermal-dummy.m": {
+    "mtime": 1785563587.8958242,
+    "hash": "54df7f95dec9fb0d2d70ad043ee70695"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Pods/Target Support Files/mobile_scanner/mobile_scanner-dummy.m": {
+    "mtime": 1785563587.8927145,
+    "hash": "6dbf28fdee68a17781d3dc3ecf738d19"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Pods/Target Support Files/mobile_scanner/mobile_scanner-umbrella.h": {
+    "mtime": 1785563587.891002,
+    "hash": "74f17cd9c1e945593014130b7e8e5813"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Pods/Target Support Files/connectivity_plus/connectivity_plus-umbrella.h": {
+    "mtime": 1785948100.7349072,
+    "hash": "11682337c70aedfd80303ff4744a7570"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Pods/Target Support Files/connectivity_plus/connectivity_plus-dummy.m": {
+    "mtime": 1785948100.736736,
+    "hash": "dedcfc62fa1a4dddad5c7ba01c868c92"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner-umbrella.h": {
+    "mtime": 1785563587.9066453,
+    "hash": "557db06615837593f7d130a79167db5c"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner-dummy.m": {
+    "mtime": 1785563587.911288,
+    "hash": "d3f88e6bc5bffb456bd31d3ae36c9256"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Pods/Target Support Files/shared_preferences_foundation/shared_preferences_foundation-dummy.m": {
+    "mtime": 1785563587.8991296,
+    "hash": "7673a87a2ff137ab1024361310c89863"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Pods/Target Support Files/shared_preferences_foundation/shared_preferences_foundation-umbrella.h": {
+    "mtime": 1785563587.898163,
+    "hash": "6617a6e3bcc47a1ce1a10def4fbefe3b"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Pods/Target Support Files/Pods-RunnerTests/Pods-RunnerTests-dummy.m": {
+    "mtime": 1785563587.9138134,
+    "hash": "097dfaf08332f413805fcca47157791c"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Pods/Target Support Files/Pods-RunnerTests/Pods-RunnerTests-umbrella.h": {
+    "mtime": 1785563587.9133093,
+    "hash": "b7effd136883324d64ca181e91aba30c"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Pods/Target Support Files/image_picker_ios/image_picker_ios-dummy.m": {
+    "mtime": 1785948100.7424164,
+    "hash": "5db9495df8abc883ca1a157005424499"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/android/gradlew": {
+    "mtime": 1785565352.8383904,
+    "hash": "7f1cd7eb3f75a1dc85cd37753972a6e2"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/android/build.gradle.kts": {
+    "mtime": 1785563428.370337,
+    "hash": "f11f360aed44d4f6871b398346af14f0"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/android/settings.gradle.kts": {
+    "mtime": 1785563428.3707037,
+    "hash": "094e3cafe85d4dbf756dfe0bd754c6cb"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/android/app/build.gradle.kts": {
+    "mtime": 1785563428.368118,
+    "hash": "b3775db8b58fd6a680a30aa12817c482"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java": {
+    "mtime": 1786002510.4908044,
+    "hash": "30c1ce880582ed3e8e3496a03a073cf8"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/android/app/src/main/kotlin/com/softverse/softverse/MainActivity.kt": {
+    "mtime": 1785563428.3687987,
+    "hash": "c635b0bdcf77553992781d4fd21691f3"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/main.dart": {
+    "mtime": 1786002508.1909246,
+    "hash": "445f7e7fbe15057b68c261e26e90d6fb"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/app.dart": {
+    "mtime": 1785563428.3798928,
+    "hash": "238b08d60e583939cddbd8c3d4d0bb09"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/utils/constants/colors.dart": {
+    "mtime": 1785563428.3838096,
+    "hash": "bab6971932b45e407407cbc990d1a793"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/utils/constants/product_images.dart": {
+    "mtime": 1785563428.3838782,
+    "hash": "d78e346df5142680bb73ba58fee00e68"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/utils/constants/api_constants.dart": {
+    "mtime": 1786255371.7021835,
+    "hash": "2912779096be61dd21aa974e71ba623f"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/utils/theme/app_colors_extension.dart": {
+    "mtime": 1785947694.3894768,
+    "hash": "e664fed69edb5bc279385f160080cb9b"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/utils/theme/theme.dart": {
+    "mtime": 1786002508.178508,
+    "hash": "22ba2bc8bd435c5e9ddde0a76e1ec093"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/utils/theme/custom_themes/text_theme.dart": {
+    "mtime": 1785947694.3903606,
+    "hash": "f057e27becc2813ed43a7895a4dba1f1"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/utils/theme/custom_themes/elevated_button_theme.dart": {
+    "mtime": 1785947694.3900385,
+    "hash": "2781941fc9629135b5cdc070543e058d"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/utils/theme/custom_themes/app_bar_theme.dart": {
+    "mtime": 1786002508.1779013,
+    "hash": "b58daa5f85379553f9c052f7d9265207"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/utils/theme/custom_themes/text_field_theme.dart": {
+    "mtime": 1785947694.3901482,
+    "hash": "8f7ce9c0834702eea40315a3eaf37b48"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/utils/helpers/app_helper.dart": {
+    "mtime": 1786002508.1774898,
+    "hash": "052ea7b0007c73ae57f030d0a903ee28"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/utils/helpers/invoice_pdf_exporter.dart": {
+    "mtime": 1786002508.1777139,
+    "hash": "3fb2e4a05c1e42969c8cce2e6a6d7040"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/models/response_data.dart": {
+    "mtime": 1785563428.3834271,
+    "hash": "08a1134406806215e5244cdc170c1f42"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/controller/theme_controller.dart": {
+    "mtime": 1785563428.3833158,
+    "hash": "1edb73e0e9e65e3ca1ad5eb929f3ae6b"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/common/styles/global_text_style.dart": {
+    "mtime": 1785563428.3822086,
+    "hash": "11a9ee143f269b363fd1cc9f3fff827e"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/common/widgets/app_nav_drawer.dart": {
+    "mtime": 1785565310.9160254,
+    "hash": "c518b9831516f98498279aa0fe967c64"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/common/widgets/app_text_field.dart": {
+    "mtime": 1785563428.3825133,
+    "hash": "66498ab9554d1b96b806eb4939e55340"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/common/widgets/quantity_stepper.dart": {
+    "mtime": 1785565310.916451,
+    "hash": "afdff1fa5d69da37e4765945ca9035be"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/common/widgets/app_back_button.dart": {
+    "mtime": 1785563428.382363,
+    "hash": "f74f475ad22fc5f7f426de7e63dde8f0"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/common/widgets/coming_soon_view.dart": {
+    "mtime": 1785563428.3825984,
+    "hash": "3e2a727df7fc51340976e94fb3334afd"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/common/widgets/primary_button.dart": {
+    "mtime": 1785563428.3829036,
+    "hash": "5fff3a715afa2520f2d29ec4f96d4d9a"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/common/widgets/dashed_divider.dart": {
+    "mtime": 1785565310.9161992,
+    "hash": "0deab83606cb4c1e9710a10dc4595754"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/common/widgets/icon_bubble.dart": {
+    "mtime": 1785563428.3828273,
+    "hash": "df2d0adede6da2fd5763b4ddae1daa35"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/common/widgets/step_progress_indicator.dart": {
+    "mtime": 1785563428.3832047,
+    "hash": "0d828263be94f3ffaa41c6be0c16458a"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/common/widgets/product_image.dart": {
+    "mtime": 1786002508.1757634,
+    "hash": "38be3b96b44d6121699abc92d99868d3"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/common/widgets/radio_circle.dart": {
+    "mtime": 1785563428.3831341,
+    "hash": "4eb9e07946fafc436e684d2e8f328bcb"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/common/widgets/floating_icon_button.dart": {
+    "mtime": 1785563428.3827593,
+    "hash": "a491b3452bba76c2ed318a950ee9a385"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/bindings/controller_binder.dart": {
+    "mtime": 1786002508.1753285,
+    "hash": "846f7595eb023b51fed3f7015939fa17"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/services/offline_database_service.dart": {
+    "mtime": 1786002508.1768038,
+    "hash": "2427f348e7f98f63343aa20ed7faf3c5"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/services/network_caller.dart": {
+    "mtime": 1786002508.1760836,
+    "hash": "e1483535f5fb2b3b28e457c7016d5732"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/services/sync_service.dart": {
+    "mtime": 1786002508.1771445,
+    "hash": "53ec8c90399730e2e8bb43f68b9fdd69"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/core/services/storage_service.dart": {
+    "mtime": 1786002508.1769717,
+    "hash": "3446d94ea5d0abfc29417e203f208242"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/transaction/models/transaction_record.dart": {
+    "mtime": 1786255371.7039957,
+    "hash": "c3550445d63538229d77e4525476898d"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/transaction/controller/transaction_controller.dart": {
+    "mtime": 1786255371.703769,
+    "hash": "28ebf465ae59e08fc6f8d36e407a4753"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/transaction/views/screens/transaction_screen.dart": {
+    "mtime": 1786255371.7042465,
+    "hash": "da2b7475315d7f98e2db5c35b2b2b9f0"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/transaction/widgets/transaction_card.dart": {
+    "mtime": 1785820097.7748244,
+    "hash": "cd47d601649f8e588d0ea3706e0dc6de"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/home/models/product.dart": {
+    "mtime": 1786002508.1834075,
+    "hash": "f0c7be4c0fbd2c6013f2e01d49e01b30"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/home/models/table_order.dart": {
+    "mtime": 1786002508.1836956,
+    "hash": "4df1a817bb9f6455469967bb540fb554"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/home/controller/home_controller.dart": {
+    "mtime": 1786002508.183181,
+    "hash": "a514eac111280af1c6f0aa0f9c73e67e"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/home/views/screens/home_screen.dart": {
+    "mtime": 1786002508.1842866,
+    "hash": "c4cd03deef5218ac97873997df7cd23c"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/home/widgets/table_order_card.dart": {
+    "mtime": 1785820097.7718945,
+    "hash": "435710f19266c0dea66cac1645739622"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/home/widgets/category_tabs.dart": {
+    "mtime": 1785563428.3895087,
+    "hash": "cd9dbc8fc4df1ccfd5e3e0417e989d85"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/home/widgets/product_row.dart": {
+    "mtime": 1786002508.184744,
+    "hash": "2c473e1471c187cc17071efbcc5508df"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/home/widgets/order_summary_card.dart": {
+    "mtime": 1785820097.770004,
+    "hash": "45217b3eb4d2fa84c050fbf9b41fad4d"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/home/widgets/order_tab_selector.dart": {
+    "mtime": 1785563428.3896515,
+    "hash": "a04cd7ffbd38120049f1c2ccbb29fd8a"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/home/widgets/product_grid_card.dart": {
+    "mtime": 1786002508.184503,
+    "hash": "675efe53cf179c9820b1b83fa0026a26"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/tables/controller/add_table_controller.dart": {
+    "mtime": 1786002508.189366,
+    "hash": "347732eb7fe05165333051e428fd9e43"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/tables/views/screens/add_table_screen.dart": {
+    "mtime": 1786002508.1896024,
+    "hash": "1a7277d12038e6e9a62b65713391c06e"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/splash/controller/splash_controller.dart": {
+    "mtime": 1786002508.1891687,
+    "hash": "dd59a85e84bf3bab7a3fae5930f93304"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/splash/views/screens/splash_screen.dart": {
+    "mtime": 1785947694.3925345,
+    "hash": "92e1f6fae014f8c9b3904a8d02b12f80"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/auth/controller/auth_controller.dart": {
+    "mtime": 1786002508.1788092,
+    "hash": "035fd11bb1315801641813dcab47c8ba"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/auth/views/screens/registration_screen.dart": {
+    "mtime": 1786002508.1804786,
+    "hash": "4de479946db4c4ec586740598a2e4042"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/auth/views/screens/login_screen.dart": {
+    "mtime": 1786002508.180203,
+    "hash": "abe26e031b15b4d865fbd282d493ee19"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/auth/views/screens/forget_password_screen.dart": {
+    "mtime": 1786002508.1796556,
+    "hash": "5e9a24d30a57f0d313438831340e98c2"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/auth/views/screens/enter_otp_screen.dart": {
+    "mtime": 1786002508.1794555,
+    "hash": "a6acf41131f84f7ca942a88cfc2bde14"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/auth/views/screens/reset_password_screen.dart": {
+    "mtime": 1785565310.918042,
+    "hash": "27fa88a083cfb06c942b00ef120998be"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/general/controller/general_controller.dart": {
+    "mtime": 1785563428.3884058,
+    "hash": "f111cbc296a4684d583f48bf7118f358"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/general/views/screens/general_settings_screen.dart": {
+    "mtime": 1785563428.3886087,
+    "hash": "47dfa92627a58fb93f3221096f7e6981"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/general/views/screens/home_screen_item_layout_screen.dart": {
+    "mtime": 1785563428.388694,
+    "hash": "bf2aff7d971d8f5561c6349efcbf2e04"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/general/widgets/language_picker.dart": {
+    "mtime": 1785563428.388807,
+    "hash": "e559f169697a00b8396e13d7ad9e476a"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/general/widgets/layout_preview_card.dart": {
+    "mtime": 1785563428.3888946,
+    "hash": "9ffdf89b9af2290ca46ddbd2c65cb043"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/printer/models/printer_model.dart": {
+    "mtime": 1785563428.3942637,
+    "hash": "eb70bc401b488a29ae7a74e899527a95"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/printer/controller/add_printer_controller.dart": {
+    "mtime": 1785563428.3941069,
+    "hash": "b6e24a8084e07badf35a0f70bc98c37b"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/printer/controller/printer_controller.dart": {
+    "mtime": 1785563428.3941736,
+    "hash": "16a2e27d1c8b90d65700d2863a5afb8f"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/printer/views/screens/printer_detail_screen.dart": {
+    "mtime": 1785563428.3944693,
+    "hash": "07147331bab6afa8cc13df6537189f89"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/printer/views/screens/printer_list_screen.dart": {
+    "mtime": 1785563428.3945293,
+    "hash": "f3916377d64503ae20c84a49464c21ad"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/printer/views/screens/add_printer_screen.dart": {
+    "mtime": 1785563428.394387,
+    "hash": "8e74d888cbea2cba1627f33912fbc58f"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/printer/widgets/printer_form_field.dart": {
+    "mtime": 1785947694.3919759,
+    "hash": "597c5da0d668646ad109455525e35c37"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/printer/widgets/printer_select_row.dart": {
+    "mtime": 1785563428.3947225,
+    "hash": "bb4b4731d6ecab28450e7d530c6bc1f0"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/printer/widgets/printer_list_tile.dart": {
+    "mtime": 1785947694.3923073,
+    "hash": "1ac6a398d539f3743fddd4e51141477d"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/shift/models/shift_record.dart": {
+    "mtime": 1785563428.3951066,
+    "hash": "ade1220d4a1f9ac2bcf4daeacdc455a6"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/shift/controller/cash_management_controller.dart": {
+    "mtime": 1785563428.3948433,
+    "hash": "b87231dccab0b5c2451cfdeb1c3a18ca"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/shift/controller/close_shift_controller.dart": {
+    "mtime": 1785563428.3949022,
+    "hash": "9a74fd123d7de4802a3670099e028aab"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/shift/controller/shift_controller.dart": {
+    "mtime": 1785563428.3950171,
+    "hash": "1e94e7da063d38574710270c472ee157"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/shift/controller/open_shift_controller.dart": {
+    "mtime": 1785563428.3949592,
+    "hash": "15228ea2d637aefb5be4acdc5985149f"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/shift/views/screens/cash_management_screen.dart": {
+    "mtime": 1785563428.3952427,
+    "hash": "fb146314bad2a0a57ec87b3c6c8e8ce5"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/shift/views/screens/shift_management_screen.dart": {
+    "mtime": 1785563428.395512,
+    "hash": "859c9152aad10f5bf6bbf92e0630375c"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/shift/views/screens/shift_list_screen.dart": {
+    "mtime": 1785563428.3954551,
+    "hash": "20af750a32764c770c172534be520b55"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/shift/views/screens/close_shift_screen.dart": {
+    "mtime": 1785563428.3953164,
+    "hash": "e5ac0e95a3e72a586c689c76f49f8166"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/shift/views/screens/open_shift_screen.dart": {
+    "mtime": 1785563428.3953917,
+    "hash": "412957cb0e01252cd77f9694a672a31d"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/shift/views/screens/shift_report_screen.dart": {
+    "mtime": 1785563428.3955643,
+    "hash": "b717db7a94aa96ced7fbf9e1cf231d98"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/shift/widgets/shift_info_card.dart": {
+    "mtime": 1785563428.3958142,
+    "hash": "56c8b1d88df9ad2aa702d3183af4df5e"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/shift/widgets/sales_summary_card.dart": {
+    "mtime": 1785563428.3957074,
+    "hash": "68c1bf983f88dbc7e2c17bad44ebc3b9"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/shift/widgets/shift_action_button.dart": {
+    "mtime": 1785563428.395761,
+    "hash": "ffe74f9e4454750c848416899c093c6d"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/shift/widgets/cash_drawer_card.dart": {
+    "mtime": 1785563428.3956614,
+    "hash": "f8075ada3cc5449af233c1d4d39cd9d2"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/walkthrough/models/feature_toggle_item.dart": {
+    "mtime": 1786002508.1901376,
+    "hash": "205423c4fdc24fde0e495b81a513d6db"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/walkthrough/controller/walkthrough_controller.dart": {
+    "mtime": 1786002508.1898808,
+    "hash": "dfa436d711dc2d32af0cfe6f45455435"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/walkthrough/views/screens/feature_settings_screen.dart": {
+    "mtime": 1786002508.1907945,
+    "hash": "34347a864b26759c4300794deeccd890"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/walkthrough/views/screens/walkthrough_screen.dart": {
+    "mtime": 1785947694.392721,
+    "hash": "18cecd45b10149165bb6fcb8bebfae6a"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/walkthrough/widgets/feature_toggle_tile.dart": {
+    "mtime": 1785563428.3979247,
+    "hash": "a9d39d364a31cd2604fc6963b59e501f"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/walkthrough/widgets/walkthrough_slide.dart": {
+    "mtime": 1785563428.3979776,
+    "hash": "ab58e27ca14c1e93d5a2655c6f684808"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/tax/models/tax_model.dart": {
+    "mtime": 1785563428.3965168,
+    "hash": "bded55cbfd0e541eed8fb651582556c8"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/tax/models/taxable_item.dart": {
+    "mtime": 1785563428.396584,
+    "hash": "1144f539c195b4f4d552ff26a8a3b555"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/tax/controller/add_tax_controller.dart": {
+    "mtime": 1785563428.3962433,
+    "hash": "d903a019de9626ba1c382a7918a9492a"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/tax/controller/tax_controller.dart": {
+    "mtime": 1785563428.3964198,
+    "hash": "53efb5e9a8278e539a3ff5b65e4413af"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/tax/controller/apply_tax_items_controller.dart": {
+    "mtime": 1785563428.3963082,
+    "hash": "2cb718265125dfc55e59d0d65f2a163a"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/tax/controller/edit_tax_controller.dart": {
+    "mtime": 1785563428.3963628,
+    "hash": "ecb94668701a5bcc0135f86d376f99e7"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/tax/views/screens/tax_list_screen.dart": {
+    "mtime": 1785563428.396912,
+    "hash": "138a69840d4b0de70e8cfc9afe903e75"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/tax/views/screens/add_tax_screen.dart": {
+    "mtime": 1785563428.3967268,
+    "hash": "0ea934d7a681b61c89c787cd4f06b454"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/tax/views/screens/apply_tax_items_screen.dart": {
+    "mtime": 1785563428.3967917,
+    "hash": "c2d2a4d60ef507e06f758e54059f3164"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/tax/views/screens/edit_tax_screen.dart": {
+    "mtime": 1785563428.3968604,
+    "hash": "ce2c24fd8386555aeb2ae46e34736e76"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/tax/widgets/checkbox_square.dart": {
+    "mtime": 1785563428.3969889,
+    "hash": "f25865b0c55dfac003ee004db6977b2e"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/tax/widgets/tax_list_tile.dart": {
+    "mtime": 1785563428.397038,
+    "hash": "826412acaf420efa62342ee3e101306a"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/tax/widgets/tax_type_picker.dart": {
+    "mtime": 1785563428.3970847,
+    "hash": "e8e8e43f35a092dedfea77c97d4276cd"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/checkout/models/payment_method.dart": {
+    "mtime": 1785563428.3867347,
+    "hash": "1dced1311e12f14db27f17aa4303413e"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/checkout/models/cart_item.dart": {
+    "mtime": 1786002508.1814933,
+    "hash": "c78f87caeff800f63831e28749ca158c"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/checkout/controller/checkout_controller.dart": {
+    "mtime": 1786255371.7034812,
+    "hash": "fcb9f64a2dbf66659003974d375a7631"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/checkout/views/screens/checkout_screen.dart": {
+    "mtime": 1786002508.1822994,
+    "hash": "d341d9718ede825ed28a776bb61eee1f"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/checkout/widgets/cart_item_card.dart": {
+    "mtime": 1786002508.1825545,
+    "hash": "b4b0d12f74a4efa4abb5c4f3cc41ff0b"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/checkout/widgets/modifier_discount_toggle.dart": {
+    "mtime": 1785565310.9187176,
+    "hash": "f689a78995aac316ee22e410a4b1602c"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/checkout/widgets/payment_method_grid.dart": {
+    "mtime": 1785563428.3872585,
+    "hash": "3a90c3556f12bb81677a73ecbb771291"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/checkout/widgets/bill_summary_card.dart": {
+    "mtime": 1785820097.7661457,
+    "hash": "2f9dd81b284c8896d0e4365b5c6732f5"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/checkout/widgets/checkout_action_buttons.dart": {
+    "mtime": 1785563428.3871331,
+    "hash": "769f743ece52d010d48c50582b32bc9d"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/main_nav/controller/main_nav_controller.dart": {
+    "mtime": 1785563428.3930595,
+    "hash": "41d08d318a4b270a2e07006263062267"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/main_nav/views/screens/main_nav_screen.dart": {
+    "mtime": 1785565310.9225729,
+    "hash": "0502c8b8b0a240711011b61568b370bc"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/more/controller/more_controller.dart": {
+    "mtime": 1786002508.187872,
+    "hash": "41b437ffd6dec205e77ff25217863fc5"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/more/views/screens/more_screen.dart": {
+    "mtime": 1786002508.1881487,
+    "hash": "3aaf9021025a14b03c3602b162ea14fe"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/more/widgets/more_menu_tile.dart": {
+    "mtime": 1785563428.3936293,
+    "hash": "f99af8c955b6a78e906368f9042da809"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/more/widgets/more_profile_card.dart": {
+    "mtime": 1785563428.3936982,
+    "hash": "b47497be6a5819d772d3652722ef6e47"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/item/models/combo_pack_draft.dart": {
+    "mtime": 1786002508.1868021,
+    "hash": "31061fa85fbafac43180c5ebac4e0b58"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/item/controller/create_item_controller.dart": {
+    "mtime": 1786002508.1864064,
+    "hash": "f235e5680043eaee46a501027850a986"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/item/controller/scan_barcode_controller.dart": {
+    "mtime": 1785563428.3922856,
+    "hash": "cda58d65ae8aac0e5248d88543fcb39b"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/item/controller/items_menu_controller.dart": {
+    "mtime": 1785563428.3922257,
+    "hash": "4af5d8191a066d6dabbdf28e300fc865"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/item/views/screens/items_menu_screen.dart": {
+    "mtime": 1785563428.3925192,
+    "hash": "6b2eadd6dede49c210e10ad4d27963bc"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/item/views/screens/scan_barcode_screen.dart": {
+    "mtime": 1785563428.3925884,
+    "hash": "3f6a63528aa1d7d4b12047e09edfd670"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/item/views/screens/create_item_screen.dart": {
+    "mtime": 1786002508.187043,
+    "hash": "bb946b5c66285de883745eeac06b4c47"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/item/widgets/item_photo_picker.dart": {
+    "mtime": 1786002508.1874585,
+    "hash": "7dc586a99dda479db239054361e4b782"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/item/widgets/create_item_field.dart": {
+    "mtime": 1785563428.3927536,
+    "hash": "3bbab23ab661d2da458e4d894e6db03e"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/item/widgets/item_menu_tile.dart": {
+    "mtime": 1785563428.3928165,
+    "hash": "7e6eedbab6e832b8132953ae14a049b8"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/item/widgets/color_shape_picker.dart": {
+    "mtime": 1785563428.3926914,
+    "hash": "9efc3176c43024d9b964d05ffc5a6baf"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/item/widgets/labeled_radio_option.dart": {
+    "mtime": 1785563428.3929257,
+    "hash": "4eb7518f22068f83f3dae75285e6cce8"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/item/widgets/combo_pack_editor_section.dart": {
+    "mtime": 1786002508.1872916,
+    "hash": "5abb2dd8687e7ba6d765ede5aac0ca0f"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/inventory/models/inventory_product.dart": {
+    "mtime": 1785563428.3902197,
+    "hash": "a1c2696d712fdb666b66cf6bc80ea050"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/inventory/models/modifier_group.dart": {
+    "mtime": 1785563428.3902807,
+    "hash": "91826fa5cbd6f77bdbc0c4e0a62b13f5"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/inventory/controller/item_detail_controller.dart": {
+    "mtime": 1785565310.9201574,
+    "hash": "f4ff3088f65f124dd987a915ceba1bae"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/inventory/controller/inventory_controller.dart": {
+    "mtime": 1785563428.3900332,
+    "hash": "ea95124887aecfb5d1b2209aa330953d"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/inventory/views/screens/item_detail_screen.dart": {
+    "mtime": 1785820097.7721028,
+    "hash": "b3fc115018add74597d6e849c904fb3b"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/inventory/views/screens/inventory_screen.dart": {
+    "mtime": 1785565310.9203765,
+    "hash": "1c75226b6d65874ebd39055d07ee3b9e"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/inventory/widgets/barcode_graphic.dart": {
+    "mtime": 1785565310.92056,
+    "hash": "77a2a206a9c3bfd1362e151a0354e285"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/inventory/widgets/modifier_section.dart": {
+    "mtime": 1785820097.7725163,
+    "hash": "7253fa763ec5b20ff1bb7274480074e1"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/inventory/widgets/date_field_row.dart": {
+    "mtime": 1785565310.9208503,
+    "hash": "e82d159dff081561908f86f816faa405"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/inventory/widgets/toggle_field_row.dart": {
+    "mtime": 1785565310.9221675,
+    "hash": "4b572bebb786479f70242d8422f16487"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/inventory/widgets/inventory_product_row.dart": {
+    "mtime": 1785820097.7722783,
+    "hash": "d3698cb5fa4cac885cdab5cac7d36571"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/inventory/widgets/labeled_row.dart": {
+    "mtime": 1785563428.3909142,
+    "hash": "626f2d5bde2258564de983c2c10c246d"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/apps/models/app_device_model.dart": {
+    "mtime": 1785563428.3849561,
+    "hash": "1ed920a71523fab022073077bb7e30bd"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/apps/controller/add_app_device_controller.dart": {
+    "mtime": 1785563428.3847158,
+    "hash": "985002373ef0115366a59b4d4b9656be"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/apps/controller/app_device_view_controller.dart": {
+    "mtime": 1785563428.384783,
+    "hash": "97b90ea0827fc3e9a6b394f96e1e52b2"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/apps/controller/apps_controller.dart": {
+    "mtime": 1785563428.384855,
+    "hash": "9e24c26fbf768b65b7bf5266a99b25af"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/apps/views/screens/apps_menu_screen.dart": {
+    "mtime": 1785563428.3856072,
+    "hash": "194305024b5a7485d17e1a3c436ed93b"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/apps/views/screens/app_device_view_screen.dart": {
+    "mtime": 1785563428.3855376,
+    "hash": "3c344fafee4cbdaef51a9a00be1c153c"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/apps/views/screens/app_device_list_screen.dart": {
+    "mtime": 1785563428.3854458,
+    "hash": "cdbf61f9914af3cc5b4f327c693edc84"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/apps/views/screens/add_app_device_screen.dart": {
+    "mtime": 1785563428.3853045,
+    "hash": "6c6280028023cf1fe763357a84ce91cc"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/apps/services/network_pairing_service.dart": {
+    "mtime": 1785563428.3850632,
+    "hash": "e8463af618d7b25be93e75f571864801"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/apps/widgets/app_device_list_tile.dart": {
+    "mtime": 1785563428.3857474,
+    "hash": "b5e7e5011b1a810fa9b34694a2630aa6"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/onboarding/controller/onboarding_controller.dart": {
+    "mtime": 1786002508.1888168,
+    "hash": "6ceec1bc9928ea81d61b21753b47a1e9"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/onboarding/views/screens/onboarding_screen.dart": {
+    "mtime": 1785947694.3915496,
+    "hash": "8d62fe567246aa367ecb79a3b9d3c8ad"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/customer/models/customer_model.dart": {
+    "mtime": 1785820097.7678437,
+    "hash": "ccd9a67599bd81a6ac58b301afc4a172"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/customer/controller/customer_controller.dart": {
+    "mtime": 1785820097.7668438,
+    "hash": "44755e9e01c6a758ee46595283808873"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/customer/controller/edit_customer_controller.dart": {
+    "mtime": 1785820097.7670987,
+    "hash": "2b530fd6c244dfd7921cd4bcc5e0eb7f"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/customer/controller/add_customer_controller.dart": {
+    "mtime": 1785820097.7666068,
+    "hash": "9b0b4b59b52ac7afe1c410eebb9a8695"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/customer/views/screens/add_customer_screen.dart": {
+    "mtime": 1785820097.768165,
+    "hash": "f70c12ac37342fb09d8648ca672be309"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/customer/views/screens/edit_customer_screen.dart": {
+    "mtime": 1785820097.7685874,
+    "hash": "1cd21b18171aa22c7b9a9fba1a068b34"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/customer/views/screens/view_customer_screen.dart": {
+    "mtime": 1785820097.7688973,
+    "hash": "1448c2bc721864bd0e0d6f71f5450850"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/customer/widgets/customer_detail_row.dart": {
+    "mtime": 1785563428.388142,
+    "hash": "6b8bfaf046a22855ac416c9d3c197f2d"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/customer/widgets/customer_form_field.dart": {
+    "mtime": 1785563428.3882308,
+    "hash": "f68a6ed8f6836d807bd494d3a51d4efc"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/invoice/controller/invoice_controller.dart": {
+    "mtime": 1786002508.185031,
+    "hash": "a3b0aea3a5e6322c5de1fb5897077ec0"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/invoice/views/screens/receipt_preview_screen.dart": {
+    "mtime": 1786002508.185876,
+    "hash": "6568730c88891cc10d82081afe3dfd1d"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/invoice/views/screens/refund_screen.dart": {
+    "mtime": 1785563428.3915207,
+    "hash": "3afe2e9b8e436840cd8ef266faa9bd66"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/invoice/views/screens/refund_invoice_screen.dart": {
+    "mtime": 1785820097.7732172,
+    "hash": "4e31d61088ea3e06002cc262754f42c0"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/invoice/views/screens/invoice_screen.dart": {
+    "mtime": 1786002508.1856287,
+    "hash": "2f7fdc13fe9ce22a4abc557936b81e45"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/invoice/widgets/invoice_item_card.dart": {
+    "mtime": 1786002508.1861176,
+    "hash": "41717d74fd212854d1563abed7d06416"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/invoice/widgets/read_only_bill_card.dart": {
+    "mtime": 1785820097.7738147,
+    "hash": "ea141e2b7080f7da9d2745636a8dc55c"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/invoice/widgets/order_summary_banner.dart": {
+    "mtime": 1785820097.773638,
+    "hash": "aae1762f7cc4086c366d4c826e5dbce6"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/features/invoice/widgets/payment_type_badge.dart": {
+    "mtime": 1785947694.3907638,
+    "hash": "3ced38e6770ad12ba8e273e2cd6b27e5"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/lib/routes/app_routes.dart": {
+    "mtime": 1786002508.1911988,
+    "hash": "e079456a667e47d51ea5f0fa2c8973f2"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/devtools_options.yaml": {
+    "mtime": 1785563428.3761656,
+    "hash": "d1ff5187b1b67653e7357395895e8449"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/README.md": {
+    "mtime": 1785563428.367744,
+    "hash": "d73f470916ad1f8c1bd6c7f5faac3e25"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/pubspec.yaml": {
+    "mtime": 1786002508.192505,
+    "hash": "06b8e787d1ca9887526f1f32acaa1933"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/analysis_options.yaml": {
+    "mtime": 1785563428.3678365,
+    "hash": "66d03d7647c8e438164feaf5b922d44a"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Runner/Assets.xcassets/LaunchImage.imageset/README.md": {
+    "mtime": 1785563428.3792338,
+    "hash": "e175e436acacf76c814d83532d0b662c"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@2x.png": {
+    "mtime": 1785563428.3791018,
+    "hash": "978c1bee49d7ad5fc1a4d81099b13e18"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage@3x.png": {
+    "mtime": 1785563428.3791685,
+    "hash": "978c1bee49d7ad5fc1a4d81099b13e18"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Runner/Assets.xcassets/LaunchImage.imageset/LaunchImage.png": {
+    "mtime": 1785563428.379033,
+    "hash": "978c1bee49d7ad5fc1a4d81099b13e18"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png": {
+    "mtime": 1785563428.3787951,
+    "hash": "643842917530acf4c5159ae851b0baf2"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png": {
+    "mtime": 1785563428.3782291,
+    "hash": "be8887071dd7ec39cb754d236aa9584f"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png": {
+    "mtime": 1785563428.378419,
+    "hash": "2247a840b6ee72b8a069208af170e5b1"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@1x.png": {
+    "mtime": 1785563428.3780313,
+    "hash": "a2f8558fb1d42514111fbbb19fb67314"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-1024x1024@1x.png": {
+    "mtime": 1785563428.3779647,
+    "hash": "c785f8932297af4acd5f5ccb7630f01c"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png": {
+    "mtime": 1785563428.378859,
+    "hash": "665cb5e3c5729da6d639d26eff47a503"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@3x.png": {
+    "mtime": 1785563428.378167,
+    "hash": "1b3b1538136316263c7092951e923e9d"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-20x20@2x.png": {
+    "mtime": 1785563428.3781028,
+    "hash": "2247a840b6ee72b8a069208af170e5b1"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png": {
+    "mtime": 1785563428.3783572,
+    "hash": "2b1452c4c1bda6177b4fbbb832df217f"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png": {
+    "mtime": 1785563428.3784826,
+    "hash": "8245359312aea1b0d2412f79a07b0ca5"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png": {
+    "mtime": 1785563428.3786743,
+    "hash": "e419d22a37bc40ba185aca1acb6d4ac6"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png": {
+    "mtime": 1785563428.3786137,
+    "hash": "5b3c0902200ce596e9848f22e1f0fe0e"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png": {
+    "mtime": 1785563428.3787334,
+    "hash": "36c0d7a7132bdde18898ffdfcfcdc4d2"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png": {
+    "mtime": 1785563428.3785505,
+    "hash": "5b3c0902200ce596e9848f22e1f0fe0e"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png": {
+    "mtime": 1785563428.3782926,
+    "hash": "043119ef4faa026ff82bd03f241e5338"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/android/app/src/main/res/mipmap-mdpi/ic_launcher.png": {
+    "mtime": 1785563428.369404,
+    "hash": "6270344430679711b81476e29878caa7"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/android/app/src/main/res/mipmap-hdpi/ic_launcher.png": {
+    "mtime": 1785563428.3692641,
+    "hash": "13e9c72ec37fac220397aa819fa1ef2d"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png": {
+    "mtime": 1785563428.3698232,
+    "hash": "57838d52c318faff743130c3fcfae0c6"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png": {
+    "mtime": 1785563428.3696818,
+    "hash": "afe1b655b9f32da22f9a4301bb8e6ba8"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png": {
+    "mtime": 1785563428.369541,
+    "hash": "a0a8db5985280b3679d99a820ae2db79"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/assets/images/walkthrough/mobile_pos.jpg": {
+    "mtime": 1785563428.37196,
+    "hash": "42b8203422edf8a00382beec4399c5ae"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/assets/images/walkthrough/complementary_apps.jpg": {
+    "mtime": 1785563428.3717554,
+    "hash": "3cc6841c7542b2ffc54d2d020aabf816"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/assets/images/walkthrough/back_office.jpg": {
+    "mtime": 1785563428.3714404,
+    "hash": "d4e0e26109af1cb1dff38147394952de"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/assets/logo/Logo-white.png": {
+    "mtime": 1785563428.3742948,
+    "hash": "31599a55a77c92c2f4525c3c56f4d853"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/assets/logo/logo.png": {
+    "mtime": 1785563428.376053,
+    "hash": "b9b357516137309bac96374ee856b996"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/assets/icon/mail.png": {
+    "mtime": 1785563428.3711634,
+    "hash": "1d88dfb709e81f2d6d13d0869d66241b"
+  },
+  "/Users/nuhan/Desktop/softverse_full/softverse/assets/icon/lock.png": {
+    "mtime": 1785563428.3709707,
+    "hash": "8f36545e86d66dcc70a71b2dbd6f15b7"
+  }
+}
