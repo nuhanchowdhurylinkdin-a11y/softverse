@@ -99,10 +99,33 @@ class TransactionScreen extends GetView<TransactionController> {
                   ),
                 ),
                 SizedBox(height: 16.h),
-                Obx(
-                  () => Column(
+                Obx(() {
+                  if (controller.isLoading.value &&
+                      controller.transactions.isEmpty) {
+                    return Padding(
+                      padding: EdgeInsets.only(top: 80.h),
+                      child: const Center(child: CircularProgressIndicator()),
+                    );
+                  }
+
+                  final transactions = controller.filteredTransactions;
+                  if (transactions.isEmpty) {
+                    return Padding(
+                      padding: EdgeInsets.only(top: 80.h),
+                      child: Text(
+                        'No transactions found',
+                        textAlign: TextAlign.center,
+                        style: getTextStyle(
+                          fontSize: 14.6,
+                          color: AppColors.chipInactiveText,
+                        ),
+                      ),
+                    );
+                  }
+
+                  return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: controller.filteredTransactions
+                    children: transactions
                         .map(
                           (transaction) => Padding(
                             padding: EdgeInsets.only(bottom: 8.h),
@@ -116,8 +139,8 @@ class TransactionScreen extends GetView<TransactionController> {
                           ),
                         )
                         .toList(),
-                  ),
-                ),
+                  );
+                }),
               ],
             ),
           ),

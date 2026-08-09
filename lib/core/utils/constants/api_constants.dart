@@ -31,6 +31,8 @@ class ApiConstants {
   static String checkoutOrder(String id) => '$baseUrl/checkout/$id';
   static String payCheckout(String id) => '$baseUrl/checkout/$id/pay';
   static String checkoutReceipt(String id) => '$baseUrl/checkout/$id/receipt';
+  static String get transactions => '$baseUrl/transactions';
+  static String transaction(String id) => '$baseUrl/transactions/$id';
   static String get tables => '$baseUrl/tables';
   static String clearTable(String id) => '$baseUrl/tables/$id/clear';
   static String table(String id) => '$baseUrl/tables/$id';
@@ -39,22 +41,26 @@ class ApiConstants {
     if (url == null || url.trim().isEmpty) return '';
     final value = url.trim();
     final uri = Uri.tryParse(value);
-    final baseUri = Uri.tryParse(baseUrl);
     if (uri != null && uri.hasScheme) {
-      final normalizedUri = uri.path.startsWith('/uploads/')
-          ? uri.replace(path: '/media${uri.path}')
-          : uri;
-      if (baseUri != null &&
-          (normalizedUri.host == 'localhost' ||
-              normalizedUri.host == '127.0.0.1') &&
-          normalizedUri.port != baseUri.port) {
-        return normalizedUri
-            .replace(host: baseUri.host, port: baseUri.port)
-            .toString();
-      }
-      return normalizedUri.toString();
+      final uploadPath = _normalizeUploadPath(uri.path);
+      if (uploadPath != null) return '$baseUrl$uploadPath';
+      return value;
     }
+
+    final uploadPath = _normalizeUploadPath(value);
+    if (uploadPath != null) return '$baseUrl$uploadPath';
     if (value.startsWith('/')) return '$baseUrl$value';
     return '$baseUrl/$value';
+  }
+
+  static String? _normalizeUploadPath(String path) {
+    final normalized = path.trim();
+    if (normalized.isEmpty) return null;
+
+    if (normalized.startsWith('/media/uploads/')) return normalized;
+    if (normalized.startsWith('/uploads/')) return '/media$normalized';
+    if (normalized.startsWith('media/uploads/')) return '/$normalized';
+    if (normalized.startsWith('uploads/')) return '/media/$normalized';
+    return null;
   }
 }

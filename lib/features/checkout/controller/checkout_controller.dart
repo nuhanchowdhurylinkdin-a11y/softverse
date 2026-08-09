@@ -14,6 +14,7 @@ import '../../home/controller/home_controller.dart';
 import '../../home/models/table_order.dart';
 import '../../invoice/controller/invoice_controller.dart';
 import '../../main_nav/controller/main_nav_controller.dart';
+import '../../transaction/controller/transaction_controller.dart';
 import '../models/cart_item.dart';
 import '../models/payment_method.dart';
 
@@ -332,6 +333,9 @@ class CheckoutController extends GetxController {
       await fetchOrders();
       if (Get.isRegistered<HomeController>()) {
         await Get.find<HomeController>().fetchTables();
+      }
+      if (Get.isRegistered<TransactionController>()) {
+        await Get.find<TransactionController>().fetchTransactions();
       }
       if (!saveOrder && !sendToTable) {
         _openInvoice(order);
