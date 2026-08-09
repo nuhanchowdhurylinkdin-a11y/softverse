@@ -14,6 +14,7 @@ import '../../checkout/models/cart_item.dart';
 import '../../transaction/models/transaction_record.dart';
 import '../../home/controller/home_controller.dart';
 import '../../main_nav/controller/main_nav_controller.dart';
+import '../../transaction/controller/transaction_controller.dart';
 
 class InvoiceController extends GetxController {
   final NetworkCaller _networkCaller = NetworkCaller();
@@ -26,8 +27,10 @@ class InvoiceController extends GetxController {
   final receiptPdfUrl = RxnString();
   final tableId = RxnString();
   final tableName = RxnString();
+  final status = ''.obs;
   final isClearingTable = false.obs;
   final isPreparingPdf = false.obs;
+  final isRefunding = false.obs;
   final localPdfPath = RxnString();
   final subtotalValue = 0.0.obs;
   final taxValue = 0.0.obs;
@@ -36,9 +39,9 @@ class InvoiceController extends GetxController {
   final changeToReturnValue = 0.0.obs;
 
   final taxRate = 0.075;
-  final refundAmount = 10840.0;
+  double get refundAmount => totalAmount;
 
-  final selectedRefundIndex = Rx<int?>(1);
+  final selectedRefundIndex = Rx<int?>(null);
 
   final items = <CartItem>[
     CartItem(
@@ -92,6 +95,7 @@ class InvoiceController extends GetxController {
         : 'Not registered';
     orderId.value = order['orderNumber']?.toString() ?? invoiceNumber.value;
     receiptPdfUrl.value = order['receiptPdfUrl']?.toString();
+    status.value = order['status']?.toString() ?? '';
     tableId.value = _cleanText(order['tableId']) ?? _cleanText(fallbackTableId);
     tableName.value =
         _cleanText(order['tableName']) ?? _cleanText(fallbackTableName);
@@ -100,7 +104,9 @@ class InvoiceController extends GetxController {
     totalValue.value = _toDouble(order['totalAmount']);
     amountReceivedValue.value = _toDouble(order['amountReceived']);
     changeToReturnValue.value = _toDouble(order['changeToReturn']);
-    paymentType.value = _paymentTypeFrom(order['paymentMethod']?.toString());
+    paymentType.value = status.value == 'refunded'
+        ? PaymentType.refund
+        : _paymentTypeFrom(order['paymentMethod']?.toString());
 
     final rawItems = order['items'] is List
         ? List<dynamic>.from(order['items'] as List)
@@ -125,11 +131,51 @@ class InvoiceController extends GetxController {
 
   void selectRefundItem(int index) => selectedRefundIndex.value = index;
 
-  void goToRefund() => Get.toNamed(AppRoute.getRefundScreen());
+  bool get isRefunded => status.value == 'refunded';
+
+  void goToRefund() {
+    if (checkoutOrderId.value == null || checkoutOrderId.value!.isEmpty) {
+      AppHelperFunctions.showWarningSnackBar(
+        'This invoice cannot be refunded.',
+      );
+      return;
+    }
+    if (isRefunded) {
+      AppHelperFunctions.showWarningSnackBar(
+        'This invoice is already refunded.',
+      );
+      return;
+    }
+    Get.toNamed(AppRoute.getRefundScreen());
+  }
 
   void cancelRefund() => Get.back();
 
-  void confirmRefund() => Get.offNamed(AppRoute.getRefundInvoiceScreen());
+  Future<void> confirmRefund() async {
+    final id = checkoutOrderId.value;
+    if (id == null || id.isEmpty || isRefunding.value) return;
+
+    isRefunding.value = true;
+    final response = await _networkCaller.postRequest(
+      ApiConstants.refundCheckout(id),
+    );
+    isRefunding.value = false;
+
+    if (!response.isSuccess || response.responseData is! Map) {
+      AppHelperFunctions.showErrorSnackBar(response.errorMessage);
+      return;
+    }
+
+    loadFromOrder(Map<String, dynamic>.from(response.responseData as Map));
+    if (Get.isRegistered<HomeController>()) {
+      await Get.find<HomeController>().fetchItems();
+    }
+    if (Get.isRegistered<TransactionController>()) {
+      await Get.find<TransactionController>().fetchTransactions();
+    }
+    AppHelperFunctions.showSuccessSnackBar('Invoice refunded.');
+    Get.offNamed(AppRoute.getRefundInvoiceScreen());
+  }
 
   void viewOriginalInvoice() {
     paymentType.value = PaymentType.cash;
@@ -148,7 +194,7 @@ class InvoiceController extends GetxController {
     if (Get.isRegistered<MainNavController>()) {
       Get.find<MainNavController>().changeTab(0);
     }
-    Get.offAllNamed(AppRoute.getHomeScreen());
+    Get.until((route) => route.settings.name == AppRoute.getHomeScreen());
   }
 
   Future<void> markTableEmpty() async {

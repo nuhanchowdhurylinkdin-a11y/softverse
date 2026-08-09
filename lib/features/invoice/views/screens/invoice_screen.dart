@@ -149,17 +149,29 @@ class InvoiceScreen extends GetView<InvoiceController> {
                 () => Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    PrimaryButton(
-                      label: 'Refund',
-                      onPressed: controller.goToRefund,
-                      backgroundColor: Colors.white,
-                      textColor: AppColors.dangerRed,
-                      borderColor: AppColors.dangerRed,
-                      width: 109.w,
-                      height: 51,
-                      fontSize: 16.4,
-                      borderRadius: 999,
-                    ),
+                    if (controller.isRefunded)
+                      PrimaryButton(
+                        label: 'Refunded',
+                        onPressed: null,
+                        backgroundColor: AppColors.fieldBackground,
+                        textColor: AppColors.dangerRed,
+                        width: 124.w,
+                        height: 51,
+                        fontSize: 16.4,
+                        borderRadius: 999,
+                      )
+                    else
+                      PrimaryButton(
+                        label: 'Refund',
+                        onPressed: controller.goToRefund,
+                        backgroundColor: Colors.white,
+                        textColor: AppColors.dangerRed,
+                        borderColor: AppColors.dangerRed,
+                        width: 109.w,
+                        height: 51,
+                        fontSize: 16.4,
+                        borderRadius: 999,
+                      ),
                     if ((controller.tableId.value ?? '').isNotEmpty) ...[
                       SizedBox(width: 12.w),
                       PrimaryButton(

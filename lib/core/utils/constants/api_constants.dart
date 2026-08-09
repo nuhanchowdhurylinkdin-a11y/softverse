@@ -31,6 +31,7 @@ class ApiConstants {
   static String get checkout => '$baseUrl/checkout';
   static String checkoutOrder(String id) => '$baseUrl/checkout/$id';
   static String payCheckout(String id) => '$baseUrl/checkout/$id/pay';
+  static String refundCheckout(String id) => '$baseUrl/checkout/$id/refund';
   static String checkoutReceipt(String id) => '$baseUrl/checkout/$id/receipt';
   static String get transactions => '$baseUrl/transactions';
   static String transaction(String id) => '$baseUrl/transactions/$id';

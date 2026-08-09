@@ -15,9 +15,6 @@ class RefundInvoiceScreen extends GetView<InvoiceController> {
 
   @override
   Widget build(BuildContext context) {
-    final refundedItem =
-        controller.items[controller.selectedRefundIndex.value ?? 0];
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -99,9 +96,20 @@ class RefundInvoiceScreen extends GetView<InvoiceController> {
                 ],
               ),
               SizedBox(height: 12.h),
-              _Row(
-                label: '${refundedItem.name} x${refundedItem.quantity}',
-                value: refundedItem.price * refundedItem.quantity,
+              Obx(
+                () => Column(
+                  children: controller.items
+                      .map(
+                        (item) => Padding(
+                          padding: EdgeInsets.only(bottom: 10.h),
+                          child: _Row(
+                            label: '${item.name} x${item.quantity}',
+                            value: item.price * item.quantity,
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
               ),
               SizedBox(height: 16.h),
               GestureDetector(

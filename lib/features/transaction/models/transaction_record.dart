@@ -69,6 +69,7 @@ class TransactionRecord {
 
   factory TransactionRecord.fromApi(Map<String, dynamic> json) {
     final payment = json['paymentMethod']?.toString();
+    final status = json['status']?.toString() ?? '';
     final createdAt = DateTime.tryParse(json['createdAt']?.toString() ?? '');
     return TransactionRecord(
       id: json['id']?.toString() ?? '',
@@ -83,8 +84,10 @@ class TransactionRecord {
       dateTime: createdAt == null
           ? ''
           : DateFormat('dd/MM/yyyy hh:mma').format(createdAt).toLowerCase(),
-      paymentType: _paymentTypeFrom(payment),
-      status: json['status']?.toString() ?? '',
+      paymentType: status == 'refunded'
+          ? PaymentType.refund
+          : _paymentTypeFrom(payment),
+      status: status,
       totalAmount: double.tryParse(json['totalAmount']?.toString() ?? '') ?? 0,
     );
   }
