@@ -16,6 +16,7 @@ import '../features/auth/views/screens/forget_password_screen.dart';
 import '../features/auth/views/screens/login_screen.dart';
 import '../features/auth/views/screens/registration_screen.dart';
 import '../features/auth/views/screens/reset_password_screen.dart';
+import '../features/checkout/views/screens/pending_orders_screen.dart';
 import '../features/general/views/screens/general_settings_screen.dart';
 import '../features/general/views/screens/home_screen_item_layout_screen.dart';
 import '../features/inventory/controller/item_detail_controller.dart';
@@ -70,6 +71,7 @@ class AppRoute {
   static String featureSettingsScreen = "/featureSettingsScreen";
   static String homeScreen = "/homeScreen";
   static String invoiceScreen = "/invoiceScreen";
+  static String pendingOrdersScreen = "/pendingOrdersScreen";
   static String receiptPreviewScreen = "/receiptPreviewScreen";
   static String refundScreen = "/refundScreen";
   static String refundInvoiceScreen = "/refundInvoiceScreen";
@@ -112,6 +114,7 @@ class AppRoute {
   static String getFeatureSettingsScreen() => featureSettingsScreen;
   static String getHomeScreen() => homeScreen;
   static String getInvoiceScreen() => invoiceScreen;
+  static String getPendingOrdersScreen() => pendingOrdersScreen;
   static String getReceiptPreviewScreen() => receiptPreviewScreen;
   static String getRefundScreen() => refundScreen;
   static String getRefundInvoiceScreen() => refundInvoiceScreen;
@@ -161,6 +164,7 @@ class AppRoute {
     ),
     GetPage(name: homeScreen, page: () => const MainNavScreen()),
     GetPage(name: invoiceScreen, page: () => const InvoiceScreen()),
+    GetPage(name: pendingOrdersScreen, page: () => const PendingOrdersScreen()),
     GetPage(
       name: receiptPreviewScreen,
       page: () => const ReceiptPreviewScreen(),

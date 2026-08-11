@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 import '../../../../core/common/styles/global_text_style.dart';
 import '../../../../core/common/widgets/primary_button.dart';
@@ -55,10 +56,34 @@ class EditCustomerScreen extends GetView<EditCustomerController> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Center(
-                child: ProductImage(
-                  imageUrl: controller.customer.imageUrl,
-                  size: 80,
-                  borderRadius: 40,
+                child: Obx(
+                  () => GestureDetector(
+                    onTap: controller.choosePhoto,
+                    child: controller.selectedImage.value == null
+                        ? ProductImage(
+                            imageUrl: controller.customer.imageUrl,
+                            size: 80,
+                            borderRadius: 40,
+                          )
+                        : Container(
+                            width: 80.w,
+                            height: 80.w,
+                            clipBehavior: Clip.antiAlias,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                            ),
+                            child: Image.file(
+                              controller.selectedImage.value!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Icon(
+                                    Iconsax.image,
+                                    size: 32.sp,
+                                    color: AppColors.chipInactiveText,
+                                  ),
+                            ),
+                          ),
+                  ),
                 ),
               ),
               SizedBox(height: 40.h),
@@ -123,16 +148,20 @@ class EditCustomerScreen extends GetView<EditCustomerController> {
               ),
               SizedBox(height: 40.h),
               Center(
-                child: PrimaryButton(
-                  label: 'Save',
-                  onPressed: controller.save,
-                  gradient: const LinearGradient(
-                    colors: [AppColors.gradientStart, AppColors.gradientEnd],
+                child: Obx(
+                  () => PrimaryButton(
+                    label: controller.isSaving.value ? 'Saving...' : 'Save',
+                    onPressed: controller.isSaving.value
+                        ? null
+                        : controller.save,
+                    gradient: const LinearGradient(
+                      colors: [AppColors.gradientStart, AppColors.gradientEnd],
+                    ),
+                    textColor: Colors.white,
+                    width: 197.w,
+                    height: 68,
+                    fontSize: 16.4,
                   ),
-                  textColor: Colors.white,
-                  width: 197.w,
-                  height: 68,
-                  fontSize: 16.4,
                 ),
               ),
             ],

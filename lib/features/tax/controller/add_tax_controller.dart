@@ -23,11 +23,11 @@ class AddTaxController extends GetxController {
       arguments: appliedItemIds.toList(),
     );
     if (result is List<String>) {
-      appliedItemIds.assignAll(result);
+      appliedItemIds.assignAll(result.toSet());
     }
   }
 
-  void save() {
+  Future<void> save() async {
     final name = nameController.text.trim();
     final rate = double.tryParse(rateController.text.trim());
     if (name.isEmpty || rate == null || type.value == null) {
@@ -37,16 +37,20 @@ class AddTaxController extends GetxController {
       return;
     }
 
-    _taxController.addTax(
+    final saved = await _taxController.addTax(
       TaxModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: '',
         name: name,
         ratePercent: rate,
         type: type.value!,
         appliedItemIds: appliedItemIds,
       ),
     );
+    if (!saved) return;
     Get.back();
+    Future<void>.delayed(const Duration(milliseconds: 120), () {
+      AppHelperFunctions.showSuccessSnackBar('Tax saved.');
+    });
   }
 
   @override

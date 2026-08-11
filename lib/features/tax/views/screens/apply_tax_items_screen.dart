@@ -9,7 +9,6 @@ import '../../../../core/common/widgets/product_image.dart';
 import '../../../../core/utils/constants/colors.dart';
 import '../../../home/widgets/category_tabs.dart';
 import '../../controller/apply_tax_items_controller.dart';
-import '../../models/taxable_item.dart';
 import '../../widgets/checkbox_square.dart';
 
 class ApplyTaxItemsScreen extends GetView<ApplyTaxItemsController> {
@@ -58,7 +57,7 @@ class ApplyTaxItemsScreen extends GetView<ApplyTaxItemsController> {
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
               child: Obx(
                 () => CategoryTabs(
-                  categories: taxItemCategories,
+                  categories: controller.categories,
                   selectedIndex: controller.selectedCategoryIndex.value,
                   onSelected: controller.selectCategory,
                 ),
@@ -68,16 +67,27 @@ class ApplyTaxItemsScreen extends GetView<ApplyTaxItemsController> {
               child: Stack(
                 children: [
                   Obx(() {
+                    if (controller.isLoading.value) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
                     final items = controller.visibleItems;
+                    if (items.isEmpty) {
+                      return Center(
+                        child: Text(
+                          'No items found.',
+                          style: getTextStyle(
+                            fontSize: 16.4,
+                            color: AppColors.onboardingBackground,
+                          ),
+                        ),
+                      );
+                    }
                     return ListView.separated(
                       padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
                       itemCount: items.length,
                       separatorBuilder: (_, _) => SizedBox(height: 12.h),
                       itemBuilder: (context, index) {
                         final item = items[index];
-                        final selected = controller.selectedIds.contains(
-                          item.id,
-                        );
                         return GestureDetector(
                           onTap: () => controller.toggleItem(item.id),
                           child: Container(
@@ -122,7 +132,13 @@ class ApplyTaxItemsScreen extends GetView<ApplyTaxItemsController> {
                                     ],
                                   ),
                                 ),
-                                CheckboxSquare(selected: selected),
+                                Obx(
+                                  () => CheckboxSquare(
+                                    selected: controller.selectedIds.contains(
+                                      item.id,
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
                           ),

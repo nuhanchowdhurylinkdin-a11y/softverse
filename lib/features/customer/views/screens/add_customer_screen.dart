@@ -55,21 +55,31 @@ class AddCustomerScreen extends GetView<AddCustomerController> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Center(
-                child: GestureDetector(
-                  onTap: controller.choosePhoto,
-                  child: Container(
-                    width: 80.w,
-                    height: 80.w,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: AppColors.chipBackground,
-                      border: Border.all(color: AppColors.cardBorder),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Iconsax.image,
-                      size: 32.sp,
-                      color: AppColors.chipInactiveText,
+                child: Obx(
+                  () => GestureDetector(
+                    onTap: controller.choosePhoto,
+                    child: Container(
+                      width: 80.w,
+                      height: 80.w,
+                      clipBehavior: Clip.antiAlias,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: AppColors.chipBackground,
+                        border: Border.all(color: AppColors.cardBorder),
+                        shape: BoxShape.circle,
+                      ),
+                      child: controller.selectedImage.value == null
+                          ? Icon(
+                              Iconsax.image,
+                              size: 32.sp,
+                              color: AppColors.chipInactiveText,
+                            )
+                          : Image.file(
+                              controller.selectedImage.value!,
+                              width: 80.w,
+                              height: 80.w,
+                              fit: BoxFit.cover,
+                            ),
                     ),
                   ),
                 ),
@@ -146,16 +156,20 @@ class AddCustomerScreen extends GetView<AddCustomerController> {
               ),
               SizedBox(height: 40.h),
               Center(
-                child: PrimaryButton(
-                  label: 'Save',
-                  onPressed: controller.save,
-                  gradient: const LinearGradient(
-                    colors: [AppColors.gradientStart, AppColors.gradientEnd],
+                child: Obx(
+                  () => PrimaryButton(
+                    label: controller.isSaving.value ? 'Saving...' : 'Save',
+                    onPressed: controller.isSaving.value
+                        ? null
+                        : controller.save,
+                    gradient: const LinearGradient(
+                      colors: [AppColors.gradientStart, AppColors.gradientEnd],
+                    ),
+                    textColor: Colors.white,
+                    width: 197.w,
+                    height: 68,
+                    fontSize: 16.4,
                   ),
-                  textColor: Colors.white,
-                  width: 197.w,
-                  height: 68,
-                  fontSize: 16.4,
                 ),
               ),
             ],

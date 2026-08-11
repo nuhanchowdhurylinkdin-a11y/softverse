@@ -89,6 +89,9 @@ class HomeController extends GetxController {
 
   void checkout() => Get.find<MainNavController>().changeTab(1);
 
+  void openPendingOrders() =>
+      Get.find<CheckoutController>().openPendingOrders();
+
   void addToCart(Product product) {
     if (product.isOutOfStock) {
       AppHelperFunctions.showWarningSnackBar(

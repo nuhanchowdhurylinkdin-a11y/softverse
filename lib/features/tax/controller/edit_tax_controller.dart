@@ -29,11 +29,11 @@ class EditTaxController extends GetxController {
       arguments: appliedItemIds.toList(),
     );
     if (result is List<String>) {
-      appliedItemIds.assignAll(result);
+      appliedItemIds.assignAll(result.toSet());
     }
   }
 
-  void save() {
+  Future<void> save() async {
     final name = nameController.text.trim();
     final rate = double.tryParse(rateController.text.trim());
     if (name.isEmpty || rate == null || type.value == null) {
@@ -43,7 +43,7 @@ class EditTaxController extends GetxController {
       return;
     }
 
-    _taxController.updateTax(
+    final saved = await _taxController.updateTax(
       tax.copyWith(
         name: name,
         ratePercent: rate,
@@ -51,12 +51,21 @@ class EditTaxController extends GetxController {
         appliedItemIds: appliedItemIds,
       ),
     );
-    Get.back();
+    if (!saved) return;
+    _closeAndShowSuccess('Tax updated.');
   }
 
-  void remove() {
-    _taxController.removeTax(taxId);
+  Future<void> remove() async {
+    final removed = await _taxController.removeTax(taxId);
+    if (!removed) return;
+    _closeAndShowSuccess('Tax removed.');
+  }
+
+  void _closeAndShowSuccess(String message) {
     Get.back();
+    Future<void>.delayed(const Duration(milliseconds: 120), () {
+      AppHelperFunctions.showSuccessSnackBar(message);
+    });
   }
 
   @override

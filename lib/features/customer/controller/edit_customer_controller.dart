@@ -1,13 +1,20 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../core/utils/helpers/app_helper.dart';
+import '../models/customer_model.dart';
 import 'customer_controller.dart';
 
 class EditCustomerController extends GetxController {
+  final ImagePicker _imagePicker = ImagePicker();
   final CustomerController _customerController = Get.find<CustomerController>();
 
   late final customer = _customerController.customer.value;
+  final selectedImage = Rxn<File>();
+  final isSaving = false.obs;
 
   late final nameController = TextEditingController(text: customer.name);
   late final emailController = TextEditingController(text: customer.email);
@@ -27,23 +34,44 @@ class EditCustomerController extends GetxController {
   );
   late final noteController = TextEditingController(text: customer.note);
 
-  void save() {
-    _customerController.customer.value = customer.copyWith(
-      name: nameController.text,
-      email: emailController.text,
-      phone: phoneController.text,
-      address: addressController.text,
-      city: cityController.text,
-      region: regionController.text,
-      postalCode: postalCodeController.text,
-      country: countryController.text,
-      customerCode: customerCodeController.text,
-      creditLimit:
-          double.tryParse(creditLimitController.text.replaceAll(',', '')) ??
-          customer.creditLimit,
-      note: noteController.text,
+  Future<void> choosePhoto() async {
+    final image = await _imagePicker.pickImage(source: ImageSource.gallery);
+    if (image != null) selectedImage.value = File(image.path);
+  }
+
+  Future<void> save() async {
+    if (nameController.text.trim().isEmpty) {
+      AppHelperFunctions.showWarningSnackBar('Enter customer name.');
+      return;
+    }
+
+    isSaving.value = true;
+    final updated = await _customerController.updateCustomer(
+      CustomerModel(
+        id: customer.id,
+        name: nameController.text,
+        email: emailController.text,
+        phone: phoneController.text,
+        address: addressController.text,
+        city: cityController.text,
+        region: regionController.text,
+        postalCode: postalCodeController.text,
+        country: countryController.text,
+        customerCode: customerCodeController.text,
+        imageUrl: customer.imageUrl,
+        creditLimit:
+            double.tryParse(creditLimitController.text.replaceAll(',', '')) ??
+            customer.creditLimit,
+        note: noteController.text,
+      ),
+      image: selectedImage.value,
     );
-    Get.back();
+    isSaving.value = false;
+    if (updated) {
+      Get.back();
+      await Future<void>.delayed(const Duration(milliseconds: 120));
+      AppHelperFunctions.showSuccessSnackBar('Customer updated.');
+    }
   }
 
   @override

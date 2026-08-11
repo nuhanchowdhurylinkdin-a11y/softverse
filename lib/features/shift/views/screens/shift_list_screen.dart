@@ -47,23 +47,39 @@ class ShiftListScreen extends GetView<ShiftController> {
       ),
       body: SafeArea(
         top: false,
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(16.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: controller.shiftHistory
-                .map(
-                  (shift) => Padding(
-                    padding: EdgeInsets.only(bottom: 12.h),
-                    child: GestureDetector(
-                      onTap: () => controller.openShiftReport(shift),
-                      child: ShiftInfoCard(shift: shift),
+        child: Obx(() {
+          if (controller.isLoading.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (controller.shiftHistory.isEmpty) {
+            return Center(
+              child: Text(
+                'No shifts found.',
+                style: getTextStyle(
+                  fontSize: 16.4,
+                  color: AppColors.onboardingBackground,
+                ),
+              ),
+            );
+          }
+          return SingleChildScrollView(
+            padding: EdgeInsets.all(16.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: controller.shiftHistory
+                  .map(
+                    (shift) => Padding(
+                      padding: EdgeInsets.only(bottom: 12.h),
+                      child: GestureDetector(
+                        onTap: () => controller.openShiftReport(shift),
+                        child: ShiftInfoCard(shift: shift),
+                      ),
                     ),
-                  ),
-                )
-                .toList(),
-          ),
-        ),
+                  )
+                  .toList(),
+            ),
+          );
+        }),
       ),
     );
   }

@@ -109,11 +109,12 @@ class NetworkCaller {
     required Map<String, String> fields,
     File? file,
     String fileField = 'image',
+    String method = 'POST',
     String? token,
   }) async {
     log('MULTIPART Request: $url');
     try {
-      final request = http.MultipartRequest('POST', Uri.parse(url));
+      final request = http.MultipartRequest(method, Uri.parse(url));
       final bearer = token ?? StorageService.accessToken;
       if (bearer != null) {
         request.headers['Authorization'] = 'Bearer $bearer';
@@ -142,6 +143,7 @@ class NetworkCaller {
           fields: fields,
           file: file,
           fileField: fileField,
+          method: method,
           token: token,
         ),
       );

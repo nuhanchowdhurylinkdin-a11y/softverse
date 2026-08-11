@@ -10,10 +10,13 @@ import '../../../core/utils/constants/api_constants.dart';
 import '../../../core/utils/helpers/app_helper.dart';
 import '../../../routes/app_routes.dart';
 import '../../customer/controller/customer_controller.dart';
+import '../../customer/models/customer_model.dart';
 import '../../home/controller/home_controller.dart';
 import '../../home/models/table_order.dart';
 import '../../invoice/controller/invoice_controller.dart';
 import '../../main_nav/controller/main_nav_controller.dart';
+import '../../tax/controller/tax_controller.dart';
+import '../../tax/models/tax_model.dart';
 import '../../transaction/controller/transaction_controller.dart';
 import '../models/cart_item.dart';
 import '../models/payment_method.dart';
@@ -24,19 +27,20 @@ class CheckoutController extends GetxController {
   final NetworkCaller _networkCaller = NetworkCaller();
   final activeOrderId = RxnString();
   final activeOrderNumber = ''.obs;
-  final customerName = 'Abs Corporation';
+  final selectedCustomerId = ''.obs;
+  final customerName = 'Not Registered'.obs;
 
   final priceAdjustmentMode = PriceAdjustmentMode.modifier.obs;
-  final amountReceived = 2200.0.obs;
+  final amountReceived = 0.0.obs;
   final selectedPaymentMethod = 'cash'.obs;
   final isSubmittingCheckout = false.obs;
   final amountEditedManually = false.obs;
   final orders = <Map<String, dynamic>>[].obs;
+  final pendingOrders = <Map<String, dynamic>>[].obs;
+  final isLoadingPendingOrders = false.obs;
   late final amountReceivedController = TextEditingController(
     text: AppHelperFunctions.getFormattedMoney(amountReceived.value),
   );
-
-  final taxRate = 0.075;
 
   final cartItems = <CartItem>[].obs;
 
@@ -75,6 +79,10 @@ class CheckoutController extends GetxController {
   void onInit() {
     super.onInit();
     fetchOrders();
+    loadCustomers();
+    if (Get.isRegistered<TaxController>()) {
+      Get.find<TaxController>().fetchTaxes();
+    }
   }
 
   double get subtotal {
@@ -85,7 +93,24 @@ class CheckoutController extends GetxController {
     return total;
   }
 
-  double get tax => subtotal * taxRate;
+  double get tax {
+    if (!Get.isRegistered<TaxController>()) return 0;
+    final taxes = Get.find<TaxController>().taxes;
+    return cartItems.fold(0.0, (sum, item) {
+      final itemId = item.itemId;
+      if (itemId == null) return sum;
+      final rate = taxes
+          .where(
+            (tax) =>
+                tax.type == TaxType.addedAtCheckout &&
+                tax.appliedItemIds.contains(itemId),
+          )
+          .fold(0.0, (total, tax) => total + tax.ratePercent);
+      return sum + (item.lineSubtotal * rate / 100);
+    });
+  }
+
+  double get taxRate => subtotal == 0 ? 0 : tax / subtotal;
 
   double get totalAmount => subtotal + tax;
 
@@ -145,6 +170,32 @@ class CheckoutController extends GetxController {
 
   void addCustomer() => Get.toNamed(AppRoute.getAddCustomerScreen());
 
+  Future<void> loadCustomers() async {
+    await Get.find<CustomerController>().fetchCustomers();
+  }
+
+  void selectCustomerById(String? id) {
+    selectedCustomerId.value = id ?? '';
+    if (selectedCustomerId.value.isEmpty) {
+      customerName.value = 'Not Registered';
+      return;
+    }
+
+    final customerController = Get.find<CustomerController>();
+    CustomerModel? selected;
+    for (final customer in customerController.customers) {
+      if (customer.id == selectedCustomerId.value) {
+        selected = customer;
+        break;
+      }
+    }
+    if (selected == null) return;
+    customerController.selectCustomer(selected);
+    customerName.value = selected.name.trim().isEmpty
+        ? 'Not Registered'
+        : selected.name.trim();
+  }
+
   Future<void> sendToTable() async {
     final homeController = Get.find<HomeController>();
     await homeController.fetchTables();
@@ -183,6 +234,8 @@ class CheckoutController extends GetxController {
     cartItems.clear();
     activeOrderId.value = null;
     activeOrderNumber.value = '';
+    selectedCustomerId.value = '';
+    customerName.value = 'Not Registered';
     amountEditedManually.value = false;
     _syncAmountReceivedWithTotal(force: true);
   }
@@ -236,6 +289,29 @@ class CheckoutController extends GetxController {
     orders.assignAll(
       data.whereType<Map>().map((entry) => Map<String, dynamic>.from(entry)),
     );
+  }
+
+  Future<void> fetchPendingOrders() async {
+    isLoadingPendingOrders.value = true;
+    final response = await _networkCaller.getRequest(
+      ApiConstants.pendingCheckout,
+    );
+    isLoadingPendingOrders.value = false;
+    if (!response.isSuccess || response.responseData is! List) {
+      AppHelperFunctions.showErrorSnackBar(response.errorMessage);
+      return;
+    }
+
+    pendingOrders.assignAll(
+      List<dynamic>.from(
+        response.responseData as List,
+      ).whereType<Map>().map((entry) => Map<String, dynamic>.from(entry)),
+    );
+  }
+
+  void openPendingOrders() {
+    fetchPendingOrders();
+    Get.toNamed(AppRoute.getPendingOrdersScreen());
   }
 
   Future<bool> _mustSelectTableBeforePayment() async {
@@ -342,6 +418,9 @@ class CheckoutController extends GetxController {
         clearOrder();
       } else if (sendToTable) {
         clearOrder();
+      } else if (saveOrder) {
+        clearOrder();
+        openPendingOrders();
       }
       AppHelperFunctions.showSuccessSnackBar(
         sendToTable
@@ -376,7 +455,9 @@ class CheckoutController extends GetxController {
     String? tableName,
   }) {
     return {
-      'customerName': customerName,
+      'customerName': customerName.value == 'Not Registered'
+          ? null
+          : customerName.value,
       'items': cartItems
           .where((item) => item.itemId != null)
           .map(
@@ -422,18 +503,23 @@ class CheckoutController extends GetxController {
 
   double _money(double value) => double.parse(value.toStringAsFixed(2));
 
-  Future<void> loadOrderForCheckout(String orderId) async {
+  Future<bool> loadOrderForCheckout(String orderId) async {
     final response = await _networkCaller.getRequest(
       ApiConstants.checkoutOrder(orderId),
     );
     if (!response.isSuccess || response.responseData is! Map) {
-      AppHelperFunctions.showErrorSnackBar('Unable to open table order.');
-      return;
+      AppHelperFunctions.showErrorSnackBar('Unable to open order.');
+      return false;
     }
 
     final order = Map<String, dynamic>.from(response.responseData as Map);
     activeOrderId.value = order['id']?.toString();
     activeOrderNumber.value = order['orderNumber']?.toString() ?? '';
+    selectedCustomerId.value = '';
+    final savedCustomerName = order['customerName']?.toString().trim() ?? '';
+    customerName.value = savedCustomerName.isEmpty
+        ? 'Not Registered'
+        : savedCustomerName;
     final items = order['items'] is List
         ? List<dynamic>.from(order['items'] as List)
         : <dynamic>[];
@@ -458,6 +544,7 @@ class CheckoutController extends GetxController {
       amountReceived.value,
     );
     Get.find<MainNavController>().changeTab(1);
+    return true;
   }
 
   void _syncAmountReceivedWithTotal({bool force = false}) {

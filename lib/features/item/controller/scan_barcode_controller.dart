@@ -1,7 +1,12 @@
 import 'package:get/get.dart';
+import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
+import '../../../core/utils/helpers/app_helper.dart';
+
 class ScanBarcodeController extends GetxController {
+  static const _settingsChannel = MethodChannel('softverse/app_settings');
+
   final cameraController = MobileScannerController();
 
   bool _handled = false;
@@ -19,6 +24,16 @@ class ScanBarcodeController extends GetxController {
   }
 
   void flipCamera() => cameraController.switchCamera();
+
+  Future<void> openAppSettings() async {
+    try {
+      await _settingsChannel.invokeMethod<bool>('openAppSettings');
+    } catch (_) {
+      AppHelperFunctions.showErrorSnackBar(
+        'Open app settings and allow camera permission.',
+      );
+    }
+  }
 
   @override
   void onClose() {

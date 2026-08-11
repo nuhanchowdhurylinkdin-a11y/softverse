@@ -51,8 +51,22 @@ class TaxListScreen extends GetView<TaxController> {
         top: false,
         child: Stack(
           children: [
-            Obx(
-              () => ListView.separated(
+            Obx(() {
+              if (controller.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (controller.taxes.isEmpty) {
+                return Center(
+                  child: Text(
+                    'No taxes found.',
+                    style: getTextStyle(
+                      fontSize: 16.4,
+                      color: AppColors.onboardingBackground,
+                    ),
+                  ),
+                );
+              }
+              return ListView.separated(
                 padding: EdgeInsets.all(16.w),
                 itemCount: controller.taxes.length,
                 separatorBuilder: (_, _) => SizedBox(height: 12.h),
@@ -66,8 +80,8 @@ class TaxListScreen extends GetView<TaxController> {
                     ),
                   );
                 },
-              ),
-            ),
+              );
+            }),
             Positioned(
               right: 16.w,
               bottom: 16.h,

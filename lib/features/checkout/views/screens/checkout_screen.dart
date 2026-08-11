@@ -7,6 +7,7 @@ import '../../../../core/common/widgets/app_nav_drawer.dart';
 import '../../../../core/common/widgets/floating_icon_button.dart';
 import '../../../../core/common/styles/global_text_style.dart';
 import '../../../../core/utils/constants/colors.dart';
+import '../../../customer/controller/customer_controller.dart';
 import '../../controller/checkout_controller.dart';
 import '../../widgets/bill_summary_card.dart';
 import '../../widgets/cart_item_card.dart';
@@ -19,6 +20,7 @@ class CheckoutScreen extends GetView<CheckoutController> {
 
   @override
   Widget build(BuildContext context) {
+    final customerController = Get.find<CustomerController>();
     return Scaffold(
       backgroundColor: Colors.white,
       drawer: const AppNavDrawer(),
@@ -56,7 +58,10 @@ class CheckoutScreen extends GetView<CheckoutController> {
             onPressed: controller.closeCheckout,
             icon: Icon(Iconsax.close_circle, color: Colors.white, size: 26.sp),
           ),
-          Icon(Iconsax.clock, color: Colors.white, size: 26.sp),
+          IconButton(
+            onPressed: controller.openPendingOrders,
+            icon: Icon(Iconsax.clock, color: Colors.white, size: 26.sp),
+          ),
           SizedBox(width: 15.w),
           Icon(Iconsax.notification, color: Colors.white, size: 26.sp),
           SizedBox(width: 15.w),
@@ -83,25 +88,58 @@ class CheckoutScreen extends GetView<CheckoutController> {
                             border: Border.all(color: AppColors.cardBorder),
                             borderRadius: BorderRadius.circular(12.r),
                           ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  controller.customerName,
-                                  style: getTextStyle(
-                                    fontSize: 16.4,
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColors.chipInactiveText,
-                                  ),
+                          child: Obx(() {
+                            final customers = customerController.customers;
+                            final selectedId =
+                                customers.any(
+                                  (customer) =>
+                                      customer.id ==
+                                      controller.selectedCustomerId.value,
+                                )
+                                ? controller.selectedCustomerId.value
+                                : '';
+                            final fallbackName =
+                                controller.customerName.value.trim().isEmpty
+                                ? 'Not Registered'
+                                : controller.customerName.value.trim();
+                            return DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: selectedId,
+                                isExpanded: true,
+                                icon: Icon(
+                                  Iconsax.arrow_down,
+                                  size: 22.sp,
+                                  color: AppColors.chipInactiveText,
                                 ),
+                                borderRadius: BorderRadius.circular(12.r),
+                                dropdownColor: Colors.white,
+                                style: getTextStyle(
+                                  fontSize: 16.4,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.chipInactiveText,
+                                ),
+                                items: [
+                                  DropdownMenuItem(
+                                    value: '',
+                                    child: Text(fallbackName),
+                                  ),
+                                  ...customers.map(
+                                    (customer) => DropdownMenuItem(
+                                      value: customer.id,
+                                      child: Text(
+                                        customer.name.trim().isEmpty
+                                            ? 'Unnamed Customer'
+                                            : customer.name.trim(),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                                onTap: controller.loadCustomers,
+                                onChanged: controller.selectCustomerById,
                               ),
-                              Icon(
-                                Iconsax.arrow_down,
-                                size: 22.sp,
-                                color: AppColors.chipInactiveText,
-                              ),
-                            ],
-                          ),
+                            );
+                          }),
                         ),
                       ),
                       SizedBox(width: 12.w),

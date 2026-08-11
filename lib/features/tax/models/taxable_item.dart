@@ -14,6 +14,16 @@ class TaxableItem {
     required this.category,
     required this.imageUrl,
   });
+
+  factory TaxableItem.fromApi(Map<String, dynamic> json) {
+    return TaxableItem(
+      id: json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? 'Unnamed Item',
+      sku: json['sku']?.toString() ?? '',
+      category: json['category']?.toString() ?? 'No Category',
+      imageUrl: json['imageUrl']?.toString() ?? '',
+    );
+  }
 }
 
 const taxItemCategories = [

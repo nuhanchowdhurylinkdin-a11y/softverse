@@ -58,7 +58,10 @@ class ScanBarcodeScreen extends GetView<ScanBarcodeController> {
           controller: controller.cameraController,
           onDetect: controller.onDetect,
           overlayBuilder: (context, constraints) => const _ViewfinderOverlay(),
-          errorBuilder: (context, error) => _CameraError(error: error),
+          errorBuilder: (context, error) => _CameraError(
+            error: error,
+            onOpenSettings: controller.openAppSettings,
+          ),
         ),
       ),
     );
@@ -116,8 +119,9 @@ class _ViewfinderOverlay extends StatelessWidget {
 
 class _CameraError extends StatelessWidget {
   final MobileScannerException error;
+  final VoidCallback onOpenSettings;
 
-  const _CameraError({required this.error});
+  const _CameraError({required this.error, required this.onOpenSettings});
 
   @override
   Widget build(BuildContext context) {
@@ -130,9 +134,20 @@ class _CameraError extends StatelessWidget {
             Icon(Iconsax.camera_slash, size: 48.sp, color: Colors.white),
             SizedBox(height: 16.h),
             Text(
-              error.errorCode.message,
+              'Camera permission is required to scan item barcodes.',
               textAlign: TextAlign.center,
               style: getTextStyle(fontSize: 14.6, color: Colors.white),
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              error.errorCode.message,
+              textAlign: TextAlign.center,
+              style: getTextStyle(fontSize: 12.8, color: Colors.white70),
+            ),
+            SizedBox(height: 20.h),
+            ElevatedButton(
+              onPressed: onOpenSettings,
+              child: const Text('Open Settings'),
             ),
           ],
         ),

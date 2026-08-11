@@ -1,43 +1,82 @@
 import 'package:get/get.dart';
 
+import '../../../core/services/network_caller.dart';
+import '../../../core/utils/constants/api_constants.dart';
+import '../../../core/utils/helpers/app_helper.dart';
 import '../models/tax_model.dart';
 
 class TaxController extends GetxController {
-  final taxes = <TaxModel>[
-    TaxModel(
-      id: 'tax-1',
-      name: 'VAT',
-      ratePercent: 7.5,
-      type: TaxType.addedAtCheckout,
-      appliedItemIds: List.generate(8, (i) => 'item-$i'),
-    ),
-    TaxModel(
-      id: 'tax-2',
-      name: 'VAT',
-      ratePercent: 10,
-      type: TaxType.addedAtCheckout,
-      appliedItemIds: List.generate(8, (i) => 'item-$i'),
-    ),
-    TaxModel(
-      id: 'tax-3',
-      name: 'VAT',
-      ratePercent: 15,
-      type: TaxType.includedInPrice,
-      appliedItemIds: List.generate(8, (i) => 'item-$i'),
-    ),
-  ].obs;
+  final NetworkCaller _networkCaller = NetworkCaller();
+  final taxes = <TaxModel>[].obs;
+  final isLoading = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchTaxes();
+  }
 
   int _indexOf(String id) => taxes.indexWhere((t) => t.id == id);
 
   TaxModel? taxById(String id) => taxes.firstWhereOrNull((t) => t.id == id);
 
-  void addTax(TaxModel tax) => taxes.add(tax);
+  Future<bool> fetchTaxes() async {
+    isLoading.value = true;
+    final response = await _networkCaller.getRequest(ApiConstants.taxes);
+    isLoading.value = false;
+    if (!response.isSuccess || response.responseData is! List) {
+      AppHelperFunctions.showErrorSnackBar(response.errorMessage);
+      return false;
+    }
+    taxes.assignAll(
+      List<dynamic>.from(response.responseData as List).whereType<Map>().map(
+        (json) => TaxModel.fromApi(Map<String, dynamic>.from(json)),
+      ),
+    );
+    return true;
+  }
 
-  void removeTax(String id) => taxes.removeWhere((t) => t.id == id);
+  Future<bool> addTax(TaxModel tax) async {
+    final response = await _networkCaller.postRequest(
+      ApiConstants.taxes,
+      body: tax.toApi(),
+    );
+    if (!response.isSuccess || response.responseData is! Map) {
+      AppHelperFunctions.showErrorSnackBar(response.errorMessage);
+      return false;
+    }
+    taxes.insert(
+      0,
+      TaxModel.fromApi(Map<String, dynamic>.from(response.responseData as Map)),
+    );
+    return true;
+  }
 
-  void updateTax(TaxModel updated) {
+  Future<bool> removeTax(String id) async {
+    final response = await _networkCaller.deleteRequest(ApiConstants.tax(id));
+    if (!response.isSuccess) {
+      AppHelperFunctions.showErrorSnackBar(response.errorMessage);
+      return false;
+    }
+    taxes.removeWhere((t) => t.id == id);
+    return true;
+  }
+
+  Future<bool> updateTax(TaxModel updated) async {
+    final response = await _networkCaller.patchRequest(
+      ApiConstants.tax(updated.id),
+      body: updated.toApi(),
+    );
+    if (!response.isSuccess || response.responseData is! Map) {
+      AppHelperFunctions.showErrorSnackBar(response.errorMessage);
+      return false;
+    }
     final index = _indexOf(updated.id);
-    if (index == -1) return;
-    taxes[index] = updated;
+    if (index != -1) {
+      taxes[index] = TaxModel.fromApi(
+        Map<String, dynamic>.from(response.responseData as Map),
+      );
+    }
+    return true;
   }
 }

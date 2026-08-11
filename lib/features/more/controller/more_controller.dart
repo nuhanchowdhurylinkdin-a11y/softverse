@@ -4,6 +4,7 @@ import '../../../core/services/network_caller.dart';
 import '../../../core/services/offline_database_service.dart';
 import '../../../core/utils/constants/api_constants.dart';
 import '../../auth/controller/auth_controller.dart';
+import '../../customer/controller/customer_controller.dart';
 import '../../../routes/app_routes.dart';
 
 class MoreController extends GetxController {
@@ -42,7 +43,12 @@ class MoreController extends GetxController {
 
   void openTables() => Get.toNamed(AppRoute.getAddTableScreen());
 
-  void openCustomer() => Get.toNamed(AppRoute.getViewCustomerScreen());
+  void openCustomer() {
+    final controller = Get.find<CustomerController>();
+    controller.showList();
+    controller.fetchCustomers();
+    Get.toNamed(AppRoute.getViewCustomerScreen());
+  }
 
   void openPrinterSettings() => Get.toNamed(AppRoute.getPrinterListScreen());
 

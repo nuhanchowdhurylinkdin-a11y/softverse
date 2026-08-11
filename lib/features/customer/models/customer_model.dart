@@ -1,4 +1,5 @@
 class CustomerModel {
+  final String id;
   final String name;
   final String email;
   final String phone;
@@ -16,6 +17,7 @@ class CustomerModel {
   final String lastVisitDate;
 
   const CustomerModel({
+    this.id = '',
     required this.name,
     required this.email,
     required this.phone,
@@ -33,7 +35,63 @@ class CustomerModel {
     this.lastVisitDate = '',
   });
 
+  factory CustomerModel.fromJson(Map<String, dynamic> json) {
+    return CustomerModel(
+      id: json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
+      phone: json['phone']?.toString() ?? '',
+      address: json['address']?.toString() ?? '',
+      city: json['city']?.toString() ?? '',
+      region: json['region']?.toString() ?? '',
+      postalCode: json['postalCode']?.toString() ?? '',
+      country: json['country']?.toString() ?? '',
+      customerCode: json['customerCode']?.toString() ?? '',
+      imageUrl: json['imageUrl']?.toString() ?? '',
+      note: json['note']?.toString() ?? '',
+      creditLimit: _doubleFrom(json['creditLimit']),
+      points: _doubleFrom(json['points']),
+      visitCount: int.tryParse(json['visitCount']?.toString() ?? '') ?? 0,
+      lastVisitDate: json['lastVisitDate']?.toString() ?? '',
+    );
+  }
+
+  Map<String, dynamic> toCreateJson() {
+    return {
+      'name': name,
+      if (email.trim().isNotEmpty) 'email': email.trim(),
+      if (phone.trim().isNotEmpty) 'phone': phone.trim(),
+      if (address.trim().isNotEmpty) 'address': address.trim(),
+      if (city.trim().isNotEmpty) 'city': city.trim(),
+      if (region.trim().isNotEmpty) 'region': region.trim(),
+      if (postalCode.trim().isNotEmpty) 'postalCode': postalCode.trim(),
+      if (country.trim().isNotEmpty) 'country': country.trim(),
+      if (customerCode.trim().isNotEmpty) 'customerCode': customerCode.trim(),
+      if (imageUrl.trim().isNotEmpty) 'imageUrl': imageUrl.trim(),
+      if (note.trim().isNotEmpty) 'note': note.trim(),
+      'creditLimit': creditLimit,
+    };
+  }
+
+  Map<String, dynamic> toUpdateJson() {
+    return {
+      'name': name,
+      'email': email,
+      'phone': phone,
+      'address': address,
+      'city': city,
+      'region': region,
+      'postalCode': postalCode,
+      'country': country,
+      'customerCode': customerCode,
+      'imageUrl': imageUrl,
+      'note': note,
+      'creditLimit': creditLimit,
+    };
+  }
+
   CustomerModel copyWith({
+    String? id,
     String? name,
     String? email,
     String? phone,
@@ -48,6 +106,7 @@ class CustomerModel {
     double? creditLimit,
   }) {
     return CustomerModel(
+      id: id ?? this.id,
       name: name ?? this.name,
       email: email ?? this.email,
       phone: phone ?? this.phone,
@@ -64,5 +123,10 @@ class CustomerModel {
       visitCount: visitCount,
       lastVisitDate: lastVisitDate,
     );
+  }
+
+  static double _doubleFrom(dynamic value) {
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '') ?? 0;
   }
 }

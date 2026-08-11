@@ -51,6 +51,17 @@ class ShiftReportScreen extends GetView<ShiftController> {
         top: false,
         child: Obx(() {
           final shift = controller.selectedReport.value;
+          if (shift == null) {
+            return Center(
+              child: Text(
+                'No shift report selected.',
+                style: getTextStyle(
+                  fontSize: 16.4,
+                  color: AppColors.onboardingBackground,
+                ),
+              ),
+            );
+          }
           return SingleChildScrollView(
             padding: EdgeInsets.all(16.w),
             child: Column(

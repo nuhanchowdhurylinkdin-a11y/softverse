@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -9,30 +10,44 @@ class AppHelperFunctions {
 
   static void showSnackBar(String message, {AppSnackBarType? type}) {
     final snackType = type ?? AppSnackBarType.failure;
-    final style = _getStyleForType(snackType);
 
     if (Get.isSnackbarOpen) Get.closeCurrentSnackbar();
-    Get.snackbar(
-      _getTitleForType(snackType),
-      message,
+    Get.rawSnackbar(
       snackPosition: SnackPosition.TOP,
-      margin: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-      borderRadius: 18,
-      backgroundColor: style.color,
-      colorText: Colors.white,
+      backgroundColor: Colors.transparent,
+      boxShadows: const [],
+      borderRadius: 0,
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      padding: EdgeInsets.zero,
       duration: const Duration(seconds: 3),
-      icon: Icon(style.icon, color: Colors.white, size: 28),
-      shouldIconPulse: false,
-      boxShadows: [
-        BoxShadow(
-          color: style.color.withValues(alpha: 0.25),
-          blurRadius: 18,
-          offset: const Offset(0, 10),
-        ),
-      ],
-      mainButton: TextButton(
-        onPressed: Get.closeCurrentSnackbar,
-        child: const Icon(Icons.close, color: Colors.white, size: 22),
+      messageText: AwesomeSnackbarContent(
+        title: _getTitleForType(snackType),
+        message: message,
+        contentType: _getContentType(snackType),
+      ),
+    );
+  }
+
+  static void showSnackBarWithTitle(
+    String title,
+    String message, {
+    AppSnackBarType? type,
+  }) {
+    final snackType = type ?? AppSnackBarType.failure;
+
+    if (Get.isSnackbarOpen) Get.closeCurrentSnackbar();
+    Get.rawSnackbar(
+      snackPosition: SnackPosition.TOP,
+      backgroundColor: Colors.transparent,
+      boxShadows: const [],
+      borderRadius: 0,
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      padding: EdgeInsets.zero,
+      duration: const Duration(seconds: 3),
+      messageText: AwesomeSnackbarContent(
+        title: title,
+        message: message,
+        contentType: _getContentType(snackType),
       ),
     );
   }
@@ -53,17 +68,11 @@ class AppHelperFunctions {
     return 'Notice';
   }
 
-  static _SnackBarStyle _getStyleForType(AppSnackBarType type) {
-    if (type == AppSnackBarType.success) {
-      return const _SnackBarStyle(Icons.check_circle, Color(0xFF20B26B));
-    }
-    if (type == AppSnackBarType.warning) {
-      return const _SnackBarStyle(Icons.warning_rounded, Color(0xFFFF9820));
-    }
-    if (type == AppSnackBarType.failure) {
-      return const _SnackBarStyle(Icons.error_rounded, Color(0xFFEA4D4D));
-    }
-    return const _SnackBarStyle(Icons.info_rounded, Color(0xFF337BFF));
+  static ContentType _getContentType(AppSnackBarType type) {
+    if (type == AppSnackBarType.success) return ContentType.success;
+    if (type == AppSnackBarType.warning) return ContentType.warning;
+    if (type == AppSnackBarType.notice) return ContentType.help;
+    return ContentType.failure;
   }
 
   static String getFormattedDate(
@@ -76,11 +85,4 @@ class AppHelperFunctions {
   static String getFormattedMoney(double value) {
     return NumberFormat('#,##0.00').format(value);
   }
-}
-
-class _SnackBarStyle {
-  final IconData icon;
-  final Color color;
-
-  const _SnackBarStyle(this.icon, this.color);
 }

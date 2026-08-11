@@ -52,8 +52,10 @@ class HomeScreen extends GetView<HomeController> {
           ),
         ),
         actions: [
-          Icon(Iconsax.clock, color: Colors.white, size: 26.sp),
-          SizedBox(width: 15.w),
+          IconButton(
+            onPressed: controller.openPendingOrders,
+            icon: Icon(Iconsax.clock, color: Colors.white, size: 26.sp),
+          ),
           Icon(Iconsax.notification, color: Colors.white, size: 26.sp),
           SizedBox(width: 16.w),
         ],

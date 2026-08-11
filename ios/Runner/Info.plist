@@ -26,6 +26,8 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Softverse POS needs camera access to scan item barcodes.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Softverse POS needs photo library access to choose customer photos.</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Softverse POS needs Bluetooth access to connect to receipt printers.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
