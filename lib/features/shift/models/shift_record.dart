@@ -98,4 +98,6 @@ class ShiftRecord {
     if (value == null) return null;
     return double.tryParse(value.toString());
   }
+
+  bool get isOpen => id.isNotEmpty && status == 'open';
 }

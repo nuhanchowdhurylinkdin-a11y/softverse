@@ -75,8 +75,10 @@ class AppNavDrawer extends GetView<MainNavController> {
         ),
       ),
       onTap: () {
-        controller.changeTab(index);
         Navigator.of(context).pop();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          controller.changeTab(index);
+        });
       },
     );
   }

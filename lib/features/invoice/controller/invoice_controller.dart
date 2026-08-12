@@ -14,6 +14,7 @@ import '../../checkout/models/cart_item.dart';
 import '../../transaction/models/transaction_record.dart';
 import '../../home/controller/home_controller.dart';
 import '../../main_nav/controller/main_nav_controller.dart';
+import '../../printer/controller/printer_controller.dart';
 import '../../transaction/controller/transaction_controller.dart';
 
 class InvoiceController extends GetxController {
@@ -30,6 +31,7 @@ class InvoiceController extends GetxController {
   final status = ''.obs;
   final isClearingTable = false.obs;
   final isPreparingPdf = false.obs;
+  final isPrinting = false.obs;
   final isRefunding = false.obs;
   final localPdfPath = RxnString();
   final subtotalValue = 0.0.obs;
@@ -186,8 +188,27 @@ class InvoiceController extends GetxController {
 
   void openMail() {}
 
-  void openPrint() {
-    AppHelperFunctions.showSuccessSnackBar('Printer preview is ready.');
+  Future<void> openPrint() async {
+    if (isPrinting.value) return;
+    if (!Get.isRegistered<PrinterController>()) {
+      AppHelperFunctions.showWarningSnackBar('Add a receipt printer first.');
+      return;
+    }
+
+    isPrinting.value = true;
+    await Get.find<PrinterController>().printReceipt(
+      invoiceNumber: invoiceNumber.value,
+      customerName: customerName.value,
+      orderId: orderId.value,
+      items: items.toList(),
+      subtotal: subtotal,
+      tax: tax,
+      totalAmount: totalAmount,
+      amountReceived: amountReceived,
+      changeToReturn: changeToReturn,
+      paymentLabel: paymentType.value.label,
+    );
+    isPrinting.value = false;
   }
 
   void returnHome() {

@@ -82,7 +82,18 @@ class InvoiceScreen extends GetView<InvoiceController> {
           ),
           IconButton(
             onPressed: controller.openPrint,
-            icon: Icon(Iconsax.printer, color: Colors.white, size: 26.sp),
+            icon: Obx(
+              () => controller.isPrinting.value
+                  ? SizedBox(
+                      width: 20.sp,
+                      height: 20.sp,
+                      child: const CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Icon(Iconsax.printer, color: Colors.white, size: 26.sp),
+            ),
           ),
         ],
       ),
@@ -142,6 +153,19 @@ class InvoiceScreen extends GetView<InvoiceController> {
                   totalAmount: controller.totalAmount,
                   amountReceived: controller.amountReceived,
                   changeToReturn: controller.changeToReturn,
+                ),
+              ),
+              SizedBox(height: 16.h),
+              Obx(
+                () => PrimaryButton(
+                  label: 'Print Receipt',
+                  onPressed: controller.openPrint,
+                  isLoading: controller.isPrinting.value,
+                  backgroundColor: AppColors.onboardingBackground,
+                  textColor: Colors.white,
+                  height: 55,
+                  fontSize: 16.4,
+                  borderRadius: 12,
                 ),
               ),
               SizedBox(height: 22.h),
