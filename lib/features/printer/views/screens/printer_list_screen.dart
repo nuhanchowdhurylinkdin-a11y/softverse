@@ -52,21 +52,35 @@ class PrinterListScreen extends GetView<PrinterController> {
         child: Stack(
           children: [
             Obx(
-              () => ListView.separated(
-                padding: EdgeInsets.all(16.w),
-                itemCount: controller.printers.length,
-                separatorBuilder: (_, _) => SizedBox(height: 12.h),
-                itemBuilder: (context, index) {
-                  final printer = controller.printers[index];
-                  return PrinterListTile(
-                    printer: printer,
-                    onTap: () => Get.toNamed(
-                      AppRoute.getPrinterDetailScreen(),
-                      arguments: printer.id,
+              () => controller.printers.isEmpty
+                  ? Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(24.w),
+                        child: Text(
+                          'No printers added yet.',
+                          textAlign: TextAlign.center,
+                          style: getTextStyle(
+                            fontSize: 16.4,
+                            color: AppColors.chipInactiveText,
+                          ),
+                        ),
+                      ),
+                    )
+                  : ListView.separated(
+                      padding: EdgeInsets.all(16.w),
+                      itemCount: controller.printers.length,
+                      separatorBuilder: (_, _) => SizedBox(height: 12.h),
+                      itemBuilder: (context, index) {
+                        final printer = controller.printers[index];
+                        return PrinterListTile(
+                          printer: printer,
+                          onTap: () => Get.toNamed(
+                            AppRoute.getPrinterDetailScreen(),
+                            arguments: printer.id,
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
             ),
             Positioned(
               right: 16.w,

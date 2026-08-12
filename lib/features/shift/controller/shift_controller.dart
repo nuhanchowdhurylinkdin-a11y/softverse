@@ -13,6 +13,8 @@ class ShiftController extends GetxController {
   final selectedReport = Rxn<ShiftRecord>();
   final isLoading = false.obs;
 
+  bool get hasOpenShift => currentShift.value?.isOpen == true;
+
   @override
   void onInit() {
     super.onInit();
@@ -22,9 +24,14 @@ class ShiftController extends GetxController {
   Future<void> fetchCurrentShift() async {
     final response = await _networkCaller.getRequest(ApiConstants.currentShift);
     if (!response.isSuccess) return;
-    currentShift.value = response.responseData is Map
-        ? ShiftRecord.fromApi(Map<String, dynamic>.from(response.responseData))
-        : null;
+    if (response.responseData is! Map) {
+      currentShift.value = null;
+      return;
+    }
+    final shift = ShiftRecord.fromApi(
+      Map<String, dynamic>.from(response.responseData),
+    );
+    currentShift.value = shift.isOpen ? shift : null;
   }
 
   Future<void> fetchHistory() async {
@@ -99,7 +106,7 @@ class ShiftController extends GetxController {
   void openCashManagement() => Get.toNamed(AppRoute.getCashManagementScreen());
 
   void openCloseShift() {
-    if (currentShift.value == null) {
+    if (!hasOpenShift) {
       Get.toNamed(AppRoute.getOpenShiftScreen());
       return;
     }

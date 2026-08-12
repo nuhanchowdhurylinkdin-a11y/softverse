@@ -171,6 +171,9 @@ class AddPrinterController extends GetxController {
       ),
     );
     Get.back();
+    Future<void>.delayed(const Duration(milliseconds: 120), () {
+      AppHelperFunctions.showSuccessSnackBar('Printer saved.');
+    });
   }
 
   @override

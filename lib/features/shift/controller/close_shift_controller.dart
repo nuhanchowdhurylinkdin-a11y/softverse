@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
+import '../../../core/utils/helpers/app_helper.dart';
+import '../../../routes/app_routes.dart';
 import '../models/shift_record.dart';
 import 'shift_controller.dart';
 
@@ -21,6 +23,11 @@ class CloseShiftController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    if (!_shiftController.hasOpenShift) {
+      AppHelperFunctions.showWarningSnackBar('Open a shift first.');
+      Get.offNamed(AppRoute.getOpenShiftScreen());
+      return;
+    }
     actualCashController.text = shift.expectedCashAmount.toStringAsFixed(2);
   }
 

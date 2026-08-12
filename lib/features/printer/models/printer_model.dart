@@ -33,7 +33,48 @@ class PrinterModel {
     required this.autoCut,
   });
 
+  factory PrinterModel.fromJson(Map<String, dynamic> json) {
+    return PrinterModel(
+      id: json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      printerModel: json['printerModel']?.toString() ?? '',
+      category: json['category']?.toString() ?? 'Receipt Printer',
+      connectionType: json['connectionType']?.toString() ?? 'Bluetooth',
+      macAddress: json['macAddress']?.toString() ?? '',
+      startTime: json['startTime']?.toString() ?? '',
+      closeTime: json['closeTime']?.toString() ?? '',
+      isConnected: json['isConnected'] == true,
+      isDefault: json['isDefault'] == true,
+      printReceiptAndBills: json['printReceiptAndBills'] != false,
+      printOrders: json['printOrders'] == true,
+      paperSize: json['paperSize']?.toString() ?? '80mm',
+      printDensity: json['printDensity']?.toString() ?? 'Medium',
+      autoCut: json['autoCut'] == true,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'printerModel': printerModel,
+      'category': category,
+      'connectionType': connectionType,
+      'macAddress': macAddress,
+      'startTime': startTime,
+      'closeTime': closeTime,
+      'isConnected': isConnected,
+      'isDefault': isDefault,
+      'printReceiptAndBills': printReceiptAndBills,
+      'printOrders': printOrders,
+      'paperSize': paperSize,
+      'printDensity': printDensity,
+      'autoCut': autoCut,
+    };
+  }
+
   PrinterModel copyWith({
+    String? id,
     String? name,
     String? printerModel,
     String? category,
@@ -50,7 +91,7 @@ class PrinterModel {
     bool? autoCut,
   }) {
     return PrinterModel(
-      id: id,
+      id: id ?? this.id,
       name: name ?? this.name,
       printerModel: printerModel ?? this.printerModel,
       category: category ?? this.category,

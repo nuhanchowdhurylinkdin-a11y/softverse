@@ -5,6 +5,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 import '../../../../core/common/styles/global_text_style.dart';
 import '../../../../core/utils/constants/colors.dart';
+import '../../../../core/utils/helpers/app_helper.dart';
 import '../../../inventory/widgets/toggle_field_row.dart';
 import '../../controller/printer_controller.dart';
 import '../../models/printer_model.dart';
@@ -320,6 +321,9 @@ class PrinterDetailScreen extends GetView<PrinterController> {
               controller.removePrinter(printer.id);
               Get.back();
               Get.back();
+              Future<void>.delayed(const Duration(milliseconds: 120), () {
+                AppHelperFunctions.showSuccessSnackBar('Printer removed.');
+              });
             },
             child: Text('Remove', style: TextStyle(color: AppColors.dangerRed)),
           ),

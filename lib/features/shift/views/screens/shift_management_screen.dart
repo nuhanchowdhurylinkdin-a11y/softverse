@@ -60,15 +60,29 @@ class ShiftManagementScreen extends GetView<ShiftController> {
         top: false,
         child: Obx(() {
           final shift = controller.currentShift.value;
-          if (shift == null) {
+          if (!controller.hasOpenShift || shift == null) {
             return Center(
               child: Padding(
                 padding: EdgeInsets.all(24.w),
-                child: ShiftActionButton(
-                  icon: Iconsax.clock,
-                  label: 'OPEN SHIFT',
-                  filled: true,
-                  onTap: () => Get.toNamed(AppRoute.getOpenShiftScreen()),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ShiftActionButton(
+                      icon: Iconsax.clock,
+                      label: 'OPEN SHIFT',
+                      filled: true,
+                      onTap: () => Get.toNamed(AppRoute.getOpenShiftScreen()),
+                    ),
+                    SizedBox(height: 16.h),
+                    Text(
+                      'No open shift found.',
+                      textAlign: TextAlign.center,
+                      style: getTextStyle(
+                        fontSize: 14.6,
+                        color: AppColors.chipInactiveText,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             );
