@@ -125,33 +125,98 @@ class _CameraError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.all(24.w),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Iconsax.camera_slash, size: 48.sp, color: Colors.white),
-            SizedBox(height: 16.h),
-            Text(
-              'Camera permission is required to scan item barcodes.',
-              textAlign: TextAlign.center,
-              style: getTextStyle(fontSize: 14.6, color: Colors.white),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 32.h),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: constraints.maxHeight - 64.h,
             ),
-            SizedBox(height: 8.h),
-            Text(
-              error.errorCode.message,
-              textAlign: TextAlign.center,
-              style: getTextStyle(fontSize: 12.8, color: Colors.white70),
+            child: Center(
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.fromLTRB(22.w, 24.h, 22.w, 22.h),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.06),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.10),
+                  ),
+                  borderRadius: BorderRadius.circular(22.r),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 78.w,
+                      height: 78.w,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.10),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Iconsax.camera_slash,
+                        size: 38.sp,
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(height: 18.h),
+                    Text(
+                      'Camera access needed',
+                      textAlign: TextAlign.center,
+                      style: getTextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    Text(
+                      'Allow camera permission to scan item barcodes.',
+                      textAlign: TextAlign.center,
+                      style: getTextStyle(
+                        fontSize: 14,
+                        color: Colors.white.withValues(alpha: 0.82),
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    Text(
+                      error.errorCode.message,
+                      textAlign: TextAlign.center,
+                      style: getTextStyle(
+                        fontSize: 12.8,
+                        color: Colors.white.withValues(alpha: 0.58),
+                      ),
+                    ),
+                    SizedBox(height: 22.h),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48.h,
+                      child: FilledButton.icon(
+                        onPressed: onOpenSettings,
+                        icon: Icon(Iconsax.setting_2, size: 18.sp),
+                        label: const Text('Open Settings'),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppColors.onboardingBackground,
+                          foregroundColor: Colors.white,
+                          textStyle: getTextStyle(
+                            fontSize: 15.2,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14.r),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            SizedBox(height: 20.h),
-            ElevatedButton(
-              onPressed: onOpenSettings,
-              child: const Text('Open Settings'),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

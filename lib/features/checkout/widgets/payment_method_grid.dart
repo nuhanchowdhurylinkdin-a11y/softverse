@@ -7,11 +7,13 @@ import '../models/payment_method.dart';
 
 class PaymentMethodGrid extends StatelessWidget {
   final List<PaymentMethod> methods;
+  final String selectedKey;
   final ValueChanged<PaymentMethod> onSelected;
 
   const PaymentMethodGrid({
     super.key,
     required this.methods,
+    required this.selectedKey,
     required this.onSelected,
   });
 
@@ -37,6 +39,7 @@ class PaymentMethodGrid extends StatelessWidget {
   }
 
   Widget _buildTile(PaymentMethod method) {
+    final selected = method.key == selectedKey;
     return GestureDetector(
       onTap: () => onSelected(method),
       child: Container(
@@ -44,8 +47,20 @@ class PaymentMethodGrid extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 16.w),
         alignment: Alignment.centerLeft,
         decoration: BoxDecoration(
-          border: Border.all(color: AppColors.cardBorder),
+          border: Border.all(
+            color: selected ? Colors.white : AppColors.cardBorder,
+            width: selected ? 2 : 1,
+          ),
           borderRadius: BorderRadius.circular(12.r),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: method.gradientEnd.withValues(alpha: 0.22),
+                    blurRadius: 16,
+                    offset: const Offset(0, 8),
+                  ),
+                ]
+              : null,
           gradient: LinearGradient(
             colors: [method.gradientStart, method.gradientEnd],
           ),
@@ -61,7 +76,11 @@ class PaymentMethodGrid extends StatelessWidget {
                 color: Colors.white,
               ),
             ),
-            Icon(method.icon, color: Colors.white, size: 22.sp),
+            Icon(
+              selected ? Icons.check_circle_rounded : method.icon,
+              color: Colors.white,
+              size: 22.sp,
+            ),
           ],
         ),
       ),
