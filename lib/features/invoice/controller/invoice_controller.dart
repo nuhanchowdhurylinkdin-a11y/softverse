@@ -243,10 +243,11 @@ class InvoiceController extends GetxController {
 
     tableId.value = null;
     tableName.value = null;
-    final orderKey = checkoutOrderId.value;
-    if (orderKey != null && orderKey.isNotEmpty) {
-      await _kdsOrderSender.complete(orderKey);
-    }
+    await _kdsOrderSender.completeAny([
+      checkoutOrderId.value,
+      orderId.value,
+      id,
+    ]);
     if (Get.isRegistered<HomeController>()) {
       await Get.find<HomeController>().fetchTables();
     }

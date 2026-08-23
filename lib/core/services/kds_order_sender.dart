@@ -8,4 +8,8 @@ class KdsOrderSender {
   Future<bool> complete(String id) async {
     return MainStationServer.instance.completeKdsOrder(id);
   }
+
+  Future<bool> completeAny(Iterable<String?> ids) async {
+    return MainStationServer.instance.completeKdsOrderByKeys(ids);
+  }
 }

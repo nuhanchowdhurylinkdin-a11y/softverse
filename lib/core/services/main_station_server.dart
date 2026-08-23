@@ -47,17 +47,38 @@ class MainStationServer {
   }
 
   Future<bool> completeKdsOrder(String id) async {
-    final key = id.trim();
-    if (key.isEmpty) return false;
+    return completeKdsOrderByKeys([id]);
+  }
 
-    final order = _kdsOrders.remove(key);
+  Future<bool> completeKdsOrderByKeys(Iterable<String?> ids) async {
+    final keys = ids
+        .map((id) => id?.trim() ?? '')
+        .where((id) => id.isNotEmpty)
+        .toSet();
+    if (keys.isEmpty) return false;
+
+    final storedKey = _kdsOrders.keys.firstWhere((key) {
+      final order = _kdsOrders[key];
+      return keys.contains(key) ||
+          keys.contains(order?['id']?.toString()) ||
+          keys.contains(order?['checkoutId']?.toString()) ||
+          keys.contains(order?['orderId']?.toString()) ||
+          keys.contains(order?['orderNumber']?.toString()) ||
+          keys.contains(order?['tableId']?.toString());
+    }, orElse: () => keys.first);
+    final order = _kdsOrders.remove(storedKey);
     final completed = {
       ...?order,
-      'id': key,
+      'id': storedKey,
       'status': 'completed',
       'completedAt': DateTime.now().toIso8601String(),
     };
-    _broadcast({'type': 'order_completed', 'id': key, 'order': completed});
+    _broadcast({
+      'type': 'order_completed',
+      'id': storedKey,
+      'keys': keys.toList(),
+      'order': completed,
+    });
     return true;
   }
 
