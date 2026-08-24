@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../../core/common/styles/global_text_style.dart';
 import '../../../../core/common/widgets/product_image.dart';
+import '../../../../core/services/feature_settings.dart';
 import '../../../../core/utils/constants/colors.dart';
 import '../../../../core/utils/helpers/app_helper.dart';
 import '../../controller/item_detail_controller.dart';
@@ -147,53 +148,64 @@ class ItemDetailScreen extends GetView<ItemDetailController> {
                   onOptionSelected: controller.selectModifierOption,
                 ),
               ),
-              SizedBox(height: 16.h),
-              Text(
-                'Expire Date',
-                style: getTextStyle(
-                  fontSize: 16.4,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.onboardingBackground,
-                ),
-              ),
-              SizedBox(height: 12.h),
               Obx(
-                () => ToggleFieldRow(
-                  label: 'Track Date',
-                  value: controller.trackExpiryDate.value,
-                  onChanged: (_) => controller.toggleTrackExpiryDate(),
-                  boxed: true,
-                ),
-              ),
-              SizedBox(height: 16.h),
-              Text(
-                'Manufacturing Date',
-                style: getTextStyle(
-                  fontSize: 16.4,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.onboardingBackground,
-                ),
-              ),
-              SizedBox(height: 8.h),
-              DateFieldRow(value: controller.manufacturingDate),
-              SizedBox(height: 16.h),
-              Text(
-                'Expire Date',
-                style: getTextStyle(
-                  fontSize: 16.4,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.onboardingBackground,
-                ),
-              ),
-              SizedBox(height: 8.h),
-              DateFieldRow(value: controller.expireDate),
-              SizedBox(height: 8.h),
-              Text(
-                'Quantity at which you will be notified about Expire Date',
-                style: getTextStyle(
-                  fontSize: 12.8,
-                  color: AppColors.chipInactiveText,
-                ),
+                () =>
+                    FeatureSettings.isEnabled('product_expiration_information')
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          SizedBox(height: 16.h),
+                          Text(
+                            'Expire Date',
+                            style: getTextStyle(
+                              fontSize: 16.4,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.onboardingBackground,
+                            ),
+                          ),
+                          SizedBox(height: 12.h),
+                          Obx(
+                            () => ToggleFieldRow(
+                              label: 'Track Date',
+                              value: controller.trackExpiryDate.value,
+                              onChanged: (_) =>
+                                  controller.toggleTrackExpiryDate(),
+                              boxed: true,
+                            ),
+                          ),
+                          SizedBox(height: 16.h),
+                          Text(
+                            'Manufacturing Date',
+                            style: getTextStyle(
+                              fontSize: 16.4,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.onboardingBackground,
+                            ),
+                          ),
+                          SizedBox(height: 8.h),
+                          DateFieldRow(value: controller.manufacturingDate),
+                          SizedBox(height: 16.h),
+                          Text(
+                            'Expire Date',
+                            style: getTextStyle(
+                              fontSize: 16.4,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.onboardingBackground,
+                            ),
+                          ),
+                          SizedBox(height: 8.h),
+                          DateFieldRow(value: controller.expireDate),
+                          SizedBox(height: 8.h),
+                          Text(
+                            'Quantity at which you will be notified about Expire Date',
+                            style: getTextStyle(
+                              fontSize: 12.8,
+                              color: AppColors.chipInactiveText,
+                            ),
+                          ),
+                        ],
+                      )
+                    : const SizedBox.shrink(),
               ),
               SizedBox(height: 16.h),
               Obx(

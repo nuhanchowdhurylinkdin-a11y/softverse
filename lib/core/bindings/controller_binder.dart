@@ -43,7 +43,12 @@ class ControllerBinder extends Bindings {
       () => TransactionController(),
       fenix: true,
     );
-    Get.lazyPut<MainNavController>(() => MainNavController(), fenix: true);
+    // permanent, not fenix: it's read by every tab's Scaffold (drawer) and
+    // the IndexedStack simultaneously — if GetX ever disposes and silently
+    // recreates it (fenix does this once nothing holds a reference, which
+    // briefly happens during Get.offAllNamed), those widgets can end up
+    // bound to two different instances, so drawer taps stop switching tabs.
+    Get.put<MainNavController>(MainNavController(), permanent: true);
     Get.lazyPut<InvoiceController>(() => InvoiceController(), fenix: true);
     Get.lazyPut<InventoryController>(() => InventoryController(), fenix: true);
     Get.lazyPut<MoreController>(() => MoreController(), fenix: true);

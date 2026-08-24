@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 import '../../../core/utils/constants/colors.dart';
+import '../../../core/services/cds_cart_sender.dart';
+import '../../../core/services/feature_settings.dart';
 import '../../../core/services/kds_order_sender.dart';
 import '../../../core/services/network_caller.dart';
 import '../../../core/services/offline_database_service.dart';
@@ -27,6 +31,7 @@ enum PriceAdjustmentMode { modifier, discount }
 class CheckoutController extends GetxController {
   final NetworkCaller _networkCaller = NetworkCaller();
   final KdsOrderSender _kdsOrderSender = KdsOrderSender();
+  final CdsCartSender _cdsCartSender = CdsCartSender();
   final activeOrderId = RxnString();
   final activeOrderNumber = ''.obs;
   final selectedCustomerId = ''.obs;
@@ -82,6 +87,15 @@ class CheckoutController extends GetxController {
   ];
 
   final paymentMethods = <PaymentMethod>[..._defaultPaymentMethods].obs;
+
+  List<PaymentMethod> get visiblePaymentMethods =>
+      paymentMethods.where((method) => _isPaymentMethodEnabled(method.key)).toList();
+
+  bool _isPaymentMethodEnabled(String key) => switch (key) {
+    'due' => FeatureSettings.isEnabled('credit_sales'),
+    'installment' => FeatureSettings.isEnabled('payment_in_installments'),
+    _ => true,
+  };
 
   @override
   void onInit() {
@@ -148,6 +162,7 @@ class CheckoutController extends GetxController {
       );
     }
     _syncAmountReceivedWithTotal();
+    _syncCds();
   }
 
   void incrementQuantity(int index) {
@@ -155,6 +170,7 @@ class CheckoutController extends GetxController {
       quantity: cartItems[index].quantity + 1,
     );
     _syncAmountReceivedWithTotal();
+    _syncCds();
   }
 
   void decrementQuantity(int index) {
@@ -163,6 +179,7 @@ class CheckoutController extends GetxController {
       quantity: cartItems[index].quantity - 1,
     );
     _syncAmountReceivedWithTotal();
+    _syncCds();
   }
 
   void selectModifier() =>
@@ -175,6 +192,7 @@ class CheckoutController extends GetxController {
     amountEditedManually.value = true;
     final normalized = value.replaceAll(',', '').replaceAll('\$', '');
     amountReceived.value = double.tryParse(normalized) ?? amountReceived.value;
+    _syncCds();
   }
 
   void addCustomer() => Get.toNamed(AppRoute.getAddCustomerScreen());
@@ -187,6 +205,7 @@ class CheckoutController extends GetxController {
     selectedCustomerId.value = id ?? '';
     if (selectedCustomerId.value.isEmpty) {
       customerName.value = 'Not Registered';
+      _syncCds();
       return;
     }
 
@@ -203,9 +222,11 @@ class CheckoutController extends GetxController {
     customerName.value = selected.name.trim().isEmpty
         ? 'Not Registered'
         : selected.name.trim();
+    _syncCds();
   }
 
   Future<void> sendToTable() async {
+    if (!isTableOptionsEnabled) return;
     final homeController = Get.find<HomeController>();
     await homeController.fetchTables();
     final availableTables = homeController.availableTables;
@@ -239,7 +260,10 @@ class CheckoutController extends GetxController {
     await _submitCheckout(saveOrder: true);
   }
 
-  void clearOrder() {
+  /// [silent] skips notifying the customer display — used right after a
+  /// successful checkout, where the display should keep showing the final
+  /// receipt (via [_cdsCartSender.complete]) instead of snapping to empty.
+  void clearOrder({bool silent = false}) {
     cartItems.clear();
     activeOrderId.value = null;
     activeOrderNumber.value = '';
@@ -247,9 +271,13 @@ class CheckoutController extends GetxController {
     customerName.value = 'Not Registered';
     amountEditedManually.value = false;
     _syncAmountReceivedWithTotal(force: true);
+    if (!silent && FeatureSettings.isEnabled('customer_displays')) {
+      _cdsCartSender.clear();
+    }
   }
 
   Future<void> selectPaymentMethod(PaymentMethod method) async {
+    if (!_isPaymentMethodEnabled(method.key)) return;
     if (await _mustSelectTableBeforePayment()) return;
 
     selectedPaymentMethod.value = method.key;
@@ -337,14 +365,19 @@ class CheckoutController extends GetxController {
   }
 
   void openPendingOrders() {
+    if (!isOpenOrderEnabled) return;
     fetchPendingOrders();
     Get.toNamed(AppRoute.getPendingOrdersScreen());
   }
 
+  bool get isOpenOrderEnabled => FeatureSettings.isEnabled('open_order');
+
+  bool get isTableOptionsEnabled => FeatureSettings.isEnabled('table_options');
+
   Future<bool> _mustSelectTableBeforePayment() async {
     if (activeOrderId.value != null) return false;
 
-    if (!_isTableOptionsEnabled()) return false;
+    if (!FeatureSettings.isEnabled('table_options')) return false;
 
     if (_cachedTableCount() == 0) {
       AppHelperFunctions.showWarningSnackBar('No table found.');
@@ -352,39 +385,6 @@ class CheckoutController extends GetxController {
       AppHelperFunctions.showWarningSnackBar('Select a table first.');
     }
     return true;
-  }
-
-  bool _isTableOptionsEnabled() {
-    final cached = OfflineDatabaseService.readCache<Map<String, dynamic>>(
-      'feature_settings',
-    );
-    return _tableOptionsFromSettings(cached) ?? false;
-  }
-
-  bool _isKitchenPrintersEnabled() {
-    final cached = OfflineDatabaseService.readCache<Map<String, dynamic>>(
-      'feature_settings',
-    );
-    final rawFeatures = cached?['features'];
-    if (rawFeatures is! List) return false;
-    for (final raw in rawFeatures) {
-      if (raw is Map && raw['key']?.toString() == 'kitchen_printers') {
-        return raw['enabled'] == true;
-      }
-    }
-    return false;
-  }
-
-  bool? _tableOptionsFromSettings(Map<String, dynamic>? data) {
-    final rawFeatures = data?['features'];
-    if (rawFeatures is! List) return null;
-    for (final raw in rawFeatures) {
-      if (raw is! Map) continue;
-      if (raw['key']?.toString() == 'table_options') {
-        return raw['enabled'] == true;
-      }
-    }
-    return null;
   }
 
   int _cachedTableCount() {
@@ -409,7 +409,7 @@ class CheckoutController extends GetxController {
     String? tableId,
     String? tableName,
   }) async {
-    if (!_isKitchenPrintersEnabled()) return;
+    if (!FeatureSettings.isEnabled('kitchen_printers')) return;
 
     try {
       final sent = await _kdsOrderSender.send({
@@ -438,6 +438,55 @@ class CheckoutController extends GetxController {
     } catch (_) {
       AppHelperFunctions.showWarningSnackBar('KDS not reachable on WiFi.');
     }
+  }
+
+  void _syncCds() {
+    if (!FeatureSettings.isEnabled('customer_displays')) return;
+    _cdsCartSender.update(_cdsCartSnapshot());
+  }
+
+  /// Product images can be a local file path on this POS device (never
+  /// uploaded) or a server-relative upload path — neither loads as-is on
+  /// the CDS device, so resolve to a full URL (or drop local-only images).
+  String _resolveCdsImageUrl(String imageUrl) {
+    final trimmed = imageUrl.trim();
+    if (trimmed.isEmpty) return '';
+    if (File(trimmed).existsSync()) return '';
+    return ApiConstants.resolveAssetUrl(trimmed);
+  }
+
+  Map<String, dynamic> _cdsCartSnapshot({bool paid = false}) {
+    return {
+      'status': paid ? 'paid' : 'building',
+      'orderNumber': activeOrderNumber.value.isEmpty
+          ? null
+          : activeOrderNumber.value,
+      'customerName': customerName.value,
+      'items': cartItems
+          .map(
+            (item) => {
+              'name': item.name,
+              'quantity': item.quantity,
+              'price': item.price,
+              'imageUrl': _resolveCdsImageUrl(item.imageUrl),
+              if (item.bundle != null)
+                'bundle': {
+                  'name': item.bundle!.name,
+                  'price': item.bundle!.price,
+                  'discountLabel': item.bundle!.discountLabel,
+                  'discountAmount': item.bundle!.discountAmount,
+                  'subtotal': item.bundle!.subtotal,
+                },
+            },
+          )
+          .toList(),
+      'subtotal': subtotal,
+      'tax': tax,
+      'taxRatePercent': taxRate * 100,
+      'totalAmount': totalAmount,
+      'amountReceived': amountReceived.value,
+      'changeToReturn': changeToReturn,
+    };
   }
 
   Future<void> _submitCheckout({
@@ -500,10 +549,21 @@ class CheckoutController extends GetxController {
         tableName: tableName,
       );
       if (!saveOrder && !sendToTable) {
+        if (FeatureSettings.isEnabled('customer_displays')) {
+          _cdsCartSender.complete(_cdsCartSnapshot(paid: true));
+        }
         _openInvoice(order);
-        clearOrder();
+        clearOrder(silent: true);
       } else if (sendToTable) {
-        clearOrder();
+        // Keep the cart open on this same order instead of wiping it — the
+        // customer may be paying right now. `activeOrderId` makes the next
+        // payment tap hit payCheckout(id) instead of creating a duplicate
+        // order. Cashiers starting a fresh walk-in sale should tap
+        // "Clear Order" first.
+        activeOrderId.value = order['id']?.toString() ?? activeOrderId.value;
+        activeOrderNumber.value =
+            order['orderNumber']?.toString() ?? activeOrderNumber.value;
+        _syncCds();
       } else if (saveOrder) {
         clearOrder();
         openPendingOrders();
@@ -646,6 +706,7 @@ class CheckoutController extends GetxController {
       amountReceived.value,
     );
     Get.find<MainNavController>().changeTab(1);
+    _syncCds();
     return true;
   }
 

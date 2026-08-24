@@ -1,10 +1,6 @@
 import 'package:get/get.dart';
 
-import '../features/apps/controller/add_app_device_controller.dart';
-import '../features/apps/controller/app_device_view_controller.dart';
-import '../features/apps/views/screens/add_app_device_screen.dart';
 import '../features/apps/views/screens/app_device_list_screen.dart';
-import '../features/apps/views/screens/app_device_view_screen.dart';
 import '../features/apps/views/screens/apps_menu_screen.dart';
 import '../features/auth/views/screens/enter_otp_screen.dart';
 import '../features/customer/controller/add_customer_controller.dart';
@@ -93,8 +89,6 @@ class AppRoute {
   static String addPrinterScreen = "/addPrinterScreen";
   static String appsMenuScreen = "/appsMenuScreen";
   static String appDeviceListScreen = "/appDeviceListScreen";
-  static String appDeviceViewScreen = "/appDeviceViewScreen";
-  static String addAppDeviceScreen = "/addAppDeviceScreen";
   static String taxListScreen = "/taxListScreen";
   static String editTaxScreen = "/editTaxScreen";
   static String addTaxScreen = "/addTaxScreen";
@@ -136,8 +130,6 @@ class AppRoute {
   static String getAddPrinterScreen() => addPrinterScreen;
   static String getAppsMenuScreen() => appsMenuScreen;
   static String getAppDeviceListScreen() => appDeviceListScreen;
-  static String getAppDeviceViewScreen() => appDeviceViewScreen;
-  static String getAddAppDeviceScreen() => addAppDeviceScreen;
   static String getTaxListScreen() => taxListScreen;
   static String getEditTaxScreen() => editTaxScreen;
   static String getAddTaxScreen() => addTaxScreen;
@@ -252,20 +244,6 @@ class AppRoute {
     ),
     GetPage(name: appsMenuScreen, page: () => const AppsMenuScreen()),
     GetPage(name: appDeviceListScreen, page: () => const AppDeviceListScreen()),
-    GetPage(
-      name: appDeviceViewScreen,
-      page: () => const AppDeviceViewScreen(),
-      binding: BindingsBuilder(() {
-        Get.lazyPut<AppDeviceViewController>(() => AppDeviceViewController());
-      }),
-    ),
-    GetPage(
-      name: addAppDeviceScreen,
-      page: () => const AddAppDeviceScreen(),
-      binding: BindingsBuilder(() {
-        Get.lazyPut<AddAppDeviceController>(() => AddAppDeviceController());
-      }),
-    ),
     GetPage(name: taxListScreen, page: () => const TaxListScreen()),
     GetPage(
       name: editTaxScreen,

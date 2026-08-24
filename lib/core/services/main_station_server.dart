@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'feature_settings.dart';
+
 class MainStationServer {
   MainStationServer._();
 
@@ -8,8 +10,16 @@ class MainStationServer {
   static const port = 8787;
 
   final _kdsOrders = <String, Map<String, dynamic>>{};
-  final _kdsSockets = <WebSocket>{};
+  final _kdsSockets = <WebSocket, String>{};
+  final _cdsSockets = <WebSocket, String>{};
+  Map<String, dynamic>? _cdsCart;
   HttpServer? _server;
+
+  /// IPs of currently-connected KDS devices (live, not a saved roster).
+  List<String> get connectedKdsIps => _kdsSockets.values.toList();
+
+  /// IPs of currently-connected CDS devices (live, not a saved roster).
+  List<String> get connectedCdsIps => _cdsSockets.values.toList();
 
   Future<void> start() async {
     if (_server != null) return;
@@ -90,12 +100,36 @@ class MainStationServer {
     return ids;
   }
 
+  /// Live-updates the customer display with the cart currently being built.
+  void updateCdsCart(Map<String, dynamic> cart) {
+    _cdsCart = cart;
+    _broadcastToCds({'type': 'cart_updated', 'cart': cart});
+  }
+
+  /// Holds the customer display on the final receipt (amount received / change).
+  void completeCdsCheckout(Map<String, dynamic> cart) {
+    _cdsCart = cart;
+    _broadcastToCds({'type': 'checkout_completed', 'cart': cart});
+  }
+
+  /// Sends the customer display back to its waiting state.
+  void clearCdsCart() {
+    _cdsCart = null;
+    _broadcastToCds({'type': 'cart_cleared'});
+  }
+
   Future<void> _handle(HttpRequest request) async {
     if (request.method == 'GET' &&
         request.uri.path == '/kds/orders/stream' &&
         WebSocketTransformer.isUpgradeRequest(request)) {
+      if (!FeatureSettings.isEnabled('kitchen_printers')) {
+        request.response.statusCode = HttpStatus.serviceUnavailable;
+        await request.response.close();
+        return;
+      }
+      final ip = request.connectionInfo?.remoteAddress.address ?? 'unknown';
       final socket = await WebSocketTransformer.upgrade(request);
-      _kdsSockets.add(socket);
+      _kdsSockets[socket] = ip;
       socket.add(
         jsonEncode({'type': 'orders', 'orders': _kdsOrders.values.toList()}),
       );
@@ -103,13 +137,39 @@ class MainStationServer {
       return;
     }
 
+    if (request.method == 'GET' &&
+        request.uri.path == '/cds/cart/stream' &&
+        WebSocketTransformer.isUpgradeRequest(request)) {
+      if (!FeatureSettings.isEnabled('customer_displays')) {
+        request.response.statusCode = HttpStatus.serviceUnavailable;
+        await request.response.close();
+        return;
+      }
+      final ip = request.connectionInfo?.remoteAddress.address ?? 'unknown';
+      final socket = await WebSocketTransformer.upgrade(request);
+      _cdsSockets[socket] = ip;
+      socket.add(jsonEncode({'type': 'cart_snapshot', 'cart': _cdsCart}));
+      socket.done.whenComplete(() => _cdsSockets.remove(socket));
+      return;
+    }
+
     request.response.headers.contentType = ContentType.json;
 
+    // /health stays open regardless of feature toggles — KDS/CDS pairing
+    // (saving the main station URL) needs to succeed even if the feature is
+    // currently off; only the live data streams above are actually gated.
     if (request.method == 'GET' && request.uri.path == '/health') {
       return _json(request, {'success': true, 'status': 'ok'});
     }
 
     if (request.method == 'GET' && request.uri.path == '/kds/orders') {
+      if (!FeatureSettings.isEnabled('kitchen_printers')) {
+        request.response.statusCode = HttpStatus.serviceUnavailable;
+        return _json(request, {
+          'success': false,
+          'message': 'Kitchen printers is disabled.',
+        });
+      }
       return _json(request, {
         'success': true,
         'orders': _kdsOrders.values.toList(),
@@ -118,6 +178,13 @@ class MainStationServer {
 
     if (request.method == 'POST' &&
         request.uri.path == '/kds/orders/complete-all') {
+      if (!FeatureSettings.isEnabled('kitchen_printers')) {
+        request.response.statusCode = HttpStatus.serviceUnavailable;
+        return _json(request, {
+          'success': false,
+          'message': 'Kitchen printers is disabled.',
+        });
+      }
       final ids = await completeAllKdsOrders();
       return _json(request, {'success': true, 'ids': ids});
     }
@@ -133,11 +200,22 @@ class MainStationServer {
 
   void _broadcast(Map<String, Object?> data) {
     final message = jsonEncode(data);
-    for (final socket in _kdsSockets.toList()) {
+    for (final socket in _kdsSockets.keys.toList()) {
       if (socket.readyState == WebSocket.open) {
         socket.add(message);
       } else {
         _kdsSockets.remove(socket);
+      }
+    }
+  }
+
+  void _broadcastToCds(Map<String, Object?> data) {
+    final message = jsonEncode(data);
+    for (final socket in _cdsSockets.keys.toList()) {
+      if (socket.readyState == WebSocket.open) {
+        socket.add(message);
+      } else {
+        _cdsSockets.remove(socket);
       }
     }
   }

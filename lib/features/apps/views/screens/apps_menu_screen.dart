@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 import '../../../../core/common/styles/global_text_style.dart';
+import '../../../../core/services/feature_settings.dart';
 import '../../../../core/services/main_station_server.dart';
 import '../../../../core/utils/constants/colors.dart';
 import '../../../../routes/app_routes.dart';
@@ -88,20 +89,32 @@ class AppsMenuScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              _AppTile(
-                type: AppDeviceType.cds,
-                onTap: () => Get.toNamed(
-                  AppRoute.getAppDeviceListScreen(),
-                  arguments: AppDeviceType.cds,
-                ),
+              Obx(
+                () => FeatureSettings.isEnabled('customer_displays')
+                    ? Column(
+                        children: [
+                          _AppTile(
+                            type: AppDeviceType.cds,
+                            onTap: () => Get.toNamed(
+                              AppRoute.getAppDeviceListScreen(),
+                              arguments: AppDeviceType.cds,
+                            ),
+                          ),
+                          SizedBox(height: 12.h),
+                        ],
+                      )
+                    : const SizedBox.shrink(),
               ),
-              SizedBox(height: 12.h),
-              _AppTile(
-                type: AppDeviceType.kds,
-                onTap: () => Get.toNamed(
-                  AppRoute.getAppDeviceListScreen(),
-                  arguments: AppDeviceType.kds,
-                ),
+              Obx(
+                () => FeatureSettings.isEnabled('kitchen_printers')
+                    ? _AppTile(
+                        type: AppDeviceType.kds,
+                        onTap: () => Get.toNamed(
+                          AppRoute.getAppDeviceListScreen(),
+                          arguments: AppDeviceType.kds,
+                        ),
+                      )
+                    : const SizedBox.shrink(),
               ),
             ],
           ),
@@ -117,13 +130,16 @@ class _AppTile extends StatelessWidget {
 
   const _AppTile({required this.type, required this.onTap});
 
+  List<String> _connectedIps() => type == AppDeviceType.cds
+      ? MainStationServer.instance.connectedCdsIps
+      : MainStationServer.instance.connectedKdsIps;
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 60.h,
-        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             begin: Alignment.topCenter,
@@ -141,12 +157,62 @@ class _AppTile extends StatelessWidget {
               color: AppColors.onboardingBackground,
             ),
             SizedBox(width: 12.w),
-            Text(
-              type.label,
-              style: getTextStyle(
-                fontSize: 14.6,
-                fontWeight: FontWeight.w500,
-                color: AppColors.onboardingBackground,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    type.label,
+                    style: getTextStyle(
+                      fontSize: 14.6,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.onboardingBackground,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  // ponytail: 2s poll of an in-process singleton; switch to a
+                  // stream on MainStationServer if this ever needs to be instant.
+                  StreamBuilder<List<String>>(
+                    stream: Stream.periodic(
+                      const Duration(seconds: 2),
+                      (_) => _connectedIps(),
+                    ),
+                    initialData: _connectedIps(),
+                    builder: (context, snapshot) {
+                      final ips = snapshot.data ?? const <String>[];
+                      final connected = ips.isNotEmpty;
+                      return Row(
+                        children: [
+                          Container(
+                            width: 8.w,
+                            height: 8.w,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: connected
+                                  ? AppColors.success
+                                  : AppColors.chipInactiveText,
+                            ),
+                          ),
+                          SizedBox(width: 6.w),
+                          Expanded(
+                            child: Text(
+                              connected
+                                  ? '${ips.length} connected — ${ips.join(', ')}'
+                                  : 'Not connected',
+                              overflow: TextOverflow.ellipsis,
+                              style: getTextStyle(
+                                fontSize: 12,
+                                color: connected
+                                    ? AppColors.success
+                                    : AppColors.chipInactiveText,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
           ],

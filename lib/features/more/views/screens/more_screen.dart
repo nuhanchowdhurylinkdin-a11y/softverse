@@ -6,6 +6,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../../core/common/styles/global_text_style.dart';
 import '../../../../core/common/widgets/app_nav_drawer.dart';
 import '../../../../core/common/widgets/primary_button.dart';
+import '../../../../core/services/feature_settings.dart';
 import '../../../../core/utils/constants/colors.dart';
 import '../../controller/more_controller.dart';
 import '../../widgets/more_menu_tile.dart';
@@ -69,12 +70,20 @@ class MoreScreen extends GetView<MoreController> {
                 onSwitchPos: controller.switchPos,
               ),
               SizedBox(height: 16.h),
-              MoreMenuTile(
-                icon: Iconsax.clock,
-                label: 'Shift',
-                onTap: controller.openShift,
+              Obx(
+                () => FeatureSettings.isEnabled('shifts')
+                    ? MoreMenuTile(
+                        icon: Iconsax.clock,
+                        label: 'Shift',
+                        onTap: controller.openShift,
+                      )
+                    : const SizedBox.shrink(),
               ),
-              SizedBox(height: 12.h),
+              Obx(
+                () => FeatureSettings.isEnabled('shifts')
+                    ? SizedBox(height: 12.h)
+                    : const SizedBox.shrink(),
+              ),
               MoreMenuTile(
                 icon: Iconsax.task_square,
                 label: 'Item',
@@ -82,7 +91,7 @@ class MoreScreen extends GetView<MoreController> {
               ),
               SizedBox(height: 12.h),
               Obx(
-                () => controller.tableOptionsEnabled.value
+                () => FeatureSettings.isEnabled('table_options')
                     ? MoreMenuTile(
                         icon: Icons.table_restaurant,
                         label: 'Tables',
@@ -91,7 +100,7 @@ class MoreScreen extends GetView<MoreController> {
                     : const SizedBox.shrink(),
               ),
               Obx(
-                () => controller.tableOptionsEnabled.value
+                () => FeatureSettings.isEnabled('table_options')
                     ? SizedBox(height: 12.h)
                     : const SizedBox.shrink(),
               ),

@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../../../core/services/feature_settings.dart';
 import '../../../core/services/network_caller.dart';
 import '../../../core/services/offline_database_service.dart';
 import '../../../core/utils/constants/api_constants.dart';
@@ -13,7 +14,6 @@ class MoreController extends GetxController {
   final profileRole = 'Softvence';
   final posLabel = 'POS-1';
   final profileImageUrl = 'https://randomuser.me/api/portraits/men/32.jpg';
-  final tableOptionsEnabled = false.obs;
 
   @override
   void onInit() {
@@ -21,20 +21,16 @@ class MoreController extends GetxController {
     loadFeatureVisibility();
   }
 
+  // Refreshes the cache; the More screen reads FeatureSettings.isEnabled(...)
+  // directly inside Obx(), so it updates the moment the cache does.
   Future<void> loadFeatureVisibility() async {
-    final cached = OfflineDatabaseService.readCache<Map<String, dynamic>>(
-      'feature_settings',
-    );
-    final cachedValue = _tableOptionsFromSettings(cached);
-    if (cachedValue != null) tableOptionsEnabled.value = cachedValue;
-
     final response = await _networkCaller.getRequest(
       ApiConstants.featureSettings,
     );
     if (!response.isSuccess || response.responseData is! Map) return;
     final data = Map<String, dynamic>.from(response.responseData as Map);
     await OfflineDatabaseService.saveCache('feature_settings', data);
-    tableOptionsEnabled.value = _tableOptionsFromSettings(data) ?? false;
+    FeatureSettings.notifyChanged();
   }
 
   void openShift() => Get.toNamed(AppRoute.getShiftManagementScreen());
@@ -59,7 +55,7 @@ class MoreController extends GetxController {
 
   void openTaxesSettings() => Get.toNamed(AppRoute.getTaxListScreen());
 
-  void openBackOffice() {}
+  void openBackOffice() => Get.toNamed(AppRoute.getFeatureSettingsScreen());
 
   void openAppsIntegration() {}
 
@@ -70,16 +66,4 @@ class MoreController extends GetxController {
   void openNotifications() {}
 
   void logout() => Get.find<AuthController>().logout();
-
-  bool? _tableOptionsFromSettings(Map<String, dynamic>? data) {
-    final rawFeatures = data?['features'];
-    if (rawFeatures is! List) return null;
-    for (final raw in rawFeatures) {
-      if (raw is! Map) continue;
-      if (raw['key']?.toString() == 'table_options') {
-        return raw['enabled'] == true;
-      }
-    }
-    return null;
-  }
 }
