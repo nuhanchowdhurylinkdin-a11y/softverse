@@ -254,10 +254,15 @@ class CheckoutScreen extends GetView<CheckoutController> {
                             ),
                           ),
                           SizedBox(height: 12.h),
-                          PaymentMethodGrid(
-                            methods: controller.paymentMethods,
-                            onSelected: controller.selectPaymentMethod,
-                          ),
+                          Obx(() {
+                            final methods = controller.paymentMethods.toList();
+                            return PaymentMethodGrid(
+                              methods: methods,
+                              selectedKey:
+                                  controller.selectedPaymentMethod.value,
+                              onSelected: controller.selectPaymentMethod,
+                            );
+                          }),
                           SizedBox(height: 16.h),
                         ],
                       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../routes/app_routes.dart';
+import '../../main_nav/controller/main_nav_controller.dart';
 import 'shift_controller.dart';
 
 class OpenShiftController extends GetxController {
@@ -14,7 +15,11 @@ class OpenShiftController extends GetxController {
         ) ??
         0;
     final opened = await Get.find<ShiftController>().openShift(amount);
-    if (opened) Get.offAllNamed(AppRoute.getHomeScreen());
+    if (!opened) return;
+    if (Get.isRegistered<MainNavController>()) {
+      Get.find<MainNavController>().changeTab(4);
+    }
+    Get.until((route) => route.settings.name == AppRoute.getHomeScreen());
   }
 
   void openShiftHistory() => Get.toNamed(AppRoute.getShiftListScreen());

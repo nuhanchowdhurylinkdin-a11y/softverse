@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../core/services/network_caller.dart';
+import '../../../core/services/kds_order_sender.dart';
 import '../../../core/services/storage_service.dart';
 import '../../../core/utils/constants/api_constants.dart';
 import '../../../core/utils/constants/product_images.dart';
@@ -19,6 +20,7 @@ import '../../transaction/controller/transaction_controller.dart';
 
 class InvoiceController extends GetxController {
   final NetworkCaller _networkCaller = NetworkCaller();
+  final KdsOrderSender _kdsOrderSender = KdsOrderSender();
   final checkoutOrderId = RxnString();
   final invoiceNumber = 'INV 00012'.obs;
   final refundInvoiceNumber = 'RINV 00001';
@@ -241,6 +243,11 @@ class InvoiceController extends GetxController {
 
     tableId.value = null;
     tableName.value = null;
+    await _kdsOrderSender.completeAny([
+      checkoutOrderId.value,
+      orderId.value,
+      id,
+    ]);
     if (Get.isRegistered<HomeController>()) {
       await Get.find<HomeController>().fetchTables();
     }
