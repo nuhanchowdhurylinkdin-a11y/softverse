@@ -45,7 +45,6 @@ app.*.map.json
 /android/app/release
 
 # Environment
-.env
 
 
 # Python Virtual Environments
@@ -53,3 +52,5 @@ venv/
 .venv/
 env/
 ENV/
+config.bat
+node_modules

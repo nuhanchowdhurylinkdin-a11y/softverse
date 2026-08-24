@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 import '../../../core/utils/constants/colors.dart';
+import '../../../core/services/kds_order_sender.dart';
 import '../../../core/services/network_caller.dart';
 import '../../../core/services/offline_database_service.dart';
 import '../../../core/services/sync_service.dart';
@@ -25,6 +26,7 @@ enum PriceAdjustmentMode { modifier, discount }
 
 class CheckoutController extends GetxController {
   final NetworkCaller _networkCaller = NetworkCaller();
+  final KdsOrderSender _kdsOrderSender = KdsOrderSender();
   final activeOrderId = RxnString();
   final activeOrderNumber = ''.obs;
   final selectedCustomerId = ''.obs;
@@ -48,26 +50,30 @@ class CheckoutController extends GetxController {
       ? 'POS-1 Order-1'
       : activeOrderNumber.value;
 
-  final paymentMethods = const [
+  static const _defaultPaymentMethods = [
     PaymentMethod(
+      key: 'cash',
       label: 'Cash',
       icon: Iconsax.money,
       gradientStart: AppColors.completeBadgeStart,
       gradientEnd: AppColors.completeBadgeEnd,
     ),
     PaymentMethod(
+      key: 'card',
       label: 'Card',
       icon: Iconsax.card,
       gradientStart: AppColors.ongoingBadgeStart,
       gradientEnd: AppColors.ongoingBadgeEnd,
     ),
     PaymentMethod(
+      key: 'due',
       label: 'Due',
       icon: Iconsax.dollar_circle,
       gradientStart: AppColors.dueStart,
       gradientEnd: AppColors.dueEnd,
     ),
     PaymentMethod(
+      key: 'installment',
       label: 'Installment',
       icon: Iconsax.truck,
       gradientStart: AppColors.installmentStart,
@@ -75,9 +81,12 @@ class CheckoutController extends GetxController {
     ),
   ];
 
+  final paymentMethods = <PaymentMethod>[..._defaultPaymentMethods].obs;
+
   @override
   void onInit() {
     super.onInit();
+    fetchPaymentTypes();
     fetchOrders();
     loadCustomers();
     if (Get.isRegistered<TaxController>()) {
@@ -243,8 +252,8 @@ class CheckoutController extends GetxController {
   Future<void> selectPaymentMethod(PaymentMethod method) async {
     if (await _mustSelectTableBeforePayment()) return;
 
-    selectedPaymentMethod.value = method.label.toLowerCase();
-    if (method.label != 'Due') {
+    selectedPaymentMethod.value = method.key;
+    if (method.key != 'due') {
       await _submitCheckout();
       return;
     }
@@ -291,6 +300,24 @@ class CheckoutController extends GetxController {
     );
   }
 
+  Future<void> fetchPaymentTypes() async {
+    final response = await _networkCaller.getRequest(ApiConstants.paymentTypes);
+    if (!response.isSuccess || response.responseData is! List) return;
+
+    final methods = List<dynamic>.from(response.responseData as List)
+        .whereType<Map>()
+        .where((entry) => entry['available'] == true)
+        .map(_paymentMethodFromJson)
+        .whereType<PaymentMethod>()
+        .toList();
+    if (methods.isNotEmpty) {
+      paymentMethods.assignAll(methods);
+      if (!methods.any((method) => method.key == selectedPaymentMethod.value)) {
+        selectedPaymentMethod.value = methods.first.key;
+      }
+    }
+  }
+
   Future<void> fetchPendingOrders() async {
     isLoadingPendingOrders.value = true;
     final response = await _networkCaller.getRequest(
@@ -334,6 +361,20 @@ class CheckoutController extends GetxController {
     return _tableOptionsFromSettings(cached) ?? false;
   }
 
+  bool _isKitchenPrintersEnabled() {
+    final cached = OfflineDatabaseService.readCache<Map<String, dynamic>>(
+      'feature_settings',
+    );
+    final rawFeatures = cached?['features'];
+    if (rawFeatures is! List) return false;
+    for (final raw in rawFeatures) {
+      if (raw is Map && raw['key']?.toString() == 'kitchen_printers') {
+        return raw['enabled'] == true;
+      }
+    }
+    return false;
+  }
+
   bool? _tableOptionsFromSettings(Map<String, dynamic>? data) {
     final rawFeatures = data?['features'];
     if (rawFeatures is! List) return null;
@@ -359,6 +400,44 @@ class CheckoutController extends GetxController {
     );
     final rawTables = cachedTables?['tables'];
     return rawTables is List ? rawTables.length : 0;
+  }
+
+  Future<void> _sendToKdsIfEnabled({
+    required Map<String, dynamic> order,
+    required bool saveOrder,
+    required bool sendToTable,
+    String? tableId,
+    String? tableName,
+  }) async {
+    if (!_isKitchenPrintersEnabled()) return;
+
+    try {
+      final sent = await _kdsOrderSender.send({
+        'id': order['id']?.toString() ?? activeOrderId.value ?? orderId,
+        'tableId': tableId,
+        'orderId':
+            order['orderNumber']?.toString() ??
+            (activeOrderNumber.value.isEmpty
+                ? orderId
+                : activeOrderNumber.value),
+        'customerName': customerName.value,
+        'tableName': tableName ?? order['tableName']?.toString() ?? 'No Table',
+        'status': sendToTable
+            ? 'ongoing'
+            : saveOrder
+            ? 'saved'
+            : 'paid',
+        'createdAt': DateTime.now().toIso8601String(),
+        'items': cartItems
+            .map((item) => {'name': item.name, 'quantity': item.quantity})
+            .toList(),
+      });
+      if (!sent) {
+        AppHelperFunctions.showWarningSnackBar('KDS is not configured.');
+      }
+    } catch (_) {
+      AppHelperFunctions.showWarningSnackBar('KDS not reachable on WiFi.');
+    }
   }
 
   Future<void> _submitCheckout({
@@ -413,6 +492,13 @@ class CheckoutController extends GetxController {
       if (Get.isRegistered<TransactionController>()) {
         await Get.find<TransactionController>().fetchTransactions();
       }
+      await _sendToKdsIfEnabled(
+        order: order,
+        saveOrder: saveOrder,
+        sendToTable: sendToTable,
+        tableId: tableId,
+        tableName: tableName,
+      );
       if (!saveOrder && !sendToTable) {
         _openInvoice(order);
         clearOrder();
@@ -502,6 +588,22 @@ class CheckoutController extends GetxController {
   }
 
   double _money(double value) => double.parse(value.toStringAsFixed(2));
+
+  PaymentMethod? _paymentMethodFromJson(Map<dynamic, dynamic> json) {
+    final key = json['method']?.toString();
+    final label = json['label']?.toString();
+    final fallback = _defaultPaymentMethods.firstWhereOrNull(
+      (method) => method.key == key,
+    );
+    if (key == null || label == null || fallback == null) return null;
+    return PaymentMethod(
+      key: key,
+      label: label,
+      icon: fallback.icon,
+      gradientStart: fallback.gradientStart,
+      gradientEnd: fallback.gradientEnd,
+    );
+  }
 
   Future<bool> loadOrderForCheckout(String orderId) async {
     final response = await _networkCaller.getRequest(

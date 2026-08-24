@@ -23,6 +23,7 @@ class ApiConstants {
 
   static String get featureSettings => '$baseUrl/feature-settings';
   static String toggleFeature(String key) => '$baseUrl/feature-settings/$key';
+  static String get paymentTypes => '$baseUrl/payment-types';
 
   static String get categories => '$baseUrl/categories';
   static String get customers => '$baseUrl/customers';
