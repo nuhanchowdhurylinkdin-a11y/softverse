@@ -31,7 +31,7 @@ class NetworkCaller {
             headers: _buildHeaders(token: token ?? StorageService.accessToken),
           )
           .timeout(Duration(seconds: timeoutDuration));
-      return _handleResponseWithRefresh(
+      return await _handleResponseWithRefresh(
         response,
         retry: () => getRequest(url, token: token),
       );
@@ -54,7 +54,7 @@ class NetworkCaller {
             body: jsonEncode(body ?? <String, dynamic>{}),
           )
           .timeout(Duration(seconds: timeoutDuration));
-      return _handleResponseWithRefresh(
+      return await _handleResponseWithRefresh(
         response,
         retry: () => postRequest(url, body: body, token: token),
       );
@@ -77,7 +77,7 @@ class NetworkCaller {
             body: jsonEncode(body ?? <String, dynamic>{}),
           )
           .timeout(Duration(seconds: timeoutDuration));
-      return _handleResponseWithRefresh(
+      return await _handleResponseWithRefresh(
         response,
         retry: () => patchRequest(url, body: body, token: token),
       );
@@ -95,7 +95,7 @@ class NetworkCaller {
             headers: _buildHeaders(token: token ?? StorageService.accessToken),
           )
           .timeout(Duration(seconds: timeoutDuration));
-      return _handleResponseWithRefresh(
+      return await _handleResponseWithRefresh(
         response,
         retry: () => deleteRequest(url, token: token),
       );
@@ -136,7 +136,7 @@ class NetworkCaller {
         Duration(seconds: timeoutDuration),
       );
       final response = await http.Response.fromStream(streamed);
-      return _handleResponseWithRefresh(
+      return await _handleResponseWithRefresh(
         response,
         retry: () => multipartRequest(
           url,
