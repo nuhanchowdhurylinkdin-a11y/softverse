@@ -10,12 +10,16 @@ class CheckoutActionButtons extends StatelessWidget {
   final VoidCallback onSendToTable;
   final VoidCallback onSaveOrder;
   final VoidCallback onClearOrder;
+  final bool showSaveOrder;
+  final bool showSendToTable;
 
   const CheckoutActionButtons({
     super.key,
     required this.onSendToTable,
     required this.onSaveOrder,
     required this.onClearOrder,
+    this.showSaveOrder = true,
+    this.showSendToTable = true,
   });
 
   @override
@@ -23,43 +27,47 @@ class CheckoutActionButtons extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        GestureDetector(
-          onTap: onSendToTable,
-          child: Container(
-            height: 48.h,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12.r),
-              gradient: const LinearGradient(
-                colors: [AppColors.gradientStart, AppColors.gradientEnd],
+        if (showSendToTable) ...[
+          GestureDetector(
+            onTap: onSendToTable,
+            child: Container(
+              height: 48.h,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12.r),
+                gradient: const LinearGradient(
+                  colors: [AppColors.gradientStart, AppColors.gradientEnd],
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Send to Table',
+                    style: getTextStyle(
+                      fontSize: 16.4,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Icon(Iconsax.arrow_down, size: 22.sp, color: Colors.white),
+                ],
               ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Send to Table',
-                  style: getTextStyle(
-                    fontSize: 16.4,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
-                  ),
-                ),
-                Icon(Iconsax.arrow_down, size: 22.sp, color: Colors.white),
-              ],
-            ),
           ),
-        ),
-        SizedBox(height: 15.h),
-        PrimaryButton(
-          label: 'Save Order',
-          onPressed: onSaveOrder,
-          backgroundColor: Colors.white,
-          textColor: AppColors.onboardingBackground,
-          borderColor: AppColors.onboardingBackground,
-          height: 48,
-          fontSize: 16.4,
-        ),
+        ],
+        if (showSaveOrder) ...[
+          SizedBox(height: 15.h),
+          PrimaryButton(
+            label: 'Save Order',
+            onPressed: onSaveOrder,
+            backgroundColor: Colors.white,
+            textColor: AppColors.onboardingBackground,
+            borderColor: AppColors.onboardingBackground,
+            height: 48,
+            fontSize: 16.4,
+          ),
+        ],
         SizedBox(height: 15.h),
         PrimaryButton(
           label: 'Clear Order',

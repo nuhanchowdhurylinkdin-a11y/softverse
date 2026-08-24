@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
+import '../../../core/services/feature_settings.dart';
 import '../../../core/services/network_caller.dart';
 import '../../../core/services/offline_database_service.dart';
 import '../../../core/services/storage_service.dart';
@@ -9,6 +10,7 @@ import '../../../core/services/sync_service.dart';
 import '../../../core/utils/constants/api_constants.dart';
 import '../../../core/utils/helpers/app_helper.dart';
 import '../../../routes/app_routes.dart';
+import '../../main_nav/controller/main_nav_controller.dart';
 import '../models/feature_toggle_item.dart';
 
 class WalkthroughController extends GetxController {
@@ -95,8 +97,73 @@ class WalkthroughController extends GetxController {
     loadFeatureSettings();
   }
 
-  void toggleFeature(int index) =>
-      featureToggles[index].value = !featureToggles[index].value;
+  /// Persists immediately via PATCH /feature-settings/{feature} — Back
+  /// Office is reachable any time now, so a toggle should take effect (and
+  /// survive a restart) on its own, not wait for the batch Save button.
+  Future<void> toggleFeature(int index) async {
+    final newValue = !featureToggles[index].value;
+    featureToggles[index].value = newValue;
+
+    final online = Get.isRegistered<SyncService>()
+        ? Get.find<SyncService>().isOnline.value
+        : true;
+    if (!online) {
+      // Every FeatureSettings.isEnabled(...) check elsewhere in the app
+      // reads this cache, not featureToggles — without writing it here too,
+      // the toggle looks flipped on this screen but has no effect anywhere
+      // else until the next successful online fetch.
+      await _cacheCurrentToggleState();
+      await OfflineDatabaseService.enqueue(
+        type: OfflineActionType.updateFeatureSettings,
+        payload: {_fieldForFeature(features[index].key): newValue},
+      );
+      AppHelperFunctions.showWarningSnackBar(
+        'Saved offline. It will sync when internet is back.',
+      );
+      return;
+    }
+
+    final response = await _networkCaller.patchRequest(
+      ApiConstants.toggleFeature(features[index].key),
+      body: {'enabled': newValue},
+    );
+
+    if (!response.isSuccess) {
+      featureToggles[index].value = !newValue;
+      AppHelperFunctions.showErrorSnackBar('Could not update this feature.');
+      return;
+    }
+
+    if (response.responseData is Map) {
+      final data = Map<String, dynamic>.from(response.responseData as Map);
+      await OfflineDatabaseService.saveCache('feature_settings', data);
+      _applySettings(data);
+    } else {
+      // Unexpected response shape — fall back to caching the toggle we know
+      // succeeded, so the rest of the app doesn't silently keep reading the
+      // pre-toggle value.
+      await _cacheCurrentToggleState();
+    }
+    FeatureSettings.notifyChanged();
+  }
+
+  Future<void> _cacheCurrentToggleState() async {
+    await OfflineDatabaseService.saveCache('feature_settings', {
+      'features': features
+          .asMap()
+          .entries
+          .map(
+            (entry) => {
+              'key': entry.value.key,
+              'label': entry.value.title,
+              'description': entry.value.subtitle,
+              'enabled': featureToggles[entry.key].value,
+            },
+          )
+          .toList(),
+    });
+    FeatureSettings.notifyChanged();
+  }
 
   void onPageChanged(int index) => currentPage.value = index;
 
@@ -130,6 +197,7 @@ class WalkthroughController extends GetxController {
     if (!response.isSuccess || response.responseData is! Map) return;
     final data = Map<String, dynamic>.from(response.responseData as Map);
     await OfflineDatabaseService.saveCache('feature_settings', data);
+    FeatureSettings.notifyChanged();
     _applySettings(data);
   }
 
@@ -152,20 +220,7 @@ class WalkthroughController extends GetxController {
         response.responseData,
       );
     } else {
-      await OfflineDatabaseService.saveCache('feature_settings', {
-        'features': features
-            .asMap()
-            .entries
-            .map(
-              (entry) => {
-                'key': entry.value.key,
-                'label': entry.value.title,
-                'description': entry.value.subtitle,
-                'enabled': featureToggles[entry.key].value,
-              },
-            )
-            .toList(),
-      });
+      await _cacheCurrentToggleState();
       await OfflineDatabaseService.enqueue(
         type: OfflineActionType.updateFeatureSettings,
         payload: payload,
@@ -175,13 +230,24 @@ class WalkthroughController extends GetxController {
       );
     }
 
+    FeatureSettings.notifyChanged();
     isSavingFeatures.value = false;
     await StorageService.setFeatureSettingsComplete(true);
-    Get.offAllNamed(AppRoute.getHomeScreen());
+    _goHome();
   }
 
   Future<void> skipFeatureSettings() async {
     await StorageService.setFeatureSettingsComplete(true);
+    _goHome();
+  }
+
+  // MainNavController.currentIndex is a persistent singleton, not reset by
+  // navigating to the /homeScreen route — without this, closing this screen
+  // from anywhere but the Home tab leaves you on whatever tab you came from.
+  void _goHome() {
+    if (Get.isRegistered<MainNavController>()) {
+      Get.find<MainNavController>().changeTab(0);
+    }
     Get.offAllNamed(AppRoute.getHomeScreen());
   }
 

@@ -239,10 +239,14 @@ class CheckoutScreen extends GetView<CheckoutController> {
                             ),
                           ),
                           SizedBox(height: 22.h),
-                          CheckoutActionButtons(
-                            onSendToTable: controller.sendToTable,
-                            onSaveOrder: controller.saveOrder,
-                            onClearOrder: controller.clearOrder,
+                          Obx(
+                            () => CheckoutActionButtons(
+                              onSendToTable: controller.sendToTable,
+                              onSaveOrder: controller.saveOrder,
+                              onClearOrder: controller.clearOrder,
+                              showSaveOrder: controller.isOpenOrderEnabled,
+                              showSendToTable: controller.isTableOptionsEnabled,
+                            ),
                           ),
                           SizedBox(height: 22.h),
                           Text(
@@ -255,7 +259,7 @@ class CheckoutScreen extends GetView<CheckoutController> {
                           ),
                           SizedBox(height: 12.h),
                           Obx(() {
-                            final methods = controller.paymentMethods.toList();
+                            final methods = controller.visiblePaymentMethods;
                             return PaymentMethodGrid(
                               methods: methods,
                               selectedKey:

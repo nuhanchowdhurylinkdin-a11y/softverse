@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../../../core/services/feature_settings.dart';
 import '../../../core/services/network_caller.dart';
 import '../../../core/services/offline_database_service.dart';
 import '../../../core/utils/constants/api_constants.dart';
@@ -93,7 +94,8 @@ class HomeController extends GetxController {
       Get.find<CheckoutController>().openPendingOrders();
 
   void addToCart(Product product) {
-    if (product.isOutOfStock) {
+    if (product.isOutOfStock &&
+        FeatureSettings.isEnabled('negative_stock_alerts')) {
       AppHelperFunctions.showWarningSnackBar(
         '${product.name} is out of stock.',
       );

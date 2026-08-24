@@ -6,6 +6,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../../core/common/styles/global_text_style.dart';
 import '../../../../core/common/widgets/app_nav_drawer.dart';
 import '../../../../core/common/widgets/floating_icon_button.dart';
+import '../../../../core/services/feature_settings.dart';
 import '../../../../core/utils/constants/colors.dart';
 import '../../../general/controller/general_controller.dart';
 import '../../controller/home_controller.dart';
@@ -52,9 +53,13 @@ class HomeScreen extends GetView<HomeController> {
           ),
         ),
         actions: [
-          IconButton(
-            onPressed: controller.openPendingOrders,
-            icon: Icon(Iconsax.clock, color: Colors.white, size: 26.sp),
+          Obx(
+            () => FeatureSettings.isEnabled('open_order')
+                ? IconButton(
+                    onPressed: controller.openPendingOrders,
+                    icon: Icon(Iconsax.clock, color: Colors.white, size: 26.sp),
+                  )
+                : const SizedBox.shrink(),
           ),
           Icon(Iconsax.notification, color: Colors.white, size: 26.sp),
           SizedBox(width: 16.w),
@@ -70,16 +75,20 @@ class HomeScreen extends GetView<HomeController> {
                 Padding(
                   padding: EdgeInsets.all(16.w),
                   child: Obx(
-                    () => OrderTabSelector(
-                      isOrderSelected: controller.isOrderTabSelected.value,
-                      onOrderTap: controller.selectOrderTab,
-                      onTableTap: controller.selectTableTab,
-                    ),
+                    () => FeatureSettings.isEnabled('table_options')
+                        ? OrderTabSelector(
+                            isOrderSelected: controller.isOrderTabSelected.value,
+                            onOrderTap: controller.selectOrderTab,
+                            onTableTap: controller.selectTableTab,
+                          )
+                        : const SizedBox.shrink(),
                   ),
                 ),
                 Expanded(
                   child: Obx(
-                    () => controller.isOrderTabSelected.value
+                    () =>
+                        controller.isOrderTabSelected.value ||
+                            !FeatureSettings.isEnabled('table_options')
                         ? _OrderTabBody(controller: controller)
                         : _TableTabBody(controller: controller),
                   ),

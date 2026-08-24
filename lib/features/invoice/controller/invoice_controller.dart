@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../core/services/feature_settings.dart';
 import '../../../core/services/network_caller.dart';
 import '../../../core/services/kds_order_sender.dart';
 import '../../../core/services/storage_service.dart';
@@ -243,11 +244,13 @@ class InvoiceController extends GetxController {
 
     tableId.value = null;
     tableName.value = null;
-    await _kdsOrderSender.completeAny([
-      checkoutOrderId.value,
-      orderId.value,
-      id,
-    ]);
+    if (FeatureSettings.isEnabled('kitchen_printers')) {
+      await _kdsOrderSender.completeAny([
+        checkoutOrderId.value,
+        orderId.value,
+        id,
+      ]);
+    }
     if (Get.isRegistered<HomeController>()) {
       await Get.find<HomeController>().fetchTables();
     }

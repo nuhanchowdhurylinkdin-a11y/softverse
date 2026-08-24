@@ -6,6 +6,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../../core/common/styles/global_text_style.dart';
 import '../../../../core/common/widgets/app_text_field.dart';
 import '../../../../core/common/widgets/primary_button.dart';
+import '../../../../core/services/feature_settings.dart';
 import '../../../../core/utils/constants/colors.dart';
 import '../../../inventory/widgets/date_field_row.dart';
 import '../../../inventory/widgets/toggle_field_row.dart';
@@ -216,43 +217,12 @@ class CreateItemScreen extends GetView<CreateItemController> {
                       )
                     : const SizedBox.shrink(),
               ),
-              SizedBox(height: 24.h),
-              Text(
-                'Expire Date',
-                style: getTextStyle(
-                  fontSize: 16.4,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.onboardingBackground,
-                ),
-              ),
-              SizedBox(height: 8.h),
               Obx(
-                () => ToggleFieldRow(
-                  label: 'Track Date',
-                  value: controller.trackDate.value,
-                  onChanged: (_) => controller.toggleTrackDate(),
-                  boxed: true,
-                ),
-              ),
-              Obx(
-                () => controller.trackDate.value
+                () =>
+                    FeatureSettings.isEnabled('product_expiration_information')
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          SizedBox(height: 24.h),
-                          Text(
-                            'Manufacturing Date',
-                            style: getTextStyle(
-                              fontSize: 16.4,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.onboardingBackground,
-                            ),
-                          ),
-                          SizedBox(height: 8.h),
-                          DateFieldRow(
-                            value: controller.manufacturingDate.value,
-                            onTap: controller.pickManufacturingDate,
-                          ),
                           SizedBox(height: 24.h),
                           Text(
                             'Expire Date',
@@ -263,17 +233,63 @@ class CreateItemScreen extends GetView<CreateItemController> {
                             ),
                           ),
                           SizedBox(height: 8.h),
-                          DateFieldRow(
-                            value: controller.expireDate.value,
-                            onTap: controller.pickExpireDate,
-                          ),
-                          SizedBox(height: 8.h),
-                          Text(
-                            'Quantity at which you will be notified about Expire Date',
-                            style: getTextStyle(
-                              fontSize: 12.8,
-                              color: AppColors.chipInactiveText,
+                          Obx(
+                            () => ToggleFieldRow(
+                              label: 'Track Date',
+                              value: controller.trackDate.value,
+                              onChanged: (_) => controller.toggleTrackDate(),
+                              boxed: true,
                             ),
+                          ),
+                          Obx(
+                            () => controller.trackDate.value
+                                ? Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      SizedBox(height: 24.h),
+                                      Text(
+                                        'Manufacturing Date',
+                                        style: getTextStyle(
+                                          fontSize: 16.4,
+                                          fontWeight: FontWeight.w500,
+                                          color:
+                                              AppColors.onboardingBackground,
+                                        ),
+                                      ),
+                                      SizedBox(height: 8.h),
+                                      DateFieldRow(
+                                        value:
+                                            controller.manufacturingDate.value,
+                                        onTap:
+                                            controller.pickManufacturingDate,
+                                      ),
+                                      SizedBox(height: 24.h),
+                                      Text(
+                                        'Expire Date',
+                                        style: getTextStyle(
+                                          fontSize: 16.4,
+                                          fontWeight: FontWeight.w500,
+                                          color:
+                                              AppColors.onboardingBackground,
+                                        ),
+                                      ),
+                                      SizedBox(height: 8.h),
+                                      DateFieldRow(
+                                        value: controller.expireDate.value,
+                                        onTap: controller.pickExpireDate,
+                                      ),
+                                      SizedBox(height: 8.h),
+                                      Text(
+                                        'Quantity at which you will be notified about Expire Date',
+                                        style: getTextStyle(
+                                          fontSize: 12.8,
+                                          color: AppColors.chipInactiveText,
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : const SizedBox.shrink(),
                           ),
                         ],
                       )
