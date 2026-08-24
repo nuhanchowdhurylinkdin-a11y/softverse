@@ -33,7 +33,7 @@ class ControllerBinder extends Bindings {
       () => OnboardingController(),
       fenix: true,
     );
-    Get.lazyPut<AuthController>(() => AuthController(), fenix: true);
+    Get.put<AuthController>(AuthController(), permanent: true);
     Get.lazyPut<WalkthroughController>(
       () => WalkthroughController(),
       fenix: true,

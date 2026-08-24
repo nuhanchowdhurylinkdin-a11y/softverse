@@ -32,6 +32,13 @@
 	<string>Softverse POS needs Bluetooth access to connect to receipt printers.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>Softverse POS needs Bluetooth access to connect to receipt printers.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Softverse POS sends kitchen orders to the KDS app on the same WiFi network.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoadsInLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>

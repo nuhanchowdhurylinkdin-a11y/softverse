@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 import '../../../../core/common/styles/global_text_style.dart';
+import '../../../../core/services/main_station_server.dart';
 import '../../../../core/utils/constants/colors.dart';
 import '../../../../routes/app_routes.dart';
 import '../../models/app_device_model.dart';
@@ -53,6 +54,40 @@ class AppsMenuScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              FutureBuilder<String>(
+                future: MainStationServer.instance.localUrl(),
+                builder: (context, snapshot) => Container(
+                  padding: EdgeInsets.all(14.w),
+                  margin: EdgeInsets.only(bottom: 12.h),
+                  decoration: BoxDecoration(
+                    color: AppColors.chipBackground,
+                    border: Border.all(color: AppColors.cardBorder),
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Main station IP',
+                        style: getTextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.onboardingBackground,
+                        ),
+                      ),
+                      SizedBox(height: 6.h),
+                      Text(
+                        snapshot.data ?? 'Starting...',
+                        style: getTextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.onboardingBackground,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               _AppTile(
                 type: AppDeviceType.cds,
                 onTap: () => Get.toNamed(

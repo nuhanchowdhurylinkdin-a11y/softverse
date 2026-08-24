@@ -82,6 +82,14 @@ class MainStationServer {
     return true;
   }
 
+  Future<List<String>> completeAllKdsOrders() async {
+    final ids = _kdsOrders.keys.toList();
+    if (ids.isEmpty) return ids;
+    _kdsOrders.clear();
+    _broadcast({'type': 'orders_completed', 'ids': ids});
+    return ids;
+  }
+
   Future<void> _handle(HttpRequest request) async {
     if (request.method == 'GET' &&
         request.uri.path == '/kds/orders/stream' &&
@@ -106,6 +114,12 @@ class MainStationServer {
         'success': true,
         'orders': _kdsOrders.values.toList(),
       });
+    }
+
+    if (request.method == 'POST' &&
+        request.uri.path == '/kds/orders/complete-all') {
+      final ids = await completeAllKdsOrders();
+      return _json(request, {'success': true, 'ids': ids});
     }
 
     request.response.statusCode = HttpStatus.notFound;
