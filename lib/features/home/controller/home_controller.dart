@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 
 import '../../../core/services/feature_settings.dart';
+import '../../../core/common/widgets/catalog_search_sheet.dart';
 import '../../../core/services/network_caller.dart';
 import '../../../core/services/offline_database_service.dart';
 import '../../../core/utils/constants/api_constants.dart';
@@ -115,9 +116,48 @@ class HomeController extends GetxController {
     );
   }
 
-  void openSearch() {}
+  Product? findProductByBarcode(String barcode) {
+    final normalized = barcode.trim().toLowerCase();
+    if (normalized.isEmpty) return null;
+    return products.firstWhereOrNull(
+      (product) => product.barcode.trim().toLowerCase() == normalized,
+    );
+  }
 
-  void openScan() {}
+  Future<void> openSearch() async {
+    final selected = await showCatalogSearchSheet(
+      title: 'Search products',
+      items: products
+          .map(
+            (product) => CatalogSearchEntry(
+              key: product.id ?? product.name,
+              name: product.name,
+              sku: product.sku,
+              barcode: product.barcode,
+              subtitle: product.stockLabel,
+            ),
+          )
+          .toList(),
+    );
+    if (selected == null) return;
+    final product = products.firstWhereOrNull(
+      (item) => (item.id ?? item.name) == selected.key,
+    );
+    if (product != null) addToCart(product);
+  }
+
+  Future<void> openScan() async {
+    final barcode = await Get.toNamed<String>(AppRoute.getScanBarcodeScreen());
+    if (barcode == null || barcode.trim().isEmpty) return;
+    final product = findProductByBarcode(barcode);
+    if (product == null) {
+      AppHelperFunctions.showWarningSnackBar(
+        'No item found for barcode $barcode.',
+      );
+      return;
+    }
+    addToCart(product);
+  }
 
   Future<void> forceSync({bool showMessage = true}) async {
     await Future.wait([fetchCategories(), fetchItems(), fetchTables()]);

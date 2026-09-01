@@ -3,6 +3,8 @@ class Product {
   final String? categoryId;
   final String? categoryName;
   final String name;
+  final String sku;
+  final String barcode;
   final double price;
   final bool trackStock;
   final int stockCount;
@@ -14,6 +16,8 @@ class Product {
     this.categoryId,
     this.categoryName,
     required this.name,
+    this.sku = '',
+    this.barcode = '',
     required this.price,
     required this.trackStock,
     required this.stockCount,
@@ -55,6 +59,8 @@ class Product {
       categoryId: json['categoryId']?.toString(),
       categoryName: json['categoryName']?.toString(),
       name: json['name']?.toString() ?? 'Unnamed Item',
+      sku: json['sku']?.toString() ?? '',
+      barcode: json['barcode']?.toString() ?? '',
       price: double.tryParse('${json['price'] ?? 0}') ?? 0,
       trackStock: trackStock,
       stockCount: _intFrom(json['inStock'] ?? inventory['inStock']),

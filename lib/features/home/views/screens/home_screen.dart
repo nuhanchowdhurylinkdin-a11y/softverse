@@ -77,7 +77,8 @@ class HomeScreen extends GetView<HomeController> {
                   child: Obx(
                     () => FeatureSettings.isEnabled('table_options')
                         ? OrderTabSelector(
-                            isOrderSelected: controller.isOrderTabSelected.value,
+                            isOrderSelected:
+                                controller.isOrderTabSelected.value,
                             onOrderTap: controller.selectOrderTab,
                             onTableTap: controller.selectTableTab,
                           )
@@ -104,6 +105,7 @@ class HomeScreen extends GetView<HomeController> {
                         children: [
                           FloatingIconButton(
                             icon: Iconsax.search_normal,
+                            tooltip: 'Search products',
                             backgroundColor: AppColors.chipBackground,
                             iconColor: AppColors.onboardingBackground,
                             onTap: controller.openSearch,
@@ -111,6 +113,7 @@ class HomeScreen extends GetView<HomeController> {
                           SizedBox(height: 15.h),
                           FloatingIconButton(
                             icon: Iconsax.scan,
+                            tooltip: 'Scan item barcode',
                             backgroundColor: AppColors.onboardingBackground,
                             iconColor: Colors.white,
                             onTap: controller.openScan,
