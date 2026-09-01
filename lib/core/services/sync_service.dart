@@ -9,6 +9,7 @@ import '../utils/constants/api_constants.dart';
 import '../../features/home/controller/home_controller.dart';
 import 'network_caller.dart';
 import 'offline_database_service.dart';
+import 'storage_service.dart';
 
 class SyncService extends GetxService {
   final NetworkCaller _networkCaller = NetworkCaller();
@@ -35,6 +36,10 @@ class SyncService extends GetxService {
     try {
       final actions = OfflineDatabaseService.pendingActions();
       for (final action in actions) {
+        if (action['businessId'] != StorageService.businessId ||
+            action['userId'] != StorageService.userId) {
+          continue;
+        }
         final id = action['id']?.toString();
         if (id == null) continue;
         final type = action['type']?.toString();
