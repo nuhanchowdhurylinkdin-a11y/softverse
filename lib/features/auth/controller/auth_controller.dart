@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/services/network_caller.dart';
+import '../../../core/services/session_lifecycle_service.dart';
 import '../../../core/services/storage_service.dart';
 import '../../../core/utils/constants/api_constants.dart';
 import '../../../core/utils/helpers/app_helper.dart';
@@ -249,8 +250,7 @@ class AuthController extends GetxController {
         body: {'refreshToken': refreshToken},
       );
     }
-    await StorageService.logoutUser();
-    Get.offAllNamed(AppRoute.getLoginScreen());
+    await SessionLifecycleService.endSession();
   }
 
   Future<void> _saveSession(dynamic raw) async {

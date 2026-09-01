@@ -16,6 +16,9 @@ class StorageService {
 
   static Future<void> init() async {
     _preferences = await SharedPreferences.getInstance();
+    // This legacy global flag could incorrectly complete setup for the next
+    // account on the device. New values are owner-scoped below.
+    await _preferences?.remove(_featureSettingsCompleteKey);
   }
 
   static bool hasToken() => _preferences?.getString(_accessTokenKey) != null;
@@ -29,8 +32,22 @@ class StorageService {
   static String? get businessId => _preferences?.getString(_businessIdKey);
   static bool get isOnboardingComplete =>
       _preferences?.getBool(_onboardingCompleteKey) ?? false;
-  static bool get isFeatureSettingsComplete =>
-      _preferences?.getBool(_featureSettingsCompleteKey) ?? false;
+  static bool get isFeatureSettingsComplete {
+    final key = _featureSettingsKey;
+    return key == null ? false : (_preferences?.getBool(key) ?? false);
+  }
+
+  static String? get _featureSettingsKey {
+    final currentBusinessId = businessId?.trim();
+    final currentUserId = userId?.trim();
+    if (currentBusinessId == null ||
+        currentBusinessId.isEmpty ||
+        currentUserId == null ||
+        currentUserId.isEmpty) {
+      return null;
+    }
+    return '${_featureSettingsCompleteKey}_${currentBusinessId}_$currentUserId';
+  }
 
   static Future<void> saveUserSession({
     required String id,
@@ -61,6 +78,10 @@ class StorageService {
   }
 
   static Future<void> logoutUser() async {
+    final featureSettingsKey = _featureSettingsKey;
+    if (featureSettingsKey != null) {
+      await _preferences?.remove(featureSettingsKey);
+    }
     await _preferences?.remove(_accessTokenKey);
     await _preferences?.remove(_refreshTokenKey);
     await _preferences?.remove(_idKey);
@@ -75,7 +96,9 @@ class StorageService {
   }
 
   static Future<void> setFeatureSettingsComplete(bool value) async {
-    await _preferences?.setBool(_featureSettingsCompleteKey, value);
+    final key = _featureSettingsKey;
+    if (key == null) return;
+    await _preferences?.setBool(key, value);
   }
 
   static String get themeMode =>

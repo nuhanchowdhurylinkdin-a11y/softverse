@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
@@ -9,6 +10,7 @@ import 'package:mime/mime.dart';
 import '../models/response_data.dart';
 import '../utils/constants/api_constants.dart';
 import '../services/storage_service.dart';
+import 'session_lifecycle_service.dart';
 
 class NetworkCaller {
   final int timeoutDuration = 40;
@@ -230,7 +232,7 @@ class NetworkCaller {
           .timeout(Duration(seconds: timeoutDuration));
       final parsed = _handleResponse(response);
       if (!parsed.isSuccess || parsed.responseData is! Map) {
-        await StorageService.logoutUser();
+        await SessionLifecycleService.endSession();
         return false;
       }
 
@@ -238,7 +240,7 @@ class NetworkCaller {
       final accessToken = data['accessToken']?.toString();
       final newRefreshToken = data['refreshToken']?.toString();
       if (accessToken == null || newRefreshToken == null) {
-        await StorageService.logoutUser();
+        await SessionLifecycleService.endSession();
         return false;
       }
       await StorageService.updateTokens(
