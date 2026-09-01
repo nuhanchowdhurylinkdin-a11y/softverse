@@ -115,6 +115,7 @@ class InventoryScreen extends GetView<InventoryController> {
                 children: [
                   FloatingIconButton(
                     icon: Iconsax.search_normal,
+                    tooltip: 'Search inventory',
                     backgroundColor: AppColors.chipBackground,
                     iconColor: AppColors.onboardingBackground,
                     onTap: controller.openSearch,
@@ -122,6 +123,7 @@ class InventoryScreen extends GetView<InventoryController> {
                   SizedBox(height: 15.h),
                   FloatingIconButton(
                     icon: Iconsax.scan,
+                    tooltip: 'Scan item barcode',
                     backgroundColor: AppColors.onboardingBackground,
                     iconColor: Colors.white,
                     onTap: controller.openScan,

@@ -6,6 +6,7 @@ class FloatingIconButton extends StatelessWidget {
   final Color backgroundColor;
   final Color iconColor;
   final VoidCallback onTap;
+  final String? tooltip;
 
   const FloatingIconButton({
     super.key,
@@ -13,11 +14,12 @@ class FloatingIconButton extends StatelessWidget {
     required this.backgroundColor,
     required this.iconColor,
     required this.onTap,
+    this.tooltip,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    final button = GestureDetector(
       onTap: onTap,
       child: Container(
         width: 51.w,
@@ -36,6 +38,12 @@ class FloatingIconButton extends StatelessWidget {
         ),
         child: Icon(icon, size: 22.sp, color: iconColor),
       ),
+    );
+    if (tooltip == null) return button;
+    return Semantics(
+      button: true,
+      label: tooltip,
+      child: Tooltip(message: tooltip!, child: button),
     );
   }
 }
