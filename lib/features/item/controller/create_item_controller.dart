@@ -15,16 +15,25 @@ import '../../../routes/app_routes.dart';
 import '../../inventory/models/modifier_group.dart';
 import '../../home/controller/home_controller.dart';
 import '../models/combo_pack_draft.dart';
+import '../data/category_repository.dart';
 
 enum SoldBy { pcs, weight }
 
 enum ItemRepresentation { colorAndShape, image }
 
 class CreateItemController extends GetxController {
-  final NetworkCaller _networkCaller = NetworkCaller();
+  final NetworkCaller _networkCaller;
+  final CategoryRepository _categoryRepository;
   final ImagePicker _imagePicker = ImagePicker();
 
+  CreateItemController({
+    NetworkCaller? networkCaller,
+    CategoryRepository? categoryRepository,
+  }) : _networkCaller = networkCaller ?? NetworkCaller(),
+       _categoryRepository = categoryRepository ?? HttpCategoryRepository();
+
   final nameController = TextEditingController();
+  final descriptionController = TextEditingController();
   final categoryController = TextEditingController();
   final priceController = TextEditingController();
   final costController = TextEditingController();
@@ -32,18 +41,26 @@ class CreateItemController extends GetxController {
   final barcodeController = TextEditingController();
   final inStockController = TextEditingController();
   final lowStockController = TextEditingController();
+  final expirationAlertQuantityController = TextEditingController();
+  final imageUrlController = TextEditingController();
 
   final soldBy = Rx<SoldBy?>(SoldBy.pcs);
   final categories = <Map<String, dynamic>>[].obs;
   final selectedCategoryId = RxnString();
 
   final trackStock = false.obs;
+  final stores = <StoreInventoryDraft>[].obs;
   final trackDate = false.obs;
   final manufacturingDate = '2025-02-01'.obs;
   final expireDate = '2028-02-01'.obs;
 
   final modifierEnabled = false.obs;
   final comboPacks = <ComboPackDraft>[].obs;
+
+  final compositeItem = false.obs;
+  final compositeComponents = <CompositeComponentDraft>[].obs;
+  final variantOptions = <VariantOptionDraft>[].obs;
+  final variants = <ItemVariantDraft>[].obs;
 
   final representation = ItemRepresentation.colorAndShape.obs;
   final selectedColorIndex = 0.obs;
@@ -55,6 +72,7 @@ class CreateItemController extends GetxController {
   void onInit() {
     super.onInit();
     fetchCategories();
+    fetchStores();
   }
 
   void selectSoldBy(SoldBy value) => soldBy.value = value;
@@ -64,6 +82,27 @@ class CreateItemController extends GetxController {
   void toggleTrackDate() => trackDate.value = !trackDate.value;
 
   void toggleModifier() => modifierEnabled.value = !modifierEnabled.value;
+
+  void toggleCompositeItem() => compositeItem.toggle();
+
+  void addCompositeComponent() =>
+      compositeComponents.add(CompositeComponentDraft());
+
+  void removeCompositeComponent(int index) {
+    compositeComponents.removeAt(index).dispose();
+  }
+
+  void addVariantOption() => variantOptions.add(VariantOptionDraft());
+
+  void removeVariantOption(int index) {
+    variantOptions.removeAt(index).dispose();
+  }
+
+  void addVariant() => variants.add(ItemVariantDraft());
+
+  void removeVariant(int index) {
+    variants.removeAt(index).dispose();
+  }
 
   void toggleComboPackSelection(int index) {
     comboPacks[index] = comboPacks[index].copyWith(
@@ -106,11 +145,31 @@ class CreateItemController extends GetxController {
       'categories',
     );
     if (cached != null) _applyCategories(cached);
-    final response = await _networkCaller.getRequest(ApiConstants.categories);
+    final response = await _categoryRepository.fetchCategories();
     if (!response.isSuccess || response.responseData is! List) return;
     final data = List<dynamic>.from(response.responseData as List);
     await OfflineDatabaseService.saveCache('categories', data);
     _applyCategories(data);
+  }
+
+  Future<void> fetchStores() async {
+    final response = await _networkCaller.getRequest(
+      ApiConstants.itemAdminFilters,
+    );
+    if (!response.isSuccess || response.responseData is! Map) return;
+    final rawStores = (response.responseData as Map)['stores'];
+    if (rawStores is! List) return;
+    for (final draft in stores) {
+      draft.dispose();
+    }
+    stores.assignAll(
+      rawStores.whereType<Map>().map(
+        (entry) => StoreInventoryDraft(
+          storeId: entry['id']?.toString() ?? '',
+          name: entry['name']?.toString() ?? 'Store',
+        ),
+      ),
+    );
   }
 
   void openCategoryPicker() {
@@ -171,7 +230,7 @@ class CreateItemController extends GetxController {
   }
 
   Future<void> save() async {
-    final payload = _payload();
+    final payload = buildPayload();
     if (payload == null) return;
 
     isSaving.value = true;
@@ -234,7 +293,7 @@ class CreateItemController extends GetxController {
     return _networkCaller.postRequest(ApiConstants.items, body: payload);
   }
 
-  Map<String, dynamic>? _payload() {
+  Map<String, dynamic>? buildPayload() {
     if (nameController.text.trim().isEmpty) {
       AppHelperFunctions.showErrorSnackBar('Item name is required.');
       return null;
@@ -244,13 +303,66 @@ class CreateItemController extends GetxController {
       return null;
     }
     if (representation.value == ItemRepresentation.image &&
-        selectedImage.value == null) {
-      AppHelperFunctions.showErrorSnackBar('Select an item image.');
+        selectedImage.value == null &&
+        imageUrlController.text.trim().isEmpty) {
+      AppHelperFunctions.showErrorSnackBar(
+        'Select an item image or provide an image URL.',
+      );
+      return null;
+    }
+    final inStock = _number(inStockController.text) ?? 0;
+    final lowStock = _number(lowStockController.text) ?? 0;
+    if (trackStock.value && lowStock > inStock) {
+      AppHelperFunctions.showErrorSnackBar(
+        'Low stock cannot be greater than in stock.',
+      );
+      return null;
+    }
+    for (final store in stores.where((entry) => entry.selected.value)) {
+      final storeInStock = _number(store.inStockController.text) ?? 0;
+      final storeLowStock = _number(store.lowStockController.text) ?? 0;
+      if (storeLowStock > storeInStock) {
+        AppHelperFunctions.showErrorSnackBar(
+          '${store.name}: low stock cannot be greater than in stock.',
+        );
+        return null;
+      }
+    }
+    if (trackDate.value &&
+        DateTime.parse(
+          manufacturingDate.value,
+        ).isAfter(DateTime.parse(expireDate.value))) {
+      AppHelperFunctions.showErrorSnackBar(
+        'Manufacturing date cannot be after expiration date.',
+      );
+      return null;
+    }
+    if (compositeItem.value &&
+        compositeComponents.any(
+          (entry) =>
+              entry.itemIdController.text.trim().isEmpty ||
+              (_number(entry.quantityController.text) ?? 0) <= 0,
+        )) {
+      AppHelperFunctions.showErrorSnackBar(
+        'Every composite component needs an item ID and quantity.',
+      );
+      return null;
+    }
+    if (variantOptions.any((entry) {
+      final payload = entry.toPayload();
+      return (payload['optionName'] as String).isEmpty ||
+          (payload['optionValue'] as List).isEmpty;
+    })) {
+      AppHelperFunctions.showErrorSnackBar(
+        'Every variant option needs a name and at least one value.',
+      );
       return null;
     }
 
     return {
       'name': nameController.text.trim(),
+      if (descriptionController.text.trim().isNotEmpty)
+        'description': descriptionController.text.trim(),
       if (selectedCategoryId.value != null)
         'categoryId': selectedCategoryId.value,
       if (categoryController.text.trim().isNotEmpty)
@@ -265,11 +377,21 @@ class CreateItemController extends GetxController {
       if (barcodeController.text.trim().isNotEmpty)
         'barcode': barcodeController.text.trim(),
       'trackStock': trackStock.value,
-      if (trackStock.value) 'inStock': _number(inStockController.text) ?? 0,
-      if (trackStock.value) 'lowStock': _number(lowStockController.text) ?? 0,
+      if (trackStock.value) 'inStock': inStock,
+      if (trackStock.value) 'lowStock': lowStock,
+      if (stores.any((store) => store.selected.value))
+        'stores': stores
+            .where((store) => store.selected.value)
+            .map((store) => store.toPayload(_number))
+            .toList(),
       'trackExpiration': trackDate.value,
       if (trackDate.value) 'manufacturingDate': manufacturingDate.value,
       if (trackDate.value) 'expirationDate': expireDate.value,
+      if (trackDate.value &&
+          _number(expirationAlertQuantityController.text) != null)
+        'expirationAlertQuantity': _number(
+          expirationAlertQuantityController.text,
+        ),
       'modifierEnabled': modifierEnabled.value,
       if (modifierEnabled.value)
         'modifierGroups': comboPacks
@@ -288,6 +410,20 @@ class CreateItemController extends GetxController {
               },
             )
             .toList(),
+      'compositeItem': compositeItem.value,
+      if (compositeItem.value)
+        'compositeComponents': compositeComponents
+            .map((component) => component.toPayload(_number))
+            .toList(),
+      if (variantOptions.isNotEmpty)
+        'variantOption': variantOptions
+            .map((option) => option.toPayload())
+            .where((option) => (option['optionName'] as String).isNotEmpty)
+            .toList(),
+      if (variants.isNotEmpty)
+        'variants': variants
+            .map((variant) => variant.toPayload(_number))
+            .toList(),
       'representation': representation.value == ItemRepresentation.image
           ? 'image'
           : 'color_and_shape',
@@ -295,6 +431,9 @@ class CreateItemController extends GetxController {
         'posColorIndex': selectedColorIndex.value,
       if (representation.value == ItemRepresentation.colorAndShape)
         'posShape': _shapeValue(selectedShapeIndex.value),
+      if (representation.value == ItemRepresentation.image &&
+          imageUrlController.text.trim().isNotEmpty)
+        'imageUrl': imageUrlController.text.trim(),
     };
   }
 
@@ -304,6 +443,7 @@ class CreateItemController extends GetxController {
       'name': payload['name'],
       'categoryId': payload['categoryId'],
       'categoryName': payload['categoryName'],
+      'description': payload['description'],
       'soldBy': payload['soldBy'],
       'price': payload['price'],
       'cost': payload['cost'],
@@ -313,12 +453,20 @@ class CreateItemController extends GetxController {
         'trackStock': payload['trackStock'] == true,
         'inStock': payload['inStock'],
         'lowStock': payload['lowStock'],
+        'stores': payload['stores'] ?? [],
       },
       'expiration': {
         'trackExpiration': payload['trackExpiration'] == true,
         'manufacturingDate': payload['manufacturingDate'],
         'expirationDate': payload['expirationDate'],
+        'alertQuantity': payload['expirationAlertQuantity'],
       },
+      'composite': {
+        'enabled': payload['compositeItem'] == true,
+        'components': payload['compositeComponents'] ?? [],
+      },
+      'variantOption': payload['variantOption'] ?? [],
+      'variants': payload['variants'] ?? [],
       'modifiers': {
         'enabled': payload['modifierEnabled'] == true,
         'groups': payload['modifierGroups'] ?? [],
@@ -373,6 +521,7 @@ class CreateItemController extends GetxController {
   @override
   void onClose() {
     nameController.dispose();
+    descriptionController.dispose();
     categoryController.dispose();
     priceController.dispose();
     costController.dispose();
@@ -380,7 +529,122 @@ class CreateItemController extends GetxController {
     barcodeController.dispose();
     inStockController.dispose();
     lowStockController.dispose();
+    expirationAlertQuantityController.dispose();
+    imageUrlController.dispose();
+    for (final store in stores) {
+      store.dispose();
+    }
+    for (final component in compositeComponents) {
+      component.dispose();
+    }
+    for (final option in variantOptions) {
+      option.dispose();
+    }
+    for (final variant in variants) {
+      variant.dispose();
+    }
     super.onClose();
+  }
+}
+
+class StoreInventoryDraft {
+  final String storeId;
+  final String name;
+  final selected = false.obs;
+  final inStockController = TextEditingController();
+  final lowStockController = TextEditingController();
+
+  StoreInventoryDraft({required this.storeId, required this.name});
+
+  Map<String, dynamic> toPayload(double? Function(String) number) => {
+    'storeId': storeId,
+    'inStock': number(inStockController.text) ?? 0,
+    'lowStock': number(lowStockController.text) ?? 0,
+  };
+
+  void dispose() {
+    inStockController.dispose();
+    lowStockController.dispose();
+  }
+}
+
+class CompositeComponentDraft {
+  final itemIdController = TextEditingController();
+  final nameController = TextEditingController();
+  final quantityController = TextEditingController(text: '1');
+  final costController = TextEditingController();
+
+  Map<String, dynamic> toPayload(double? Function(String) number) => {
+    'itemId': itemIdController.text.trim(),
+    if (nameController.text.trim().isNotEmpty)
+      'name': nameController.text.trim(),
+    'quantity': number(quantityController.text) ?? 1,
+    if (number(costController.text) != null)
+      'cost': number(costController.text),
+  };
+
+  void dispose() {
+    itemIdController.dispose();
+    nameController.dispose();
+    quantityController.dispose();
+    costController.dispose();
+  }
+}
+
+class VariantOptionDraft {
+  final optionNameController = TextEditingController();
+  final optionValuesController = TextEditingController();
+
+  Map<String, dynamic> toPayload() => {
+    'optionName': optionNameController.text.trim(),
+    'optionValue': optionValuesController.text
+        .split(',')
+        .map((value) => value.trim())
+        .where((value) => value.isNotEmpty)
+        .toList(),
+  };
+
+  void dispose() {
+    optionNameController.dispose();
+    optionValuesController.dispose();
+  }
+}
+
+class ItemVariantDraft {
+  final nameController = TextEditingController();
+  final sizeController = TextEditingController();
+  final colorController = TextEditingController();
+  final priceController = TextEditingController();
+  final costController = TextEditingController();
+  final skuController = TextEditingController();
+  final barcodeController = TextEditingController();
+  final availableForSale = true.obs;
+
+  Map<String, dynamic> toPayload(double? Function(String) number) => {
+    if (nameController.text.trim().isNotEmpty)
+      'name': nameController.text.trim(),
+    if (sizeController.text.trim().isNotEmpty)
+      'size': sizeController.text.trim(),
+    if (colorController.text.trim().isNotEmpty)
+      'color': colorController.text.trim(),
+    'availableForSale': availableForSale.value,
+    if (number(priceController.text) != null)
+      'price': number(priceController.text),
+    if (number(costController.text) != null)
+      'cost': number(costController.text),
+    if (skuController.text.trim().isNotEmpty) 'sku': skuController.text.trim(),
+    if (barcodeController.text.trim().isNotEmpty)
+      'barcode': barcodeController.text.trim(),
+  };
+
+  void dispose() {
+    nameController.dispose();
+    sizeController.dispose();
+    colorController.dispose();
+    priceController.dispose();
+    costController.dispose();
+    skuController.dispose();
+    barcodeController.dispose();
   }
 }
 
