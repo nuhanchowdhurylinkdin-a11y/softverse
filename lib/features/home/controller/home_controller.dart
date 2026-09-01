@@ -11,9 +11,15 @@ import '../../invoice/controller/invoice_controller.dart';
 import '../../main_nav/controller/main_nav_controller.dart';
 import '../models/product.dart';
 import '../models/table_order.dart';
+import '../data/home_repository.dart';
 
 class HomeController extends GetxController {
-  final NetworkCaller _networkCaller = NetworkCaller();
+  final NetworkCaller _networkCaller;
+  final HomeRepository _homeRepository;
+
+  HomeController({NetworkCaller? networkCaller, HomeRepository? homeRepository})
+    : _networkCaller = networkCaller ?? NetworkCaller(),
+      _homeRepository = homeRepository ?? HttpHomeRepository();
   final isOrderTabSelected = true.obs;
   final selectedCategoryIndex = 0.obs;
   final isLoadingCatalog = false.obs;
@@ -121,7 +127,7 @@ class HomeController extends GetxController {
   }
 
   Future<void> fetchCategories() async {
-    final response = await _networkCaller.getRequest(ApiConstants.categories);
+    final response = await _homeRepository.fetchCategories();
     if (!response.isSuccess || response.responseData is! List) return;
     final data = List<dynamic>.from(response.responseData as List);
     await OfflineDatabaseService.saveCache('categories', data);
@@ -130,7 +136,7 @@ class HomeController extends GetxController {
 
   Future<void> fetchItems() async {
     isLoadingCatalog.value = true;
-    final response = await _networkCaller.getRequest(ApiConstants.inventory);
+    final response = await _homeRepository.fetchItems();
     isLoadingCatalog.value = false;
     if (!response.isSuccess) return;
     final data = response.responseData is Map
@@ -144,7 +150,7 @@ class HomeController extends GetxController {
 
   Future<void> fetchTables() async {
     isLoadingTables.value = true;
-    final response = await _networkCaller.getRequest(ApiConstants.tables);
+    final response = await _homeRepository.fetchTables();
     isLoadingTables.value = false;
     if (!response.isSuccess || response.responseData is! Map) return;
     final data = Map<String, dynamic>.from(response.responseData as Map);
