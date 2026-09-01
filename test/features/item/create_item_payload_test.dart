@@ -132,4 +132,37 @@ void main() {
       },
     ]);
   });
+
+  test('untracked item omits all stock quantities and store inventory', () {
+    final controller = CreateItemController();
+    controller.nameController.text = 'Consulting';
+    controller.trackStock.value = false;
+    controller.inStockController.text = '10';
+    controller.lowStockController.text = '20';
+    final store = StoreInventoryDraft(storeId: 'store-id', name: 'Main');
+    store.selected.value = true;
+    store.inStockController.text = '10';
+    store.lowStockController.text = '20';
+    controller.stores.add(store);
+
+    final payload = controller.buildPayload()!;
+
+    expect(payload['trackStock'], isFalse);
+    expect(payload.containsKey('inStock'), isFalse);
+    expect(payload.containsKey('lowStock'), isFalse);
+    expect(payload.containsKey('stores'), isFalse);
+  });
+
+  test('low stock threshold may be higher than the current quantity', () {
+    final controller = CreateItemController();
+    controller.nameController.text = 'Nearly empty item';
+    controller.trackStock.value = true;
+    controller.inStockController.text = '2';
+    controller.lowStockController.text = '5';
+
+    final payload = controller.buildPayload()!;
+
+    expect(payload['inStock'], 2);
+    expect(payload['lowStock'], 5);
+  });
 }

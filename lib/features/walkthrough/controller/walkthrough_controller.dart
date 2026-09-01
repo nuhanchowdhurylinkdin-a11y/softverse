@@ -50,7 +50,8 @@ class WalkthroughController extends GetxController {
     const FeatureToggleItem(
       key: 'table_options',
       title: 'Table options',
-      subtitle: 'Mark orders as dine in, takeout, or for delivery',
+      subtitle:
+          'Require a table before payment. Keep this off for retail checkout',
       icon: Iconsax.reserve,
     ),
     const FeatureToggleItem(

@@ -130,13 +130,19 @@ class ItemDetailScreen extends GetView<ItemDetailController> {
               ),
               SizedBox(height: 10.h),
               LabeledRow(
-                label: 'In Stock',
-                value: controller.product.stockLabel,
+                label: 'Stock tracking',
+                value: controller.product.trackStock ? 'On' : 'Off',
               ),
-              LabeledRow(
-                label: 'Low Stock',
-                value: '${controller.product.lowStockThreshold}',
-              ),
+              if (controller.product.trackStock) ...[
+                LabeledRow(
+                  label: 'Stock status',
+                  value: controller.product.stockLabel,
+                ),
+                LabeledRow(
+                  label: 'Low stock threshold',
+                  value: '${controller.product.lowStockThreshold}',
+                ),
+              ],
               SizedBox(height: 16.h),
               Obx(
                 () => ModifierSection(

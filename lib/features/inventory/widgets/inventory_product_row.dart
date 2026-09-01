@@ -71,30 +71,38 @@ class InventoryProductRow extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 10.w,
-                    vertical: 4.h,
-                  ),
-                  decoration: BoxDecoration(
-                    color: badgeBackground,
-                    borderRadius: BorderRadius.circular(18.r),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (product.isOutOfStock || product.isLowStock) ...[
-                        Icon(Iconsax.warning_2, size: 13.sp, color: badgeColor),
-                        SizedBox(width: 3.w),
+                if (product.trackStock)
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10.w,
+                      vertical: 4.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: badgeBackground,
+                      borderRadius: BorderRadius.circular(18.r),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (product.isOutOfStock || product.isLowStock) ...[
+                          Icon(
+                            Iconsax.warning_2,
+                            size: 13.sp,
+                            color: badgeColor,
+                          ),
+                          SizedBox(width: 3.w),
+                        ],
+                        Text(
+                          product.stockLabel,
+                          style: getTextStyle(
+                            fontSize: 12.8,
+                            color: badgeColor,
+                          ),
+                        ),
                       ],
-                      Text(
-                        product.stockLabel,
-                        style: getTextStyle(fontSize: 12.8, color: badgeColor),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-                SizedBox(height: 8.h),
+                if (product.trackStock) SizedBox(height: 8.h),
                 Text(
                   '\$${AppHelperFunctions.getFormattedMoney(product.price)}',
                   style: getTextStyle(

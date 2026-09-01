@@ -36,7 +36,7 @@ class InventoryProduct {
       inStock <= lowStockThreshold;
 
   String get stockLabel {
-    if (!trackStock) return 'Stock Off';
+    if (!trackStock) return '';
     if (isOutOfStock) return 'Out of Stock';
     if (isLowStock) return 'Low Stock';
     return '$displayInStock In Stock';

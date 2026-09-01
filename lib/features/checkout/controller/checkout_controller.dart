@@ -34,6 +34,8 @@ class CheckoutController extends GetxController {
   final CdsCartSender _cdsCartSender = CdsCartSender();
   final activeOrderId = RxnString();
   final activeOrderNumber = ''.obs;
+  final activeTableId = RxnString();
+  final activeTableName = RxnString();
   final selectedCustomerId = ''.obs;
   final customerName = 'Not Registered'.obs;
 
@@ -268,6 +270,8 @@ class CheckoutController extends GetxController {
     cartItems.clear();
     activeOrderId.value = null;
     activeOrderNumber.value = '';
+    activeTableId.value = null;
+    activeTableName.value = null;
     selectedCustomerId.value = '';
     customerName.value = 'Not Registered';
     amountEditedManually.value = false;
@@ -279,11 +283,19 @@ class CheckoutController extends GetxController {
 
   Future<void> selectPaymentMethod(PaymentMethod method) async {
     if (!_isPaymentMethodEnabled(method.key)) return;
-    if (await _mustSelectTableBeforePayment()) return;
+
+    TableOrder? paymentTable;
+    if (isTableOptionsEnabled && activeTableId.value == null) {
+      paymentTable = await _selectAvailableTable();
+      if (paymentTable == null) return;
+    }
 
     selectedPaymentMethod.value = method.key;
     if (method.key != 'due') {
-      await _submitCheckout();
+      await _submitCheckout(
+        tableId: paymentTable?.tableId ?? activeTableId.value,
+        tableName: paymentTable?.tableName ?? activeTableName.value,
+      );
       return;
     }
 
@@ -296,7 +308,10 @@ class CheckoutController extends GetxController {
     }
 
     AppHelperFunctions.showSuccessSnackBar('Credit sale is within limit.');
-    await _submitCheckout();
+    await _submitCheckout(
+      tableId: paymentTable?.tableId ?? activeTableId.value,
+      tableName: paymentTable?.tableName ?? activeTableName.value,
+    );
   }
 
   Future<void> openSearch() => Get.find<HomeController>().openSearch();
@@ -375,32 +390,22 @@ class CheckoutController extends GetxController {
 
   bool get isTableOptionsEnabled => FeatureSettings.isEnabled('table_options');
 
-  Future<bool> _mustSelectTableBeforePayment() async {
-    if (activeOrderId.value != null) return false;
-
-    if (!FeatureSettings.isEnabled('table_options')) return false;
-
-    if (_cachedTableCount() == 0) {
-      AppHelperFunctions.showWarningSnackBar('No table found.');
-    } else {
-      AppHelperFunctions.showWarningSnackBar('Select a table first.');
+  Future<TableOrder?> _selectAvailableTable() async {
+    final homeController = Get.find<HomeController>();
+    await homeController.fetchTables();
+    final availableTables = homeController.availableTables;
+    if (availableTables.isEmpty) {
+      AppHelperFunctions.showWarningSnackBar('No available table found.');
+      return null;
     }
-    return true;
-  }
-
-  int _cachedTableCount() {
-    if (Get.isRegistered<HomeController>()) {
-      final homeController = Get.find<HomeController>();
-      if (homeController.tableOrders.isNotEmpty) {
-        return homeController.tableOrders.length;
-      }
-    }
-
-    final cachedTables = OfflineDatabaseService.readCache<Map<String, dynamic>>(
-      'tables',
+    return Get.bottomSheet<TableOrder>(
+      _AvailableTableSheet(tables: availableTables),
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
     );
-    final rawTables = cachedTables?['tables'];
-    return rawTables is List ? rawTables.length : 0;
   }
 
   Future<void> _sendToKdsIfEnabled({
@@ -522,7 +527,7 @@ class CheckoutController extends GetxController {
         ? currentOrderId != null && !sendToTable && !saveOrder
               ? await _networkCaller.postRequest(
                   ApiConstants.payCheckout(currentOrderId),
-                  body: _paymentPayload(),
+                  body: _paymentPayload(tableId: tableId, tableName: tableName),
                 )
               : await _networkCaller.postRequest(
                   ApiConstants.checkout,
@@ -631,12 +636,12 @@ class CheckoutController extends GetxController {
       },
       'saveOrder': saveOrder,
       'sendToTable': sendToTable,
-      if (sendToTable && tableId != null) 'tableId': tableId,
-      if (sendToTable) 'tableName': tableName,
+      'tableId': ?tableId,
+      'tableName': ?tableName,
     };
   }
 
-  Map<String, dynamic> _paymentPayload() {
+  Map<String, dynamic> _paymentPayload({String? tableId, String? tableName}) {
     return {
       'amountReceived': _money(amountReceived.value),
       'payment': {
@@ -645,6 +650,8 @@ class CheckoutController extends GetxController {
         'due': selectedPaymentMethod.value == 'due',
         'installment': selectedPaymentMethod.value == 'installment',
       },
+      'tableId': ?tableId,
+      'tableName': ?tableName,
     };
   }
 
@@ -678,6 +685,8 @@ class CheckoutController extends GetxController {
     final order = Map<String, dynamic>.from(response.responseData as Map);
     activeOrderId.value = order['id']?.toString();
     activeOrderNumber.value = order['orderNumber']?.toString() ?? '';
+    activeTableId.value = order['tableId']?.toString();
+    activeTableName.value = order['tableName']?.toString();
     selectedCustomerId.value = '';
     final savedCustomerName = order['customerName']?.toString().trim() ?? '';
     customerName.value = savedCustomerName.isEmpty

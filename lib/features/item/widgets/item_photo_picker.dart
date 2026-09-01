@@ -70,12 +70,16 @@ class ItemPhotoPicker extends StatelessWidget {
                         color: AppColors.authTextDark,
                       ),
                       SizedBox(width: 12.w),
-                      Text(
-                        'CHOOSE PHOTO',
-                        style: getTextStyle(
-                          fontSize: 16.4,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.authTextDark,
+                      Expanded(
+                        child: Text(
+                          'CHOOSE PHOTO',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: getTextStyle(
+                            fontSize: 16.4,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.authTextDark,
+                          ),
                         ),
                       ),
                     ],
@@ -92,12 +96,16 @@ class ItemPhotoPicker extends StatelessWidget {
                         color: AppColors.authTextDark,
                       ),
                       SizedBox(width: 12.w),
-                      Text(
-                        'TAKE PHOTO',
-                        style: getTextStyle(
-                          fontSize: 16.4,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.authTextDark,
+                      Expanded(
+                        child: Text(
+                          'TAKE PHOTO',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: getTextStyle(
+                            fontSize: 16.4,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.authTextDark,
+                          ),
                         ),
                       ),
                     ],

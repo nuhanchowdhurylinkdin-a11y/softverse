@@ -201,6 +201,20 @@ class CreateItemScreen extends GetView<CreateItemController> {
                 ),
               ),
               Obx(
+                () => Padding(
+                  padding: EdgeInsets.only(top: 6.h),
+                  child: Text(
+                    controller.trackStock.value
+                        ? 'On: stock is reduced after each sale and shown as In stock, Low stock, or Out of stock.'
+                        : 'Off: this item is always sellable; quantities are not tracked.',
+                    style: getTextStyle(
+                      fontSize: 11.8,
+                      color: AppColors.mutedText,
+                    ),
+                  ),
+                ),
+              ),
+              Obx(
                 () => controller.trackStock.value
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -224,7 +238,7 @@ class CreateItemScreen extends GetView<CreateItemController> {
                     : const SizedBox.shrink(),
               ),
               Obx(
-                () => controller.stores.isEmpty
+                () => !controller.trackStock.value || controller.stores.isEmpty
                     ? const SizedBox.shrink()
                     : _StoreInventorySection(controller: controller),
               ),

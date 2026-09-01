@@ -312,22 +312,6 @@ class CreateItemController extends GetxController {
     }
     final inStock = _number(inStockController.text) ?? 0;
     final lowStock = _number(lowStockController.text) ?? 0;
-    if (trackStock.value && lowStock > inStock) {
-      AppHelperFunctions.showErrorSnackBar(
-        'Low stock cannot be greater than in stock.',
-      );
-      return null;
-    }
-    for (final store in stores.where((entry) => entry.selected.value)) {
-      final storeInStock = _number(store.inStockController.text) ?? 0;
-      final storeLowStock = _number(store.lowStockController.text) ?? 0;
-      if (storeLowStock > storeInStock) {
-        AppHelperFunctions.showErrorSnackBar(
-          '${store.name}: low stock cannot be greater than in stock.',
-        );
-        return null;
-      }
-    }
     if (trackDate.value &&
         DateTime.parse(
           manufacturingDate.value,
@@ -379,7 +363,7 @@ class CreateItemController extends GetxController {
       'trackStock': trackStock.value,
       if (trackStock.value) 'inStock': inStock,
       if (trackStock.value) 'lowStock': lowStock,
-      if (stores.any((store) => store.selected.value))
+      if (trackStock.value && stores.any((store) => store.selected.value))
         'stores': stores
             .where((store) => store.selected.value)
             .map((store) => store.toPayload(_number))
