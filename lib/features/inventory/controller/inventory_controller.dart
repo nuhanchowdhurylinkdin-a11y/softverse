@@ -1,14 +1,16 @@
 import 'package:get/get.dart';
 
-import '../../../core/services/network_caller.dart';
 import '../../../core/services/offline_database_service.dart';
-import '../../../core/utils/constants/api_constants.dart';
 import '../../../core/utils/helpers/app_helper.dart';
 import '../../../routes/app_routes.dart';
 import '../models/inventory_product.dart';
+import '../data/inventory_repository.dart';
 
 class InventoryController extends GetxController {
-  final NetworkCaller _networkCaller = NetworkCaller();
+  final InventoryRepository _inventoryRepository;
+
+  InventoryController({InventoryRepository? inventoryRepository})
+    : _inventoryRepository = inventoryRepository ?? HttpInventoryRepository();
   final selectedCategoryIndex = 0.obs;
   final selectedFilterIndex = 0.obs;
   final isLoading = false.obs;
@@ -50,10 +52,9 @@ class InventoryController extends GetxController {
   Future<void> fetchInventory() async {
     isLoading.value = true;
     final stockFilter = _stockFilters[selectedFilterIndex.value];
-    final url = stockFilter == null
-        ? ApiConstants.inventory
-        : '${ApiConstants.inventory}?stockStatus=$stockFilter';
-    final response = await _networkCaller.getRequest(url);
+    final response = await _inventoryRepository.fetchInventory(
+      stockStatus: stockFilter,
+    );
     isLoading.value = false;
     if (!response.isSuccess || response.responseData is! Map) {
       if (products.isEmpty) {
@@ -69,7 +70,7 @@ class InventoryController extends GetxController {
   }
 
   Future<void> fetchCategories() async {
-    final response = await _networkCaller.getRequest(ApiConstants.categories);
+    final response = await _inventoryRepository.fetchCategories();
     if (!response.isSuccess || response.responseData is! List) return;
     final data = List<dynamic>.from(response.responseData as List);
     await OfflineDatabaseService.saveCache('categories', data);

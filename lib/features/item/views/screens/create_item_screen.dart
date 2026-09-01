@@ -76,7 +76,13 @@ class CreateItemScreen extends GetView<CreateItemController> {
                   vertical: 16.h,
                 ),
               ),
-              SizedBox(height: 8.h),
+              SizedBox(height: 24.h),
+              CreateItemField(
+                label: 'Description',
+                controller: controller.descriptionController,
+                hintText: 'Item description',
+              ),
+              SizedBox(height: 24.h),
               GestureDetector(
                 onTap: controller.openCategoryPicker,
                 child: Container(
@@ -218,6 +224,11 @@ class CreateItemScreen extends GetView<CreateItemController> {
                     : const SizedBox.shrink(),
               ),
               Obx(
+                () => controller.stores.isEmpty
+                    ? const SizedBox.shrink()
+                    : _StoreInventorySection(controller: controller),
+              ),
+              Obx(
                 () =>
                     FeatureSettings.isEnabled('product_expiration_information')
                     ? Column(
@@ -253,16 +264,14 @@ class CreateItemScreen extends GetView<CreateItemController> {
                                         style: getTextStyle(
                                           fontSize: 16.4,
                                           fontWeight: FontWeight.w500,
-                                          color:
-                                              AppColors.onboardingBackground,
+                                          color: AppColors.onboardingBackground,
                                         ),
                                       ),
                                       SizedBox(height: 8.h),
                                       DateFieldRow(
                                         value:
                                             controller.manufacturingDate.value,
-                                        onTap:
-                                            controller.pickManufacturingDate,
+                                        onTap: controller.pickManufacturingDate,
                                       ),
                                       SizedBox(height: 24.h),
                                       Text(
@@ -270,8 +279,7 @@ class CreateItemScreen extends GetView<CreateItemController> {
                                         style: getTextStyle(
                                           fontSize: 16.4,
                                           fontWeight: FontWeight.w500,
-                                          color:
-                                              AppColors.onboardingBackground,
+                                          color: AppColors.onboardingBackground,
                                         ),
                                       ),
                                       SizedBox(height: 8.h),
@@ -279,13 +287,14 @@ class CreateItemScreen extends GetView<CreateItemController> {
                                         value: controller.expireDate.value,
                                         onTap: controller.pickExpireDate,
                                       ),
-                                      SizedBox(height: 8.h),
-                                      Text(
-                                        'Quantity at which you will be notified about Expire Date',
-                                        style: getTextStyle(
-                                          fontSize: 12.8,
-                                          color: AppColors.chipInactiveText,
-                                        ),
+                                      SizedBox(height: 24.h),
+                                      CreateItemField(
+                                        label: 'Expiration alert quantity',
+                                        controller: controller
+                                            .expirationAlertQuantityController,
+                                        keyboardType: TextInputType.number,
+                                        helperText:
+                                            'Quantity at which you will be notified about the expiration date',
                                       ),
                                     ],
                                   )
@@ -308,6 +317,12 @@ class CreateItemScreen extends GetView<CreateItemController> {
                   onAdd: controller.openComboPackEditor,
                 ),
               ),
+              SizedBox(height: 24.h),
+              _CompositeItemSection(controller: controller),
+              SizedBox(height: 24.h),
+              _VariantOptionsSection(controller: controller),
+              SizedBox(height: 24.h),
+              _VariantsSection(controller: controller),
               SizedBox(height: 24.h),
               Text(
                 'Representation on POS',
@@ -355,10 +370,23 @@ class CreateItemScreen extends GetView<CreateItemController> {
                         selectedShapeIndex: controller.selectedShapeIndex.value,
                         onShapeSelected: controller.selectShape,
                       )
-                    : ItemPhotoPicker(
-                        selectedImage: controller.selectedImage.value,
-                        onChoosePhoto: controller.choosePhoto,
-                        onTakePhoto: controller.takePhoto,
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          ItemPhotoPicker(
+                            selectedImage: controller.selectedImage.value,
+                            onChoosePhoto: controller.choosePhoto,
+                            onTakePhoto: controller.takePhoto,
+                          ),
+                          SizedBox(height: 16.h),
+                          CreateItemField(
+                            label: 'Image URL',
+                            controller: controller.imageUrlController,
+                            hintText: 'https://example.com/item.jpg',
+                            helperText:
+                                'Optional when a photo is selected above',
+                          ),
+                        ],
                       ),
               ),
               SizedBox(height: 40.h),
@@ -384,4 +412,261 @@ class CreateItemScreen extends GetView<CreateItemController> {
       ),
     );
   }
+}
+
+class _StoreInventorySection extends StatelessWidget {
+  final CreateItemController controller;
+
+  const _StoreInventorySection({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(height: 24.h),
+        _sectionTitle('Store inventory'),
+        SizedBox(height: 8.h),
+        ...controller.stores.map(
+          (store) => Obx(
+            () => _draftCard(
+              children: [
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(store.name),
+                  value: store.selected.value,
+                  onChanged: (value) => store.selected.value = value,
+                ),
+                if (store.selected.value) ...[
+                  CreateItemField(
+                    label: 'In stock',
+                    controller: store.inStockController,
+                    keyboardType: TextInputType.number,
+                  ),
+                  SizedBox(height: 12.h),
+                  CreateItemField(
+                    label: 'Low stock',
+                    controller: store.lowStockController,
+                    keyboardType: TextInputType.number,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CompositeItemSection extends StatelessWidget {
+  final CreateItemController controller;
+
+  const _CompositeItemSection({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(
+      () => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          ToggleFieldRow(
+            label: 'Composite item',
+            value: controller.compositeItem.value,
+            onChanged: (_) => controller.toggleCompositeItem(),
+            boxed: true,
+          ),
+          if (controller.compositeItem.value) ...[
+            SizedBox(height: 12.h),
+            ...controller.compositeComponents.asMap().entries.map(
+              (entry) => _draftCard(
+                onDelete: () => controller.removeCompositeComponent(entry.key),
+                children: [
+                  CreateItemField(
+                    label: 'Component item ID',
+                    controller: entry.value.itemIdController,
+                    hintText: 'Item UUID',
+                  ),
+                  SizedBox(height: 12.h),
+                  CreateItemField(
+                    label: 'Component name',
+                    controller: entry.value.nameController,
+                  ),
+                  SizedBox(height: 12.h),
+                  CreateItemField(
+                    label: 'Quantity',
+                    controller: entry.value.quantityController,
+                    keyboardType: TextInputType.number,
+                  ),
+                  SizedBox(height: 12.h),
+                  CreateItemField(
+                    label: 'Cost',
+                    controller: entry.value.costController,
+                    keyboardType: TextInputType.number,
+                  ),
+                ],
+              ),
+            ),
+            _addButton('Add component', controller.addCompositeComponent),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _VariantOptionsSection extends StatelessWidget {
+  final CreateItemController controller;
+
+  const _VariantOptionsSection({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(
+      () => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _sectionTitle('Variant options'),
+          SizedBox(height: 8.h),
+          ...controller.variantOptions.asMap().entries.map(
+            (entry) => _draftCard(
+              onDelete: () => controller.removeVariantOption(entry.key),
+              children: [
+                CreateItemField(
+                  label: 'Option name',
+                  controller: entry.value.optionNameController,
+                  hintText: 'Size',
+                ),
+                SizedBox(height: 12.h),
+                CreateItemField(
+                  label: 'Option values',
+                  controller: entry.value.optionValuesController,
+                  hintText: 'Small, Medium, Large',
+                  helperText: 'Separate values with commas',
+                ),
+              ],
+            ),
+          ),
+          _addButton('Add variant option', controller.addVariantOption),
+        ],
+      ),
+    );
+  }
+}
+
+class _VariantsSection extends StatelessWidget {
+  final CreateItemController controller;
+
+  const _VariantsSection({required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(
+      () => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _sectionTitle('Variants'),
+          SizedBox(height: 8.h),
+          ...controller.variants.asMap().entries.map(
+            (entry) => _draftCard(
+              onDelete: () => controller.removeVariant(entry.key),
+              children: [
+                CreateItemField(
+                  label: 'Variant name',
+                  controller: entry.value.nameController,
+                ),
+                SizedBox(height: 12.h),
+                CreateItemField(
+                  label: 'Size',
+                  controller: entry.value.sizeController,
+                ),
+                SizedBox(height: 12.h),
+                CreateItemField(
+                  label: 'Color',
+                  controller: entry.value.colorController,
+                ),
+                SizedBox(height: 12.h),
+                Obx(
+                  () => SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Available for sale'),
+                    value: entry.value.availableForSale.value,
+                    onChanged: (value) =>
+                        entry.value.availableForSale.value = value,
+                  ),
+                ),
+                CreateItemField(
+                  label: 'Price',
+                  controller: entry.value.priceController,
+                  keyboardType: TextInputType.number,
+                ),
+                SizedBox(height: 12.h),
+                CreateItemField(
+                  label: 'Cost',
+                  controller: entry.value.costController,
+                  keyboardType: TextInputType.number,
+                ),
+                SizedBox(height: 12.h),
+                CreateItemField(
+                  label: 'SKU',
+                  controller: entry.value.skuController,
+                ),
+                SizedBox(height: 12.h),
+                CreateItemField(
+                  label: 'Barcode',
+                  controller: entry.value.barcodeController,
+                ),
+              ],
+            ),
+          ),
+          _addButton('Add variant', controller.addVariant),
+        ],
+      ),
+    );
+  }
+}
+
+Widget _draftCard({required List<Widget> children, VoidCallback? onDelete}) {
+  return Container(
+    margin: EdgeInsets.only(bottom: 12.h),
+    padding: EdgeInsets.all(12.w),
+    decoration: BoxDecoration(
+      color: AppColors.chipBackground,
+      border: Border.all(color: AppColors.cardBorder),
+      borderRadius: BorderRadius.circular(12.r),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (onDelete != null)
+          Align(
+            alignment: Alignment.centerRight,
+            child: IconButton(
+              onPressed: onDelete,
+              icon: const Icon(Icons.delete_outline),
+            ),
+          ),
+        ...children,
+      ],
+    ),
+  );
+}
+
+Widget _addButton(String label, VoidCallback onPressed) {
+  return OutlinedButton.icon(
+    onPressed: onPressed,
+    icon: const Icon(Icons.add),
+    label: Text(label),
+  );
+}
+
+Widget _sectionTitle(String label) {
+  return Text(
+    label,
+    style: getTextStyle(
+      fontSize: 16.4,
+      fontWeight: FontWeight.w500,
+      color: AppColors.onboardingBackground,
+    ),
+  );
 }

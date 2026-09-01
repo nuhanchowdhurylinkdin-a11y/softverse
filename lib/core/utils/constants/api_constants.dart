@@ -29,6 +29,7 @@ class ApiConstants {
   static String get customers => '$baseUrl/customers';
   static String customer(String id) => '$baseUrl/customers/$id';
   static String get items => '$baseUrl/items';
+  static String get itemAdminFilters => '$baseUrl/items/admin/filters';
   static String get inventory => '$baseUrl/inventory';
   static String item(String id) => '$baseUrl/items/$id';
   static String get checkout => '$baseUrl/checkout';
