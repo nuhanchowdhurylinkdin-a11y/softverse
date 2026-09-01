@@ -88,8 +88,9 @@ class CheckoutController extends GetxController {
 
   final paymentMethods = <PaymentMethod>[..._defaultPaymentMethods].obs;
 
-  List<PaymentMethod> get visiblePaymentMethods =>
-      paymentMethods.where((method) => _isPaymentMethodEnabled(method.key)).toList();
+  List<PaymentMethod> get visiblePaymentMethods => paymentMethods
+      .where((method) => _isPaymentMethodEnabled(method.key))
+      .toList();
 
   bool _isPaymentMethodEnabled(String key) => switch (key) {
     'due' => FeatureSettings.isEnabled('credit_sales'),
@@ -298,9 +299,9 @@ class CheckoutController extends GetxController {
     await _submitCheckout();
   }
 
-  void openSearch() {}
+  Future<void> openSearch() => Get.find<HomeController>().openSearch();
 
-  void openScan() {}
+  Future<void> openScan() => Get.find<HomeController>().openScan();
 
   void closeCheckout() => Get.find<MainNavController>().changeTab(0);
 
