@@ -474,30 +474,28 @@ class _StoreInventorySection extends StatelessWidget {
               ],
             ),
           ...controller.stores.map(
-            (store) => Obx(
-              () => _draftCard(
-                children: [
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(store.name),
-                    value: store.selected.value,
-                    onChanged: (value) => store.selected.value = value,
+            (store) => _draftCard(
+              children: [
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(store.name),
+                  value: store.selected.value,
+                  onChanged: (value) => store.selected.value = value,
+                ),
+                if (store.selected.value && controller.trackStock.value) ...[
+                  CreateItemField(
+                    label: 'In stock',
+                    controller: store.inStockController,
+                    keyboardType: TextInputType.number,
                   ),
-                  if (store.selected.value && controller.trackStock.value) ...[
-                    CreateItemField(
-                      label: 'In stock',
-                      controller: store.inStockController,
-                      keyboardType: TextInputType.number,
-                    ),
-                    SizedBox(height: 12.h),
-                    CreateItemField(
-                      label: 'Low stock',
-                      controller: store.lowStockController,
-                      keyboardType: TextInputType.number,
-                    ),
-                  ],
+                  SizedBox(height: 12.h),
+                  CreateItemField(
+                    label: 'Low stock',
+                    controller: store.lowStockController,
+                    keyboardType: TextInputType.number,
+                  ),
                 ],
-              ),
+              ],
             ),
           ),
         ],
