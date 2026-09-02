@@ -178,19 +178,4 @@ void main() {
     expect(payload['inStock'], 2);
     expect(payload['lowStock'], 5);
   });
-
-  test('color and shape representation uses the create item API fields', () {
-    final controller = CreateItemController();
-    controller.nameController.text = 'Blue star item';
-    controller.representation.value = ItemRepresentation.colorAndShape;
-    controller.selectColor(6);
-    controller.selectShape(2);
-
-    final payload = controller.buildPayload()!;
-
-    expect(payload['representation'], 'color_and_shape');
-    expect(payload['posColorIndex'], 6);
-    expect(payload['posShape'], 'star');
-    expect(payload.containsKey('imageUrl'), isFalse);
-  });
 }

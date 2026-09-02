@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../controller/category_controller.dart';
+import '../../widgets/color_shape_picker.dart';
 
 class CategoryFormScreen extends GetView<CategoryFormController> {
   const CategoryFormScreen({super.key});
@@ -31,6 +32,20 @@ class CategoryFormScreen extends GetView<CategoryFormController> {
           decoration: const InputDecoration(
             labelText: 'Description (optional)',
             border: OutlineInputBorder(),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Text(
+          'POS color and shape',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 12),
+        Obx(
+          () => ColorShapePicker(
+            selectedColorIndex: controller.selectedColorIndex.value,
+            onColorSelected: controller.selectColor,
+            selectedShapeIndex: controller.selectedShapeIndex.value,
+            onShapeSelected: controller.selectShape,
           ),
         ),
         if (controller.isEditing)
