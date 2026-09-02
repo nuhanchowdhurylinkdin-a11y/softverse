@@ -81,8 +81,6 @@ class CreateItemController extends GetxController {
 
   void toggleTrackStock() => trackStock.value = !trackStock.value;
 
-  bool get hasSelectedStores => stores.any((store) => store.selected.value);
-
   void toggleTrackDate() => trackDate.value = !trackDate.value;
 
   void toggleModifier() => modifierEnabled.value = !modifierEnabled.value;
@@ -323,24 +321,8 @@ class CreateItemController extends GetxController {
       );
       return null;
     }
-    final selectedStores = stores
-        .where((store) => store.selected.value)
-        .toList(growable: false);
-    final storePayloads = selectedStores
-        .map((store) => store.toPayload(_number))
-        .toList(growable: false);
-    final inStock = storePayloads.isEmpty
-        ? (_number(inStockController.text) ?? 0)
-        : storePayloads.fold<num>(
-            0,
-            (total, store) => total + (store['inStock'] as num),
-          );
-    final lowStock = storePayloads.isEmpty
-        ? (_number(lowStockController.text) ?? 0)
-        : storePayloads.fold<num>(
-            0,
-            (total, store) => total + (store['lowStock'] as num),
-          );
+    final inStock = _number(inStockController.text) ?? 0;
+    final lowStock = _number(lowStockController.text) ?? 0;
     if (trackDate.value &&
         DateTime.parse(
           manufacturingDate.value,
@@ -392,7 +374,11 @@ class CreateItemController extends GetxController {
       'trackStock': trackStock.value,
       if (trackStock.value) 'inStock': inStock,
       if (trackStock.value) 'lowStock': lowStock,
-      if (storePayloads.isNotEmpty) 'stores': storePayloads,
+      if (stores.any((store) => store.selected.value))
+        'stores': stores
+            .where((store) => store.selected.value)
+            .map((store) => store.toPayload(_number))
+            .toList(),
       'trackExpiration': trackDate.value,
       if (trackDate.value) 'manufacturingDate': manufacturingDate.value,
       if (trackDate.value) 'expirationDate': expireDate.value,

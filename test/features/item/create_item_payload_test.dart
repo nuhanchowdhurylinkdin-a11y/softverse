@@ -167,27 +167,4 @@ void main() {
     expect(payload['inStock'], 2);
     expect(payload['lowStock'], 5);
   });
-
-  test('store quantities are the single source of tracked stock totals', () {
-    final controller = CreateItemController();
-    controller.nameController.text = 'Store item';
-    controller.trackStock.value = true;
-    controller.inStockController.text = '999';
-    controller.lowStockController.text = '999';
-    final first = StoreInventoryDraft(storeId: 'store-1', name: 'First');
-    first.selected.value = true;
-    first.inStockController.text = '10';
-    first.lowStockController.text = '2';
-    final second = StoreInventoryDraft(storeId: 'store-2', name: 'Second');
-    second.selected.value = true;
-    second.inStockController.text = '5';
-    second.lowStockController.text = '1';
-    controller.stores.addAll([first, second]);
-
-    final payload = controller.buildPayload()!;
-
-    expect(payload['inStock'], 15);
-    expect(payload['lowStock'], 3);
-    expect(payload['stores'], hasLength(2));
-  });
 }
