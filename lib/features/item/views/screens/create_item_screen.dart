@@ -215,7 +215,8 @@ class CreateItemScreen extends GetView<CreateItemController> {
                 ),
               ),
               Obx(
-                () => controller.trackStock.value
+                () =>
+                    controller.trackStock.value && !controller.hasSelectedStores
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
@@ -476,11 +477,14 @@ class _StoreInventorySection extends StatelessWidget {
           ...controller.stores.map(
             (store) => _draftCard(
               children: [
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(store.name),
-                  value: store.selected.value,
-                  onChanged: (value) => store.selected.value = value,
+                Row(
+                  children: [
+                    Expanded(child: Text(store.name)),
+                    Switch(
+                      value: store.selected.value,
+                      onChanged: (value) => store.selected.value = value,
+                    ),
+                  ],
                 ),
                 if (store.selected.value && controller.trackStock.value) ...[
                   CreateItemField(
