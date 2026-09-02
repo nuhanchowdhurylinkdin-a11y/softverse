@@ -476,11 +476,14 @@ class _StoreInventorySection extends StatelessWidget {
           ...controller.stores.map(
             (store) => _draftCard(
               children: [
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(store.name),
-                  value: store.selected.value,
-                  onChanged: (value) => store.selected.value = value,
+                Material(
+                  color: Colors.transparent,
+                  child: SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(store.name),
+                    value: store.selected.value,
+                    onChanged: (value) => store.selected.value = value,
+                  ),
                 ),
                 if (store.selected.value && controller.trackStock.value) ...[
                   CreateItemField(
