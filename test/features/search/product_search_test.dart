@@ -1,12 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:softverse/core/common/widgets/catalog_search_sheet.dart';
+import 'package:softverse/features/checkout/controller/checkout_controller.dart';
 import 'package:softverse/features/home/controller/home_controller.dart';
 import 'package:softverse/features/home/models/product.dart';
 import 'package:softverse/features/inventory/controller/inventory_controller.dart';
 import 'package:softverse/features/inventory/models/inventory_product.dart';
 
 void main() {
+  setUp(() => Get.testMode = true);
+  tearDown(Get.reset);
+
   test('catalog search matches name, SKU, and barcode', () {
     const entry = CatalogSearchEntry(
       key: '1',
@@ -40,6 +44,44 @@ void main() {
     expect(controller.findProductByBarcode('unknown'), isNull);
   });
 
+  test('scanned POS product is added to checkout immediately', () {
+    final checkout = _TestCheckoutController();
+    Get.put<CheckoutController>(checkout);
+    final home = HomeController();
+    home.products.add(
+      const Product(
+        id: 'item-200',
+        name: 'Keyboard',
+        barcode: 'BAR-200',
+        price: 25,
+        trackStock: true,
+        stockCount: 5,
+        imageUrl: '',
+      ),
+    );
+
+    final added = home.addProductByBarcode(' bar-200 ', showFeedback: false);
+
+    expect(added, isTrue);
+    expect(checkout.cartItems.single.itemId, 'item-200');
+    expect(checkout.cartItems.single.name, 'Keyboard');
+    expect(checkout.cartItems.single.quantity, 1);
+  });
+
+  test('inventory action scanner delegates to the checkout flow', () {
+    final home = _RecordingHomeController();
+    Get.put<HomeController>(home);
+    final inventory = InventoryController();
+
+    final added = inventory.addScannedProductToCheckout(
+      'BAR-300',
+      showFeedback: false,
+    );
+
+    expect(added, isTrue);
+    expect(home.lastBarcode, 'BAR-300');
+  });
+
   test('inventory barcode lookup resolves the inventory item', () {
     final controller = InventoryController();
     controller.products.assignAll([
@@ -59,4 +101,26 @@ void main() {
     expect(controller.findProductByBarcode('BAR-200')?.id, 'item-1');
     expect(controller.findProductByBarcode('unknown'), isNull);
   });
+}
+
+class _TestCheckoutController extends CheckoutController {
+  // Test double intentionally skips network/dependency startup.
+  @override
+  // ignore: must_call_super
+  void onInit() {}
+}
+
+class _RecordingHomeController extends HomeController {
+  String? lastBarcode;
+
+  @override
+  bool addProductByBarcode(String barcode, {bool showFeedback = true}) {
+    lastBarcode = barcode;
+    return true;
+  }
+
+  // Test double intentionally skips catalog startup.
+  @override
+  // ignore: must_call_super
+  void onInit() {}
 }

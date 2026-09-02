@@ -53,6 +53,24 @@ void main() {
     expect(repository.createCalls, 1);
     expect(controller.isSaving.value, isFalse);
   });
+
+  test('category payload includes the selected API color and shape', () {
+    final controller = CategoryFormController(
+      repository: _DelayedCategoryRepository(),
+    );
+    controller.nameController.text = 'Beverages';
+    controller.descriptionController.text = 'Cold drinks';
+    controller.selectColor(5);
+    controller.selectShape(3);
+
+    expect(controller.buildPayload(), {
+      'name': 'Beverages',
+      'description': 'Cold drinks',
+      'colorIndex': 5,
+      'shape': 'hexagon',
+      'isActive': true,
+    });
+  });
 }
 
 class _DelayedCategoryRepository implements CategoryRepository {

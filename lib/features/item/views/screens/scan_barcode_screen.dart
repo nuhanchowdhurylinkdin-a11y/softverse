@@ -60,6 +60,7 @@ class ScanBarcodeScreen extends GetView<ScanBarcodeController> {
           overlayBuilder: (context, constraints) => const _ViewfinderOverlay(),
           errorBuilder: (context, error) => _CameraError(
             error: error,
+            onRetry: controller.retryCamera,
             onOpenSettings: controller.openAppSettings,
           ),
         ),
@@ -119,9 +120,14 @@ class _ViewfinderOverlay extends StatelessWidget {
 
 class _CameraError extends StatelessWidget {
   final MobileScannerException error;
+  final VoidCallback onRetry;
   final VoidCallback onOpenSettings;
 
-  const _CameraError({required this.error, required this.onOpenSettings});
+  const _CameraError({
+    required this.error,
+    required this.onRetry,
+    required this.onOpenSettings,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -189,6 +195,25 @@ class _CameraError extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 22.h),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48.h,
+                      child: OutlinedButton.icon(
+                        onPressed: onRetry,
+                        icon: Icon(Iconsax.refresh, size: 18.sp),
+                        label: const Text('Try Again'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: BorderSide(
+                            color: Colors.white.withValues(alpha: 0.35),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14.r),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 10.h),
                     SizedBox(
                       width: double.infinity,
                       height: 48.h,

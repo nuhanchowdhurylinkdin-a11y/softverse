@@ -4,6 +4,7 @@ import '../../../core/common/widgets/catalog_search_sheet.dart';
 import '../../../core/services/offline_database_service.dart';
 import '../../../core/utils/helpers/app_helper.dart';
 import '../../../routes/app_routes.dart';
+import '../../home/controller/home_controller.dart';
 import '../models/inventory_product.dart';
 import '../data/inventory_repository.dart';
 
@@ -113,17 +114,19 @@ class InventoryController extends GetxController {
   }
 
   Future<void> openScan() async {
-    final barcode = await Get.toNamed<String>(AppRoute.getScanBarcodeScreen());
-    if (barcode == null || barcode.trim().isEmpty) return;
-    final product = findProductByBarcode(barcode);
-    if (product == null) {
-      AppHelperFunctions.showWarningSnackBar(
-        'No item found for barcode $barcode.',
-      );
-      return;
-    }
-    openProduct(product);
+    final result = await Get.toNamed(AppRoute.getScanBarcodeScreen());
+    if (result is! String || result.trim().isEmpty) return;
+    final barcode = result.trim();
+    addScannedProductToCheckout(barcode);
   }
+
+  bool addScannedProductToCheckout(
+    String barcode, {
+    bool showFeedback = true,
+  }) => Get.find<HomeController>().addProductByBarcode(
+    barcode,
+    showFeedback: showFeedback,
+  );
 
   void openNotifications() {}
 

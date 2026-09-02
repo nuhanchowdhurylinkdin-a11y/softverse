@@ -138,6 +138,8 @@ class CategoryFormController extends GetxController {
   final descriptionController = TextEditingController();
   final isActive = true.obs;
   final isSaving = false.obs;
+  final selectedColorIndex = 0.obs;
+  final selectedShapeIndex = 0.obs;
   CategoryModel? category;
 
   bool get isEditing => category != null;
@@ -150,7 +152,26 @@ class CategoryFormController extends GetxController {
       nameController.text = category!.name;
       descriptionController.text = category!.description ?? '';
       isActive.value = category!.isActive;
+      selectedColorIndex.value = category!.colorIndex.clamp(0, 7);
+      selectedShapeIndex.value = _shapeIndex(category!.shape);
     }
+  }
+
+  void selectColor(int index) => selectedColorIndex.value = index.clamp(0, 7);
+
+  void selectShape(int index) => selectedShapeIndex.value = index.clamp(0, 3);
+
+  Map<String, dynamic>? buildPayload() {
+    final name = nameController.text.trim();
+    if (name.isEmpty) return null;
+    return {
+      'name': name,
+      if (descriptionController.text.trim().isNotEmpty)
+        'description': descriptionController.text.trim(),
+      'colorIndex': selectedColorIndex.value,
+      'shape': _shapeValue(selectedShapeIndex.value),
+      'isActive': isActive.value,
+    };
   }
 
   Future<void> save() async {
@@ -161,8 +182,8 @@ class CategoryFormController extends GetxController {
       );
       return;
     }
-    final name = nameController.text.trim();
-    if (name.isEmpty) {
+    final payload = buildPayload();
+    if (payload == null) {
       AppHelperFunctions.showWarningSnackBar('Category name is required.');
       return;
     }
@@ -177,12 +198,6 @@ class CategoryFormController extends GetxController {
     }
 
     isSaving.value = true;
-    final payload = {
-      'name': name,
-      if (descriptionController.text.trim().isNotEmpty)
-        'description': descriptionController.text.trim(),
-      'isActive': isActive.value,
-    };
     final response = isEditing
         ? await _repository.updateCategory(category!.id, payload)
         : await _repository.createCategory(payload);
@@ -206,6 +221,20 @@ class CategoryFormController extends GetxController {
       isEditing ? 'Category updated.' : 'Category created.',
     );
   }
+
+  String _shapeValue(int index) => switch (index) {
+    1 => 'circle',
+    2 => 'star',
+    3 => 'hexagon',
+    _ => 'square',
+  };
+
+  int _shapeIndex(String? shape) => switch (shape?.toLowerCase()) {
+    'circle' => 1,
+    'star' => 2,
+    'hexagon' => 3,
+    _ => 0,
+  };
 
   @override
   void onClose() {
