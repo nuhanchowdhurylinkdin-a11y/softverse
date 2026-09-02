@@ -167,8 +167,9 @@ class HomeController extends GetxController {
   }
 
   Future<void> openScan() async {
-    final barcode = await Get.toNamed<String>(AppRoute.getScanBarcodeScreen());
-    if (barcode == null || barcode.trim().isEmpty) return;
+    final result = await Get.toNamed(AppRoute.getScanBarcodeScreen());
+    if (result is! String || result.trim().isEmpty) return;
+    final barcode = result.trim();
     addProductByBarcode(barcode);
   }
 
