@@ -26,6 +26,8 @@ class ApiConstants {
   static String get paymentTypes => '$baseUrl/payment-types';
 
   static String get categories => '$baseUrl/categories';
+  static String get categoryAdmin => '$baseUrl/categories/admin?limit=100';
+  static String category(String id) => '$baseUrl/categories/$id';
   static String get customers => '$baseUrl/customers';
   static String customer(String id) => '$baseUrl/customers/$id';
   static String get items => '$baseUrl/items';

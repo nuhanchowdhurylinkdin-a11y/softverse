@@ -71,7 +71,6 @@ void main() {
       'name',
       'description',
       'categoryId',
-      'categoryName',
       'soldBy',
       'price',
       'cost',
@@ -131,6 +130,18 @@ void main() {
         'barcode': 'BAR-L',
       },
     ]);
+  });
+
+  test('No Category omits both category id and legacy free-text name', () {
+    final controller = CreateItemController();
+    controller.nameController.text = 'Uncategorized item';
+    controller.categoryController.text = 'Stale category text';
+    controller.selectedCategoryId.value = null;
+
+    final payload = controller.buildPayload()!;
+
+    expect(payload.containsKey('categoryId'), isFalse);
+    expect(payload.containsKey('categoryName'), isFalse);
   });
 
   test('untracked item omits quantities but keeps store availability', () {

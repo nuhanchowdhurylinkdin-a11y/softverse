@@ -8,13 +8,16 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../core/services/network_caller.dart';
 import '../../../core/services/offline_database_service.dart';
+import '../../../core/services/permission_service.dart';
 import '../../../core/services/sync_service.dart';
 import '../../../core/utils/constants/api_constants.dart';
 import '../../../core/utils/helpers/app_helper.dart';
 import '../../../routes/app_routes.dart';
 import '../../inventory/models/modifier_group.dart';
+import '../../inventory/controller/inventory_controller.dart';
 import '../../home/controller/home_controller.dart';
 import '../models/combo_pack_draft.dart';
+import '../models/category_model.dart';
 import '../data/category_repository.dart';
 
 enum SoldBy { pcs, weight }
@@ -183,34 +186,71 @@ class CreateItemController extends GetxController {
     );
   }
 
-  void openCategoryPicker() {
-    if (categories.isEmpty) {
-      AppHelperFunctions.showWarningSnackBar('No categories found.');
-      return;
-    }
-    Get.bottomSheet(
-      Container(
+  Future<void> openCategoryPicker() async {
+    await Get.bottomSheet(
+      Material(
         color: Colors.white,
         child: SafeArea(
           child: ListView(
             shrinkWrap: true,
-            children: categories
-                .map(
-                  (category) => ListTile(
-                    title: Text(category['name']?.toString() ?? 'Category'),
-                    onTap: () {
-                      selectedCategoryId.value = category['id']?.toString();
-                      categoryController.text =
-                          category['name']?.toString() ?? '';
-                      Get.back();
-                    },
-                  ),
-                )
-                .toList(),
+            children: [
+              ListTile(
+                leading: const Icon(Icons.block),
+                title: const Text('No Category'),
+                onTap: () {
+                  clearCategory();
+                  Get.back();
+                },
+              ),
+              ...categories.map(
+                (category) => ListTile(
+                  title: Text(category['name']?.toString() ?? 'Category'),
+                  onTap: () {
+                    selectCategory(
+                      category['id']?.toString(),
+                      category['name']?.toString() ?? '',
+                    );
+                    Get.back();
+                  },
+                ),
+              ),
+              if (PermissionService.has(AppPermission.createEditCategories))
+                ListTile(
+                  leading: const Icon(Icons.add),
+                  title: const Text('Create Category'),
+                  onTap: () async {
+                    Get.back();
+                    await createCategoryInline();
+                  },
+                ),
+            ],
           ),
         ),
       ),
     );
+  }
+
+  void selectCategory(String? id, String name) {
+    selectedCategoryId.value = id;
+    categoryController.text = id == null ? '' : name;
+  }
+
+  void clearCategory() => selectCategory(null, '');
+
+  Future<void> createCategoryInline() async {
+    final online =
+        !Get.isRegistered<SyncService>() ||
+        Get.find<SyncService>().isOnline.value;
+    if (!online) {
+      AppHelperFunctions.showWarningSnackBar(
+        'Connect to the internet to create a category. Existing categories remain available offline.',
+      );
+      return;
+    }
+    final result = await Get.toNamed(AppRoute.getCategoryFormScreen());
+    if (result is! CategoryModel) return;
+    await fetchCategories();
+    selectCategory(result.id, result.name);
   }
 
   Future<void> pickManufacturingDate() async {
@@ -241,6 +281,7 @@ class CreateItemController extends GetxController {
   }
 
   Future<void> save() async {
+    if (isSaving.value) return;
     final payload = buildPayload();
     if (payload == null) return;
 
@@ -255,6 +296,9 @@ class CreateItemController extends GetxController {
       AppHelperFunctions.showSuccessSnackBar('Item created.');
       if (Get.isRegistered<HomeController>()) {
         await Get.find<HomeController>().forceSync(showMessage: false);
+      }
+      if (Get.isRegistered<InventoryController>()) {
+        await Get.find<InventoryController>().fetchInventory();
       }
       Get.back();
       return;
@@ -360,8 +404,6 @@ class CreateItemController extends GetxController {
         'description': descriptionController.text.trim(),
       if (selectedCategoryId.value != null)
         'categoryId': selectedCategoryId.value,
-      if (categoryController.text.trim().isNotEmpty)
-        'categoryName': categoryController.text.trim(),
       'soldBy': soldBy.value == SoldBy.weight ? 'weight' : 'pcs',
       if (_number(priceController.text) != null)
         'price': _number(priceController.text),
@@ -437,7 +479,9 @@ class CreateItemController extends GetxController {
       'id': 'local-${DateTime.now().microsecondsSinceEpoch}',
       'name': payload['name'],
       'categoryId': payload['categoryId'],
-      'categoryName': payload['categoryName'],
+      'categoryName': selectedCategoryId.value == null
+          ? null
+          : categoryController.text.trim(),
       'description': payload['description'],
       'soldBy': payload['soldBy'],
       'price': payload['price'],

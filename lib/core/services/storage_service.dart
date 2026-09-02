@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StorageService {
@@ -8,6 +10,7 @@ class StorageService {
   static const String _emailKey = 'email';
   static const String _roleKey = 'role';
   static const String _businessIdKey = 'businessId';
+  static const String _permissionsKey = 'permissions';
   static const String _onboardingCompleteKey = 'onboardingComplete';
   static const String _featureSettingsCompleteKey = 'featureSettingsComplete';
   static const String _themeModeKey = 'themeMode';
@@ -30,6 +33,15 @@ class StorageService {
   static String? get email => _preferences?.getString(_emailKey);
   static String? get role => _preferences?.getString(_roleKey);
   static String? get businessId => _preferences?.getString(_businessIdKey);
+  static List<String> get permissions {
+    final raw = _preferences?.getString(_permissionsKey);
+    if (raw == null || raw.isEmpty) return const [];
+    final decoded = jsonDecode(raw);
+    return decoded is List
+        ? decoded.map((value) => value.toString()).toList()
+        : const [];
+  }
+
   static bool get isOnboardingComplete =>
       _preferences?.getBool(_onboardingCompleteKey) ?? false;
   static bool get isFeatureSettingsComplete {
@@ -57,6 +69,7 @@ class StorageService {
     required String refreshToken,
     String? role,
     String? businessId,
+    List<String> permissions = const [],
   }) async {
     await _preferences?.setString(_idKey, id);
     await _preferences?.setString(_nameKey, fullName);
@@ -67,6 +80,7 @@ class StorageService {
     if (businessId != null) {
       await _preferences?.setString(_businessIdKey, businessId);
     }
+    await _preferences?.setString(_permissionsKey, jsonEncode(permissions));
   }
 
   static Future<void> updateTokens({
@@ -89,6 +103,7 @@ class StorageService {
     await _preferences?.remove(_emailKey);
     await _preferences?.remove(_roleKey);
     await _preferences?.remove(_businessIdKey);
+    await _preferences?.remove(_permissionsKey);
   }
 
   static Future<void> setOnboardingComplete(bool value) async {

@@ -262,6 +262,11 @@ class AuthController extends GetxController {
       email: user['email']?.toString() ?? '',
       role: user['role']?.toString(),
       businessId: user['businessId']?.toString(),
+      permissions: (user['permissions'] is List)
+          ? (user['permissions'] as List)
+                .map((value) => value.toString())
+                .toList()
+          : const [],
       accessToken: data['accessToken']?.toString() ?? '',
       refreshToken: data['refreshToken']?.toString() ?? '',
     );
