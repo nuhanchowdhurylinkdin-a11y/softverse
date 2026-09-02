@@ -100,13 +100,13 @@ class HomeController extends GetxController {
   void openPendingOrders() =>
       Get.find<CheckoutController>().openPendingOrders();
 
-  void addToCart(Product product) {
+  bool addToCart(Product product) {
     if (product.isOutOfStock &&
         FeatureSettings.isEnabled('negative_stock_alerts')) {
       AppHelperFunctions.showWarningSnackBar(
         '${product.name} is out of stock.',
       );
-      return;
+      return false;
     }
     Get.find<CheckoutController>().addProduct(
       itemId: product.id,
@@ -114,6 +114,7 @@ class HomeController extends GetxController {
       price: product.price,
       imageUrl: product.imageUrl,
     );
+    return true;
   }
 
   Product? findProductByBarcode(String barcode) {
@@ -122,6 +123,25 @@ class HomeController extends GetxController {
     return products.firstWhereOrNull(
       (product) => product.barcode.trim().toLowerCase() == normalized,
     );
+  }
+
+  bool addProductByBarcode(String barcode, {bool showFeedback = true}) {
+    final product = findProductByBarcode(barcode);
+    if (product == null) {
+      if (showFeedback) {
+        AppHelperFunctions.showWarningSnackBar(
+          'No item found for barcode $barcode.',
+        );
+      }
+      return false;
+    }
+    final added = addToCart(product);
+    if (added && showFeedback) {
+      AppHelperFunctions.showSuccessSnackBar(
+        '${product.name} added to checkout.',
+      );
+    }
+    return added;
   }
 
   Future<void> openSearch() async {
@@ -149,14 +169,7 @@ class HomeController extends GetxController {
   Future<void> openScan() async {
     final barcode = await Get.toNamed<String>(AppRoute.getScanBarcodeScreen());
     if (barcode == null || barcode.trim().isEmpty) return;
-    final product = findProductByBarcode(barcode);
-    if (product == null) {
-      AppHelperFunctions.showWarningSnackBar(
-        'No item found for barcode $barcode.',
-      );
-      return;
-    }
-    addToCart(product);
+    addProductByBarcode(barcode);
   }
 
   Future<void> forceSync({bool showMessage = true}) async {
