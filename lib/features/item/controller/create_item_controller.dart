@@ -50,6 +50,8 @@ class CreateItemController extends GetxController {
 
   final trackStock = false.obs;
   final stores = <StoreInventoryDraft>[].obs;
+  final isLoadingStores = false.obs;
+  final storeLoadFailed = false.obs;
   final trackDate = false.obs;
   final manufacturingDate = '2025-02-01'.obs;
   final expireDate = '2028-02-01'.obs;
@@ -153,12 +155,21 @@ class CreateItemController extends GetxController {
   }
 
   Future<void> fetchStores() async {
+    isLoadingStores.value = true;
+    storeLoadFailed.value = false;
     final response = await _networkCaller.getRequest(
       ApiConstants.itemAdminFilters,
     );
-    if (!response.isSuccess || response.responseData is! Map) return;
+    isLoadingStores.value = false;
+    if (!response.isSuccess || response.responseData is! Map) {
+      storeLoadFailed.value = true;
+      return;
+    }
     final rawStores = (response.responseData as Map)['stores'];
-    if (rawStores is! List) return;
+    if (rawStores is! List) {
+      storeLoadFailed.value = true;
+      return;
+    }
     for (final draft in stores) {
       draft.dispose();
     }
@@ -363,7 +374,7 @@ class CreateItemController extends GetxController {
       'trackStock': trackStock.value,
       if (trackStock.value) 'inStock': inStock,
       if (trackStock.value) 'lowStock': lowStock,
-      if (trackStock.value && stores.any((store) => store.selected.value))
+      if (stores.any((store) => store.selected.value))
         'stores': stores
             .where((store) => store.selected.value)
             .map((store) => store.toPayload(_number))

@@ -133,7 +133,7 @@ void main() {
     ]);
   });
 
-  test('untracked item omits all stock quantities and store inventory', () {
+  test('untracked item omits quantities but keeps store availability', () {
     final controller = CreateItemController();
     controller.nameController.text = 'Consulting';
     controller.trackStock.value = false;
@@ -150,7 +150,9 @@ void main() {
     expect(payload['trackStock'], isFalse);
     expect(payload.containsKey('inStock'), isFalse);
     expect(payload.containsKey('lowStock'), isFalse);
-    expect(payload.containsKey('stores'), isFalse);
+    expect(payload['stores'], [
+      {'storeId': 'store-id', 'inStock': 10, 'lowStock': 20},
+    ]);
   });
 
   test('low stock threshold may be higher than the current quantity', () {

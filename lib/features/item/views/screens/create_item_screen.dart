@@ -237,11 +237,7 @@ class CreateItemScreen extends GetView<CreateItemController> {
                       )
                     : const SizedBox.shrink(),
               ),
-              Obx(
-                () => !controller.trackStock.value || controller.stores.isEmpty
-                    ? const SizedBox.shrink()
-                    : _StoreInventorySection(controller: controller),
-              ),
+              Obx(() => _StoreInventorySection(controller: controller)),
               Obx(
                 () =>
                     FeatureSettings.isEnabled('product_expiration_information')
@@ -439,8 +435,37 @@ class _StoreInventorySection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SizedBox(height: 24.h),
-        _sectionTitle('Store inventory'),
+        _sectionTitle('Available stores'),
+        SizedBox(height: 4.h),
+        Text(
+          'Select the store(s) where this item can be sold.',
+          style: getTextStyle(fontSize: 11.8, color: AppColors.mutedText),
+        ),
         SizedBox(height: 8.h),
+        if (controller.isLoadingStores.value)
+          const Center(child: CircularProgressIndicator())
+        else if (controller.storeLoadFailed.value)
+          _draftCard(
+            children: [
+              Text(
+                'Could not load stores.',
+                style: getTextStyle(fontSize: 12.8, color: AppColors.dangerRed),
+              ),
+              TextButton(
+                onPressed: controller.fetchStores,
+                child: const Text('RETRY'),
+              ),
+            ],
+          )
+        else if (controller.stores.isEmpty)
+          _draftCard(
+            children: [
+              Text(
+                'No active stores found. The item will be available at all stores.',
+                style: getTextStyle(fontSize: 12.8, color: AppColors.mutedText),
+              ),
+            ],
+          ),
         ...controller.stores.map(
           (store) => Obx(
             () => _draftCard(
@@ -451,7 +476,7 @@ class _StoreInventorySection extends StatelessWidget {
                   value: store.selected.value,
                   onChanged: (value) => store.selected.value = value,
                 ),
-                if (store.selected.value) ...[
+                if (store.selected.value && controller.trackStock.value) ...[
                   CreateItemField(
                     label: 'In stock',
                     controller: store.inStockController,
