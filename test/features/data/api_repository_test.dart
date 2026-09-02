@@ -41,22 +41,69 @@ void main() {
     ]);
   });
 
-  test('item category repository can be replaced by a fake', () async {
-    final network = _RecordingNetworkCaller();
-    final repository = HttpCategoryRepository(networkCaller: network);
+  test(
+    'category repository uses the active and management API routes',
+    () async {
+      final network = _RecordingNetworkCaller();
+      final repository = HttpCategoryRepository(networkCaller: network);
 
-    await repository.fetchCategories();
+      await repository.fetchCategories();
+      await repository.fetchAdminCategories();
+      await repository.createCategory({'name': 'Food'});
+      await repository.updateCategory('category-id', {'name': 'Fresh Food'});
+      await repository.deleteCategory('category-id');
 
-    expect(network.urls, ['https://phase-one.test/categories']);
-  });
+      expect(network.calls, [
+        'GET https://phase-one.test/categories',
+        'GET https://phase-one.test/categories/admin?limit=100',
+        'POST https://phase-one.test/categories',
+        'PATCH https://phase-one.test/categories/category-id',
+        'DELETE https://phase-one.test/categories/category-id',
+      ]);
+    },
+  );
 }
 
 class _RecordingNetworkCaller extends NetworkCaller {
-  final urls = <String>[];
+  final calls = <String>[];
+  List<String> get urls => calls
+      .where((call) => call.startsWith('GET '))
+      .map((call) => call.substring(4))
+      .toList();
 
   @override
   Future<ResponseData> getRequest(String url, {String? token}) async {
-    urls.add(url);
+    calls.add('GET $url');
+    return _success();
+  }
+
+  @override
+  Future<ResponseData> postRequest(
+    String url, {
+    Map<String, dynamic>? body,
+    String? token,
+  }) async {
+    calls.add('POST $url');
+    return _success();
+  }
+
+  @override
+  Future<ResponseData> patchRequest(
+    String url, {
+    Map<String, dynamic>? body,
+    String? token,
+  }) async {
+    calls.add('PATCH $url');
+    return _success();
+  }
+
+  @override
+  Future<ResponseData> deleteRequest(String url, {String? token}) async {
+    calls.add('DELETE $url');
+    return _success();
+  }
+
+  ResponseData _success() {
     return ResponseData(
       isSuccess: true,
       statusCode: 200,

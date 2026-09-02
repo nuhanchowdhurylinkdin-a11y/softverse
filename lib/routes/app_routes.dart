@@ -22,9 +22,12 @@ import '../features/invoice/views/screens/receipt_preview_screen.dart';
 import '../features/invoice/views/screens/refund_invoice_screen.dart';
 import '../features/invoice/views/screens/refund_screen.dart';
 import '../features/item/controller/create_item_controller.dart';
+import '../features/item/controller/category_controller.dart';
 import '../features/item/controller/items_menu_controller.dart';
 import '../features/item/controller/scan_barcode_controller.dart';
 import '../features/item/views/screens/create_item_screen.dart';
+import '../features/item/views/screens/category_form_screen.dart';
+import '../features/item/views/screens/category_list_screen.dart';
 import '../features/item/views/screens/items_menu_screen.dart';
 import '../features/item/views/screens/scan_barcode_screen.dart';
 import '../features/main_nav/views/screens/main_nav_screen.dart';
@@ -81,6 +84,8 @@ class AppRoute {
   static String itemsMenuScreen = "/itemsMenuScreen";
   static String createItemScreen = "/createItemScreen";
   static String scanBarcodeScreen = "/scanBarcodeScreen";
+  static String categoryListScreen = "/categoryListScreen";
+  static String categoryFormScreen = "/categoryFormScreen";
   static String viewCustomerScreen = "/viewCustomerScreen";
   static String editCustomerScreen = "/editCustomerScreen";
   static String addCustomerScreen = "/addCustomerScreen";
@@ -122,6 +127,8 @@ class AppRoute {
   static String getItemsMenuScreen() => itemsMenuScreen;
   static String getCreateItemScreen() => createItemScreen;
   static String getScanBarcodeScreen() => scanBarcodeScreen;
+  static String getCategoryListScreen() => categoryListScreen;
+  static String getCategoryFormScreen() => categoryFormScreen;
   static String getViewCustomerScreen() => viewCustomerScreen;
   static String getEditCustomerScreen() => editCustomerScreen;
   static String getAddCustomerScreen() => addCustomerScreen;
@@ -209,6 +216,20 @@ class AppRoute {
       page: () => const CreateItemScreen(),
       binding: BindingsBuilder(() {
         Get.lazyPut<CreateItemController>(() => CreateItemController());
+      }),
+    ),
+    GetPage(
+      name: categoryListScreen,
+      page: () => const CategoryListScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<CategoryController>(() => CategoryController());
+      }),
+    ),
+    GetPage(
+      name: categoryFormScreen,
+      page: () => const CategoryFormScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<CategoryFormController>(() => CategoryFormController());
       }),
     ),
     GetPage(

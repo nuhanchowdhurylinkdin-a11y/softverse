@@ -53,18 +53,22 @@ class ItemsMenuScreen extends GetView<ItemsMenuController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              ItemMenuTile(
-                icon: Iconsax.task_square,
-                label: 'Create Items',
-                onTap: controller.openCreateItems,
-              ),
-              SizedBox(height: 8.h),
-              ItemMenuTile(
-                icon: Iconsax.category,
-                label: 'Category',
-                onTap: controller.openCategory,
-              ),
-              SizedBox(height: 8.h),
+              if (controller.canEditProducts) ...[
+                ItemMenuTile(
+                  icon: Iconsax.task_square,
+                  label: 'Create Items',
+                  onTap: controller.openCreateItems,
+                ),
+                SizedBox(height: 8.h),
+              ],
+              if (controller.canEditCategories) ...[
+                ItemMenuTile(
+                  icon: Iconsax.category,
+                  label: 'Category',
+                  onTap: controller.openCategory,
+                ),
+                SizedBox(height: 8.h),
+              ],
               ItemMenuTile(
                 icon: Iconsax.edit_2,
                 label: 'Modifiers',
