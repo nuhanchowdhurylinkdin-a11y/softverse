@@ -354,91 +354,109 @@ class AddPrinterScreen extends GetView<AddPrinterController> {
   void _openDevicePicker(BuildContext context) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
       ),
       builder: (context) {
-        return SafeArea(
-          child: Obx(() {
-            final devices = controller.availableDevices;
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(height: 12.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    SizedBox(width: 16.w),
-                    Text(
-                      'Paired Printers',
-                      style: getTextStyle(
-                        fontSize: 16.4,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.onboardingBackground,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: controller.scanForPrinters,
-                      icon: Icon(
-                        Iconsax.refresh,
-                        size: 20.sp,
-                        color: AppColors.onboardingBackground,
-                      ),
-                    ),
-                  ],
-                ),
-                if (controller.isScanning.value)
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16.h),
-                    child: const CircularProgressIndicator(strokeWidth: 2),
-                  )
-                else if (devices.isEmpty)
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      vertical: 24.h,
-                      horizontal: 16.w,
-                    ),
-                    child: Text(
-                      'No paired Bluetooth printers found. Pair a printer in your device Bluetooth settings first, then tap rescan.',
-                      textAlign: TextAlign.center,
-                      style: getTextStyle(
-                        fontSize: 12.8,
-                        color: AppColors.chipInactiveText,
-                      ),
-                    ),
-                  )
-                else
-                  ...devices.map(
-                    (device) => ListTile(
-                      leading: Icon(
-                        Iconsax.printer,
-                        color: AppColors.onboardingBackground,
-                      ),
-                      title: Text(
-                        device.name,
+        return FractionallySizedBox(
+          heightFactor: 0.72,
+          child: SafeArea(
+            child: Obx(() {
+              final devices = controller.availableDevices;
+              return Column(
+                children: [
+                  SizedBox(height: 12.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(width: 16.w),
+                      Text(
+                        'Paired Printers',
                         style: getTextStyle(
-                          fontSize: 14.6,
-                          color: AppColors.authTextDark,
+                          fontSize: 16.4,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.onboardingBackground,
                         ),
                       ),
-                      subtitle: Text(
-                        device.macAdress,
-                        style: getTextStyle(
-                          fontSize: 11.6,
-                          color: AppColors.chipInactiveText,
+                      IconButton(
+                        onPressed: controller.scanForPrinters,
+                        icon: Icon(
+                          Iconsax.refresh,
+                          size: 20.sp,
+                          color: AppColors.onboardingBackground,
                         ),
                       ),
-                      onTap: () {
-                        Navigator.of(context).pop();
-                        controller.selectDevice(device);
-                      },
-                    ),
+                    ],
                   ),
-                SizedBox(height: 8.h),
-              ],
-            );
-          }),
+                  const Divider(height: 1),
+                  Expanded(
+                    child: controller.isScanning.value
+                        ? const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : devices.isEmpty
+                        ? Center(
+                            child: SingleChildScrollView(
+                              padding: EdgeInsets.symmetric(
+                                vertical: 24.h,
+                                horizontal: 16.w,
+                              ),
+                              child: Text(
+                                'No paired Bluetooth printers found. Pair a printer in your device Bluetooth settings first, then tap rescan.',
+                                textAlign: TextAlign.center,
+                                style: getTextStyle(
+                                  fontSize: 12.8,
+                                  color: AppColors.chipInactiveText,
+                                ),
+                              ),
+                            ),
+                          )
+                        : Scrollbar(
+                            child: ListView.separated(
+                              padding: EdgeInsets.only(bottom: 8.h),
+                              itemCount: devices.length,
+                              separatorBuilder: (_, _) =>
+                                  const Divider(height: 1, indent: 64),
+                              itemBuilder: (context, index) {
+                                final device = devices[index];
+                                return ListTile(
+                                  leading: Icon(
+                                    Iconsax.printer,
+                                    color: AppColors.onboardingBackground,
+                                  ),
+                                  title: Text(
+                                    device.name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: getTextStyle(
+                                      fontSize: 14.6,
+                                      color: AppColors.authTextDark,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    device.macAdress,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: getTextStyle(
+                                      fontSize: 11.6,
+                                      color: AppColors.chipInactiveText,
+                                    ),
+                                  ),
+                                  onTap: () {
+                                    Navigator.of(context).pop();
+                                    controller.selectDevice(device);
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                  ),
+                ],
+              );
+            }),
+          ),
         );
       },
     );
