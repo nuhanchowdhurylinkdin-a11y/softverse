@@ -80,7 +80,7 @@ class PrinterDetailScreen extends GetView<PrinterController> {
                             width: 8.w,
                             height: 8.w,
                             decoration: BoxDecoration(
-                              color: printer.isConnected
+                              color: printer.isConnected || printer.isVirtual
                                   ? AppColors.stockBadgeText
                                   : AppColors.chipInactiveText,
                               shape: BoxShape.circle,
@@ -88,7 +88,11 @@ class PrinterDetailScreen extends GetView<PrinterController> {
                           ),
                           SizedBox(width: 6.w),
                           Text(
-                            printer.isConnected ? 'Connected' : 'Disconnected',
+                            printer.isVirtual
+                                ? 'Ready (Virtual)'
+                                : printer.isConnected
+                                ? 'Connected'
+                                : 'Disconnected',
                             style: getTextStyle(
                               fontSize: 14.6,
                               color: AppColors.chipInactiveText,
@@ -264,7 +268,9 @@ class PrinterDetailScreen extends GetView<PrinterController> {
                                   ),
                                   SizedBox(height: 4.h),
                                   Text(
-                                    'Make sure the printer is powered on and paper is loaded properly',
+                                    printer.isVirtual
+                                        ? 'Virtual prints open as an on-screen preview; no hardware is required.'
+                                        : 'Make sure the printer is powered on and paper is loaded properly',
                                     style: getTextStyle(
                                       fontSize: 10.9,
                                       color: AppColors.chipInactiveText,

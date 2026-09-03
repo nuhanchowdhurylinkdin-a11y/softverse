@@ -10,7 +10,11 @@ class PrinterListTile extends StatelessWidget {
   final PrinterModel printer;
   final VoidCallback onTap;
 
-  const PrinterListTile({super.key, required this.printer, required this.onTap});
+  const PrinterListTile({
+    super.key,
+    required this.printer,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +75,7 @@ class PrinterListTile extends StatelessWidget {
                         width: 8.w,
                         height: 8.w,
                         decoration: BoxDecoration(
-                          color: printer.isConnected
+                          color: printer.isConnected || printer.isVirtual
                               ? AppColors.stockBadgeText
                               : AppColors.chipInactiveText,
                           shape: BoxShape.circle,
@@ -79,7 +83,11 @@ class PrinterListTile extends StatelessWidget {
                       ),
                       SizedBox(width: 6.w),
                       Text(
-                        printer.isConnected ? 'Connected' : 'Disconnected',
+                        printer.isVirtual
+                            ? 'Ready (Virtual)'
+                            : printer.isConnected
+                            ? 'Connected'
+                            : 'Disconnected',
                         style: getTextStyle(
                           fontSize: 12.8,
                           color: AppColors.chipInactiveText,

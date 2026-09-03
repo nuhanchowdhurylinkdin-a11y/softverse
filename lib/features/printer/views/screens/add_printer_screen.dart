@@ -8,6 +8,7 @@ import '../../../../core/common/widgets/primary_button.dart';
 import '../../../../core/utils/constants/colors.dart';
 import '../../../inventory/widgets/toggle_field_row.dart';
 import '../../controller/add_printer_controller.dart';
+import '../../models/printer_model.dart';
 import '../../widgets/printer_form_field.dart';
 import '../../widgets/printer_select_row.dart';
 
@@ -73,8 +74,11 @@ class AddPrinterScreen extends GetView<AddPrinterController> {
               SizedBox(height: 8.h),
               Obx(() {
                 final device = controller.selectedDevice.value;
+                final isVirtual =
+                    controller.connectionType.value ==
+                    PrinterModel.virtualConnection;
                 return GestureDetector(
-                  onTap: () => _openDevicePicker(context),
+                  onTap: isVirtual ? null : () => _openDevicePicker(context),
                   child: Container(
                     height: 55.h,
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -88,7 +92,9 @@ class AddPrinterScreen extends GetView<AddPrinterController> {
                       children: [
                         Expanded(
                           child: Text(
-                            device?.name ?? 'Select paired printer',
+                            isVirtual
+                                ? PrinterModel.virtualModel
+                                : device?.name ?? 'Select paired printer',
                             style: getTextStyle(
                               fontSize: 14.6,
                               color: AppColors.chipInactiveText,
@@ -121,10 +127,17 @@ class AddPrinterScreen extends GetView<AddPrinterController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         GestureDetector(
-                          onTap: controller.scanForPrinters,
+                          onTap:
+                              controller.connectionType.value ==
+                                  PrinterModel.virtualConnection
+                              ? null
+                              : controller.scanForPrinters,
                           child: Obx(
                             () => Text(
-                              controller.isScanning.value
+                              controller.connectionType.value ==
+                                      PrinterModel.virtualConnection
+                                  ? 'No physical printer or Bluetooth pairing is required.'
+                                  : controller.isScanning.value
                                   ? 'Scanning for printers...'
                                   : "Can't find your printer? Tap to rescan.",
                               style: getTextStyle(
@@ -134,11 +147,16 @@ class AddPrinterScreen extends GetView<AddPrinterController> {
                             ),
                           ),
                         ),
-                        Text(
-                          'Make sure the printer is turned on and connected.',
-                          style: getTextStyle(
-                            fontSize: 10.9,
-                            color: AppColors.chipInactiveText,
+                        Obx(
+                          () => Text(
+                            controller.connectionType.value ==
+                                    PrinterModel.virtualConnection
+                                ? 'Print actions will open an on-screen receipt preview.'
+                                : 'Make sure the printer is turned on and connected.',
+                            style: getTextStyle(
+                              fontSize: 10.9,
+                              color: AppColors.chipInactiveText,
+                            ),
                           ),
                         ),
                       ],
@@ -157,30 +175,46 @@ class AddPrinterScreen extends GetView<AddPrinterController> {
               ),
               SizedBox(height: 8.h),
               Obx(
-                () => Container(
-                  height: 55.h,
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  decoration: BoxDecoration(
-                    color: AppColors.chipBackground,
-                    border: Border.all(color: AppColors.cardBorder),
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        controller.connectionType.value,
-                        style: getTextStyle(
-                          fontSize: 14.6,
+                () => GestureDetector(
+                  onTap: () async {
+                    final selected = await showPrinterOptionPicker(
+                      context: context,
+                      title: 'Connection Type',
+                      options: const [
+                        PrinterModel.bluetoothConnection,
+                        PrinterModel.virtualConnection,
+                      ],
+                      selected: controller.connectionType.value,
+                    );
+                    if (selected != null) {
+                      controller.setConnectionType(selected);
+                    }
+                  },
+                  child: Container(
+                    height: 55.h,
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    decoration: BoxDecoration(
+                      color: AppColors.chipBackground,
+                      border: Border.all(color: AppColors.cardBorder),
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          controller.connectionType.value,
+                          style: getTextStyle(
+                            fontSize: 14.6,
+                            color: AppColors.chipInactiveText,
+                          ),
+                        ),
+                        Icon(
+                          Iconsax.arrow_down_1,
+                          size: 22.sp,
                           color: AppColors.chipInactiveText,
                         ),
-                      ),
-                      Icon(
-                        Iconsax.arrow_down_1,
-                        size: 22.sp,
-                        color: AppColors.chipInactiveText,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
