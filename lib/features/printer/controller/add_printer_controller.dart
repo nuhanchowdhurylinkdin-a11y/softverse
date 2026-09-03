@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 
@@ -7,6 +10,7 @@ import '../models/printer_model.dart';
 import 'printer_controller.dart';
 
 class AddPrinterController extends GetxController {
+  static const _settingsChannel = MethodChannel('softverse/app_settings');
   final PrinterController _printerController = Get.find<PrinterController>();
 
   final nameController = TextEditingController();
@@ -34,6 +38,13 @@ class AddPrinterController extends GetxController {
   Future<void> scanForPrinters() async {
     isScanning.value = true;
     try {
+      if (!await _ensureBluetoothPermission()) {
+        availableDevices.clear();
+        AppHelperFunctions.showWarningSnackBar(
+          'Allow Nearby devices permission to find paired printers.',
+        );
+        return;
+      }
       final enabled = await PrintBluetoothThermal.bluetoothEnabled;
       if (!enabled) {
         AppHelperFunctions.showWarningSnackBar(
@@ -46,6 +57,19 @@ class AddPrinterController extends GetxController {
       availableDevices.assignAll(devices);
     } finally {
       isScanning.value = false;
+    }
+  }
+
+  Future<bool> _ensureBluetoothPermission() async {
+    if (!Platform.isAndroid) return true;
+    if (await PrintBluetoothThermal.isPermissionBluetoothGranted) return true;
+    try {
+      return await _settingsChannel.invokeMethod<bool>(
+            'requestBluetoothPermissions',
+          ) ??
+          false;
+    } on PlatformException {
+      return false;
     }
   }
 
