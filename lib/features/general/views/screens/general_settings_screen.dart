@@ -39,7 +39,7 @@ class GeneralSettingsScreen extends GetView<GeneralController> {
           ),
         ),
         title: Text(
-          'General',
+          'General'.tr,
           style: getTextStyle(
             fontSize: 16.4,
             fontWeight: FontWeight.w500,
@@ -58,7 +58,7 @@ class GeneralSettingsScreen extends GetView<GeneralController> {
                 children: [
                   Expanded(
                     child: Text(
-                      'Use camera to scan barcodes',
+                      'Use camera to scan barcodes'.tr,
                       style: getTextStyle(
                         fontSize: 14.6,
                         fontWeight: FontWeight.w500,
@@ -86,7 +86,7 @@ class GeneralSettingsScreen extends GetView<GeneralController> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      'Home screen item layout',
+                      'Home screen item layout'.tr,
                       style: getTextStyle(
                         fontSize: 14.6,
                         fontWeight: FontWeight.w500,
@@ -120,7 +120,7 @@ class GeneralSettingsScreen extends GetView<GeneralController> {
               ),
               SizedBox(height: 20.h),
               Text(
-                'Feature',
+                'Feature'.tr,
                 style: getTextStyle(
                   fontSize: 14.6,
                   fontWeight: FontWeight.w500,
@@ -130,7 +130,7 @@ class GeneralSettingsScreen extends GetView<GeneralController> {
               ),
               SizedBox(height: 12.h),
               Text(
-                'Language',
+                'Language'.tr,
                 style: getTextStyle(
                   fontSize: 14.6,
                   fontWeight: FontWeight.w500,
@@ -162,7 +162,7 @@ class GeneralSettingsScreen extends GetView<GeneralController> {
                       children: [
                         Expanded(
                           child: Text(
-                            controller.language.value,
+                            controller.language.value.tr,
                             style: getTextStyle(
                               fontSize: 14.6,
                               color: AppColors.chipInactiveText,

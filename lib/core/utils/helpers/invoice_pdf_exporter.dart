@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+
 import '../../../features/checkout/models/cart_item.dart';
 import 'app_helper.dart';
 
@@ -20,7 +23,10 @@ class InvoicePdfExporter {
     required double changeToReturn,
   }) async {
     final fileName = '${invoiceNumber.replaceAll(' ', '_')}.pdf';
-    final file = File('${Directory.systemTemp.path}/$fileName');
+    // The documents directory persists across app restarts and OS cache
+    // clears, unlike systemTemp — a downloaded invoice shouldn't vanish.
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}/$fileName');
     await file.writeAsBytes(
       _buildPdf(
         invoiceNumber: invoiceNumber,
@@ -38,8 +44,13 @@ class InvoicePdfExporter {
     return file;
   }
 
+  /// Hands the exported PDF to the OS share sheet so the user can save it
+  /// (Files/Drive/Downloads) or send it on, since the app has no in-place
+  /// "Downloads" folder of its own to point them to.
   static Future<void> open(File file) async {
-    AppHelperFunctions.showSuccessSnackBar('Invoice exported to ${file.path}');
+    await SharePlus.instance.share(
+      ShareParams(files: [XFile(file.path)], fileNameOverrides: [file.uri.pathSegments.last]),
+    );
   }
 
   static Uint8List _buildPdf({

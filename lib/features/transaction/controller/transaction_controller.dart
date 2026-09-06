@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/services/network_caller.dart';
@@ -7,12 +8,14 @@ import '../../../core/utils/helpers/app_helper.dart';
 import '../../../routes/app_routes.dart';
 import '../../invoice/controller/invoice_controller.dart';
 import '../models/transaction_record.dart';
+import '../widgets/transaction_filter_sheet.dart';
 
 class TransactionController extends GetxController {
   final NetworkCaller _networkCaller = NetworkCaller();
   final transactions = <TransactionRecord>[].obs;
   final searchQuery = ''.obs;
   final isLoading = false.obs;
+  final Rxn<PaymentType> statusFilter = Rxn<PaymentType>();
 
   @override
   void onInit() {
@@ -21,20 +24,34 @@ class TransactionController extends GetxController {
     fetchTransactions();
   }
 
+  String get filterLabel => statusFilter.value?.label ?? 'Transaction';
+
   List<TransactionRecord> get filteredTransactions {
     final query = searchQuery.value.trim().toLowerCase();
-    if (query.isEmpty) return transactions;
-    return transactions
-        .where(
-          (transaction) =>
-              transaction.companyName.toLowerCase().contains(query) ||
-              transaction.invoiceNumber.toLowerCase().contains(query) ||
-              transaction.orderId.toLowerCase().contains(query),
-        )
-        .toList();
+    final filter = statusFilter.value;
+    return transactions.where((transaction) {
+      final matchesQuery =
+          query.isEmpty ||
+          transaction.companyName.toLowerCase().contains(query) ||
+          transaction.invoiceNumber.toLowerCase().contains(query) ||
+          transaction.orderId.toLowerCase().contains(query);
+      final matchesFilter = filter == null || transaction.paymentType == filter;
+      return matchesQuery && matchesFilter;
+    }).toList();
   }
 
   void updateSearchQuery(String value) => searchQuery.value = value;
+
+  Future<void> openFilterSheet(BuildContext context) async {
+    final result = await showTransactionFilterSheet(
+      context: context,
+      selected: statusFilter.value,
+    );
+    if (result == null) return;
+    statusFilter.value = result == kTransactionFilterAll
+        ? null
+        : result as PaymentType;
+  }
 
   Future<void> fetchTransactions({bool showMessage = false}) async {
     isLoading.value = true;
@@ -71,11 +88,18 @@ class TransactionController extends GetxController {
   }
 
   Future<void> exportInvoice(TransactionRecord transaction) async {
-    await openTransaction(transaction);
-    await Get.find<InvoiceController>().exportPdf();
-  }
+    Map<String, dynamic> payload = transaction.raw;
+    final response = await _networkCaller.getRequest(
+      ApiConstants.transaction(transaction.id),
+    );
+    if (response.isSuccess && response.responseData is Map) {
+      payload = Map<String, dynamic>.from(response.responseData as Map);
+    }
 
-  void openFilter() {}
+    final invoiceController = Get.find<InvoiceController>();
+    invoiceController.loadFromOrder(payload);
+    await invoiceController.exportAndSharePdf();
+  }
 
   void openNotifications() {}
 

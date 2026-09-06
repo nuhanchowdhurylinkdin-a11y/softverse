@@ -272,6 +272,31 @@ class InvoiceController extends GetxController {
     }
   }
 
+  /// Generates the PDF and immediately hands it to the OS share sheet,
+  /// without navigating anywhere — used by the download icon on the
+  /// transaction list, where jumping to the invoice screen would be an
+  /// unexpected side effect of a "download" tap.
+  Future<void> exportAndSharePdf() async {
+    if (isPreparingPdf.value) return;
+
+    isPreparingPdf.value = true;
+    try {
+      final file = await _downloadBackendReceipt() ?? await _createLocalPdf();
+      localPdfPath.value = file.path;
+      await InvoicePdfExporter.open(file);
+    } catch (_) {
+      AppHelperFunctions.showErrorSnackBar('Could not prepare receipt PDF.');
+    } finally {
+      isPreparingPdf.value = false;
+    }
+  }
+
+  Future<void> shareGeneratedPdf() async {
+    final path = localPdfPath.value;
+    if (path == null || path.isEmpty) return;
+    await InvoicePdfExporter.open(File(path));
+  }
+
   Future<File> _createLocalPdf() {
     return InvoicePdfExporter.exportInvoice(
       invoiceNumber: invoiceNumber.value,

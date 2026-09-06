@@ -17,12 +17,12 @@ class _NavDrawerItem {
 class AppNavDrawer extends GetView<MainNavController> {
   const AppNavDrawer({super.key});
 
-  static const _items = [
-    _NavDrawerItem(label: 'Home', icon: Iconsax.home),
-    _NavDrawerItem(label: 'Checkout', icon: Iconsax.shopping_cart),
-    _NavDrawerItem(label: 'Transaction', icon: Iconsax.refresh),
-    _NavDrawerItem(label: 'Inventory', icon: Iconsax.box),
-    _NavDrawerItem(label: 'More', icon: Iconsax.menu),
+  static List<_NavDrawerItem> get _items => [
+    _NavDrawerItem(label: 'Home'.tr, icon: Iconsax.home),
+    _NavDrawerItem(label: 'Checkout'.tr, icon: Iconsax.shopping_cart),
+    _NavDrawerItem(label: 'Transaction'.tr, icon: Iconsax.refresh),
+    _NavDrawerItem(label: 'Inventory'.tr, icon: Iconsax.box),
+    _NavDrawerItem(label: 'More'.tr, icon: Iconsax.menu),
   ];
 
   @override

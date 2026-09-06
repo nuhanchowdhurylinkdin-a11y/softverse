@@ -14,6 +14,7 @@ class StorageService {
   static const String _onboardingCompleteKey = 'onboardingComplete';
   static const String _featureSettingsCompleteKey = 'featureSettingsComplete';
   static const String _themeModeKey = 'themeMode';
+  static const String _languageKey = 'language';
 
   static SharedPreferences? _preferences;
 
@@ -121,5 +122,11 @@ class StorageService {
 
   static Future<void> setThemeMode(String mode) async {
     await _preferences?.setString(_themeModeKey, mode);
+  }
+
+  static String? get language => _preferences?.getString(_languageKey);
+
+  static Future<void> setLanguage(String value) async {
+    await _preferences?.setString(_languageKey, value);
   }
 }

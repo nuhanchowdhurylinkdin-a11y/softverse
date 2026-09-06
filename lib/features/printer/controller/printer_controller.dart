@@ -268,5 +268,79 @@ class PrinterController extends GetxController {
     return sent;
   }
 
+  /// Prints a pre-payment estimate for an in-progress order — same layout as
+  /// a receipt, minus the amount-received/change lines that don't exist yet.
+  Future<bool> printEstimate({
+    required String orderId,
+    required String customerName,
+    required List<CartItem> items,
+    required double subtotal,
+    required double tax,
+    required double totalAmount,
+  }) async {
+    final printer = receiptPrinter;
+    if (printer == null) {
+      AppHelperFunctions.showWarningSnackBar('Add a receipt printer first.');
+      return false;
+    }
+
+    final connected = await connectToPrinter(printer);
+    if (!connected) {
+      AppHelperFunctions.showErrorSnackBar('Could not connect to printer.');
+      return false;
+    }
+
+    final profile = await CapabilityProfile.load();
+    final paperSize = printer.paperSize == '58mm'
+        ? PaperSize.mm58
+        : PaperSize.mm80;
+    final generator = Generator(paperSize, profile);
+    final isDark = printer.printDensity == 'Dark';
+
+    final bytes = <int>[
+      ...generator.text(
+        'Softverse POS',
+        styles: PosStyles(
+          align: PosAlign.center,
+          bold: true,
+          height: PosTextSize.size2,
+          width: PosTextSize.size2,
+        ),
+      ),
+      ...generator.text(
+        'ESTIMATE (not a receipt)',
+        styles: const PosStyles(align: PosAlign.center),
+      ),
+      ...generator.text(orderId),
+      ...generator.text('Customer: $customerName'),
+      ...generator.hr(),
+      ...generator.text('Items', styles: PosStyles(bold: isDark)),
+      for (final item in items) ...[
+        ...generator.text('${item.name} x${item.quantity}'),
+        ...generator.text(
+          _money(item.lineSubtotal),
+          styles: const PosStyles(align: PosAlign.right),
+        ),
+      ],
+      ...generator.hr(),
+      ...generator.text('Subtotal: ${_money(subtotal)}'),
+      ...generator.text('Tax: ${_money(tax)}'),
+      ...generator.text(
+        'Total: ${_money(totalAmount)}',
+        styles: PosStyles(bold: isDark),
+      ),
+      ...generator.feed(2),
+      if (printer.autoCut) ...generator.cut(),
+    ];
+
+    final sent = await PrintBluetoothThermal.writeBytes(bytes);
+    if (sent) {
+      AppHelperFunctions.showSuccessSnackBar('Estimate sent to printer.');
+    } else {
+      AppHelperFunctions.showErrorSnackBar('Failed to print estimate.');
+    }
+    return sent;
+  }
+
   String _money(double value) => '\$${value.toStringAsFixed(2)}';
 }

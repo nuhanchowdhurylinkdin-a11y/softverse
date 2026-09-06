@@ -20,6 +20,7 @@ import '../../home/controller/home_controller.dart';
 import '../../home/models/table_order.dart';
 import '../../invoice/controller/invoice_controller.dart';
 import '../../main_nav/controller/main_nav_controller.dart';
+import '../../printer/controller/printer_controller.dart';
 import '../../tax/controller/tax_controller.dart';
 import '../../tax/models/tax_model.dart';
 import '../../transaction/controller/transaction_controller.dart';
@@ -319,6 +320,21 @@ class CheckoutController extends GetxController {
   Future<void> openScan() => Get.find<HomeController>().openScan();
 
   void closeCheckout() => Get.find<MainNavController>().changeTab(0);
+
+  Future<void> printEstimate() async {
+    if (cartItems.isEmpty) {
+      AppHelperFunctions.showWarningSnackBar('Add items before printing an estimate.');
+      return;
+    }
+    await Get.find<PrinterController>().printEstimate(
+      orderId: orderId,
+      customerName: customerName.value,
+      items: cartItems.toList(),
+      subtotal: subtotal,
+      tax: tax,
+      totalAmount: totalAmount,
+    );
+  }
 
   Future<void> forceSync() async {
     if (Get.isRegistered<SyncService>()) {
@@ -692,22 +708,7 @@ class CheckoutController extends GetxController {
     customerName.value = savedCustomerName.isEmpty
         ? 'Not Registered'
         : savedCustomerName;
-    final items = order['items'] is List
-        ? List<dynamic>.from(order['items'] as List)
-        : <dynamic>[];
-    cartItems.assignAll(
-      items.whereType<Map>().map((entry) {
-        final item = Map<String, dynamic>.from(entry);
-        return CartItem(
-          itemId: item['itemId']?.toString(),
-          name: item['name']?.toString() ?? 'Item',
-          price: double.tryParse(item['unitPrice']?.toString() ?? '') ?? 0,
-          imageUrl: item['imageUrl']?.toString() ?? '',
-          quantity: (double.tryParse(item['quantity']?.toString() ?? '') ?? 1)
-              .round(),
-        );
-      }),
-    );
+    cartItems.assignAll(_cartItemsFromOrderJson(order));
     amountEditedManually.value = false;
     amountReceived.value =
         double.tryParse(order['totalAmount']?.toString() ?? '') ??
@@ -718,6 +719,56 @@ class CheckoutController extends GetxController {
     Get.find<MainNavController>().changeTab(1);
     _syncCds();
     return true;
+  }
+
+  List<CartItem> _cartItemsFromOrderJson(Map<String, dynamic> order) {
+    final items = order['items'] is List
+        ? List<dynamic>.from(order['items'] as List)
+        : <dynamic>[];
+    return items.whereType<Map>().map((entry) {
+      final item = Map<String, dynamic>.from(entry);
+      return CartItem(
+        itemId: item['itemId']?.toString(),
+        name: item['name']?.toString() ?? 'Item',
+        price: double.tryParse(item['unitPrice']?.toString() ?? '') ?? 0,
+        imageUrl: item['imageUrl']?.toString() ?? '',
+        quantity: (double.tryParse(item['quantity']?.toString() ?? '') ?? 1)
+            .round(),
+      );
+    }).toList();
+  }
+
+  Future<void> printPendingOrder(String orderId) async {
+    final response = await _networkCaller.getRequest(
+      ApiConstants.checkoutOrder(orderId),
+    );
+    if (!response.isSuccess || response.responseData is! Map) {
+      AppHelperFunctions.showErrorSnackBar('Unable to load order.');
+      return;
+    }
+
+    final order = Map<String, dynamic>.from(response.responseData as Map);
+    final rawCustomerName = order['customerName']?.toString().trim() ?? '';
+    await Get.find<PrinterController>().printEstimate(
+      orderId: order['orderNumber']?.toString() ?? orderId,
+      customerName: rawCustomerName.isEmpty ? 'Not Registered' : rawCustomerName,
+      items: _cartItemsFromOrderJson(order),
+      subtotal: double.tryParse(order['subtotal']?.toString() ?? '') ?? 0,
+      tax: double.tryParse(order['taxAmount']?.toString() ?? '') ?? 0,
+      totalAmount: double.tryParse(order['totalAmount']?.toString() ?? '') ?? 0,
+    );
+  }
+
+  Future<void> deletePendingOrder(String orderId) async {
+    final response = await _networkCaller.deleteRequest(
+      ApiConstants.checkoutOrder(orderId),
+    );
+    if (!response.isSuccess) {
+      AppHelperFunctions.showErrorSnackBar(response.errorMessage);
+      return;
+    }
+    pendingOrders.removeWhere((order) => order['id']?.toString() == orderId);
+    AppHelperFunctions.showSuccessSnackBar('Order deleted.');
   }
 
   void _syncAmountReceivedWithTotal({bool force = false}) {

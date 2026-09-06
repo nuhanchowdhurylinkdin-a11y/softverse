@@ -182,31 +182,43 @@ class ReceiptPreviewScreen extends GetView<InvoiceController> {
                 ),
                 SizedBox(height: 14.h),
                 if ((controller.localPdfPath.value ?? '').isNotEmpty)
-                  Container(
-                    padding: EdgeInsets.all(12.w),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
+                  Material(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8.r),
+                    child: InkWell(
                       borderRadius: BorderRadius.circular(8.r),
-                      border: Border.all(color: AppColors.cardBorder),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Iconsax.tick_circle,
-                          color: AppColors.stockBadgeText,
-                          size: 20.sp,
+                      onTap: controller.shareGeneratedPdf,
+                      child: Container(
+                        padding: EdgeInsets.all(12.w),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8.r),
+                          border: Border.all(color: AppColors.cardBorder),
                         ),
-                        SizedBox(width: 8.w),
-                        Expanded(
-                          child: Text(
-                            'PDF is ready for sharing or printing.',
-                            style: getTextStyle(
-                              fontSize: 12.8,
-                              color: AppColors.authTextDark,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Iconsax.tick_circle,
+                              color: AppColors.stockBadgeText,
+                              size: 20.sp,
                             ),
-                          ),
+                            SizedBox(width: 8.w),
+                            Expanded(
+                              child: Text(
+                                'PDF is ready — tap to share or save.',
+                                style: getTextStyle(
+                                  fontSize: 12.8,
+                                  color: AppColors.authTextDark,
+                                ),
+                              ),
+                            ),
+                            Icon(
+                              Iconsax.share,
+                              color: AppColors.onboardingBackground,
+                              size: 18.sp,
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 SizedBox(height: 16.h),

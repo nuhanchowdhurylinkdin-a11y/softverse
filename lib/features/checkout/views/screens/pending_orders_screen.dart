@@ -116,12 +116,7 @@ class _PendingOrderTile extends GetView<CheckoutController> {
       borderRadius: BorderRadius.circular(12.r),
       child: InkWell(
         borderRadius: BorderRadius.circular(12.r),
-        onTap: () async {
-          final id = order['id']?.toString();
-          if (id == null || id.isEmpty) return;
-          final opened = await controller.loadOrderForCheckout(id);
-          if (opened) Get.back();
-        },
+        onTap: () => _modify(context),
         child: Container(
           padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
@@ -160,11 +155,74 @@ class _PendingOrderTile extends GetView<CheckoutController> {
                   color: AppColors.chipInactiveText,
                 ),
               ),
+              SizedBox(height: 4.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  _ActionIcon(
+                    icon: Iconsax.edit,
+                    tooltip: 'Modify',
+                    onTap: () => _modify(context),
+                  ),
+                  SizedBox(width: 6.w),
+                  _ActionIcon(
+                    icon: Iconsax.printer,
+                    tooltip: 'Print',
+                    onTap: () {
+                      final id = order['id']?.toString();
+                      if (id != null && id.isNotEmpty) {
+                        controller.printPendingOrder(id);
+                      }
+                    },
+                  ),
+                  SizedBox(width: 6.w),
+                  _ActionIcon(
+                    icon: Iconsax.trash,
+                    tooltip: 'Delete',
+                    color: AppColors.dangerRed,
+                    onTap: () => _confirmDelete(context),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _modify(BuildContext context) async {
+    final id = order['id']?.toString();
+    if (id == null || id.isEmpty) return;
+    final opened = await controller.loadOrderForCheckout(id);
+    if (opened) Get.back();
+  }
+
+  Future<void> _confirmDelete(BuildContext context) async {
+    final id = order['id']?.toString();
+    if (id == null || id.isEmpty) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete order?'),
+        content: const Text(
+          'This pending order will be permanently removed.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text('Delete', style: TextStyle(color: AppColors.dangerRed)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await controller.deletePendingOrder(id);
+    }
   }
 
   String _text(dynamic value, {required String fallback}) {
@@ -176,5 +234,34 @@ class _PendingOrderTile extends GetView<CheckoutController> {
     final parsed = DateTime.tryParse(value?.toString() ?? '');
     if (parsed == null) return '';
     return DateFormat('dd/MM/yyyy hh:mma').format(parsed.toLocal());
+  }
+}
+
+class _ActionIcon extends StatelessWidget {
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback onTap;
+  final Color? color;
+
+  const _ActionIcon({
+    required this.icon,
+    required this.tooltip,
+    required this.onTap,
+    this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      shape: const CircleBorder(),
+      child: IconButton(
+        onPressed: onTap,
+        tooltip: tooltip,
+        icon: Icon(icon, size: 18.sp, color: color ?? AppColors.onboardingBackground),
+        constraints: BoxConstraints.tight(Size(34.w, 34.w)),
+        padding: EdgeInsets.zero,
+      ),
+    );
   }
 }
