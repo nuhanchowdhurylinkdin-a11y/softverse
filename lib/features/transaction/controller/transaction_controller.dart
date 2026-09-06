@@ -98,7 +98,7 @@ class TransactionController extends GetxController {
 
     final invoiceController = Get.find<InvoiceController>();
     invoiceController.loadFromOrder(payload);
-    await invoiceController.exportAndSharePdf();
+    await invoiceController.exportAndDownloadPdf();
   }
 
   void openNotifications() {}

@@ -187,7 +187,7 @@ class ReceiptPreviewScreen extends GetView<InvoiceController> {
                     borderRadius: BorderRadius.circular(8.r),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(8.r),
-                      onTap: controller.shareGeneratedPdf,
+                      onTap: controller.downloadGeneratedPdf,
                       child: Container(
                         padding: EdgeInsets.all(12.w),
                         decoration: BoxDecoration(
@@ -204,7 +204,7 @@ class ReceiptPreviewScreen extends GetView<InvoiceController> {
                             SizedBox(width: 8.w),
                             Expanded(
                               child: Text(
-                                'PDF is ready — tap to share or save.',
+                                'PDF is ready — tap to download.',
                                 style: getTextStyle(
                                   fontSize: 12.8,
                                   color: AppColors.authTextDark,
@@ -212,7 +212,7 @@ class ReceiptPreviewScreen extends GetView<InvoiceController> {
                               ),
                             ),
                             Icon(
-                              Iconsax.share,
+                              Iconsax.document_download,
                               color: AppColors.onboardingBackground,
                               size: 18.sp,
                             ),
