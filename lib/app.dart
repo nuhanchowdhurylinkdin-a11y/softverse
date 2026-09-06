@@ -57,11 +57,7 @@ class MyApp extends StatelessWidget {
     };
   }
 
-  Locale _initialLocale() {
-    return switch (StorageService.language) {
-      'Bengali' => const Locale('bn', 'BD'),
-      'English' => AppTranslations.fallbackLocale,
-      _ => Get.deviceLocale ?? AppTranslations.fallbackLocale,
-    };
-  }
+  Locale _initialLocale() => AppTranslations.localeForLanguageName(
+    StorageService.language ?? 'Use device settings',
+  );
 }

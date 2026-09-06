@@ -9,6 +9,10 @@ const List<String> kLanguageOptions = [
   'Use device settings',
   'English',
   'Bengali',
+  'Hindi',
+  'Arabic',
+  'Spanish',
+  'French',
 ];
 
 Future<String?> showLanguagePicker({

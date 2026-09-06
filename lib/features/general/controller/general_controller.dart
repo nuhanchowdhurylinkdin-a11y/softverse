@@ -1,4 +1,3 @@
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 
 import '../../../core/localization/app_translations.dart';
@@ -19,14 +18,8 @@ class GeneralController extends GetxController {
   void selectLanguage(String value) {
     language.value = value;
     StorageService.setLanguage(value);
-    Get.updateLocale(_localeFor(value));
+    Get.updateLocale(AppTranslations.localeForLanguageName(value));
   }
-
-  Locale _localeFor(String value) => switch (value) {
-    'Bengali' => const Locale('bn', 'BD'),
-    'English' => AppTranslations.fallbackLocale,
-    _ => Get.deviceLocale ?? AppTranslations.fallbackLocale,
-  };
 
   String get homeScreenLayoutLabel =>
       homeScreenLayout.value == HomeScreenLayout.grid ? 'Grid' : 'List';
