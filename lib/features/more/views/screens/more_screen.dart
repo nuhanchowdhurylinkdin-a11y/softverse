@@ -74,7 +74,7 @@ class MoreScreen extends GetView<MoreController> {
                 () => FeatureSettings.isEnabled('shifts')
                     ? MoreMenuTile(
                         icon: Iconsax.clock,
-                        label: 'Shift',
+                        label: 'Shift'.tr,
                         onTap: controller.openShift,
                       )
                     : const SizedBox.shrink(),
@@ -86,7 +86,7 @@ class MoreScreen extends GetView<MoreController> {
               ),
               MoreMenuTile(
                 icon: Iconsax.task_square,
-                label: 'Item',
+                label: 'Item'.tr,
                 onTap: controller.openItem,
               ),
               SizedBox(height: 12.h),
@@ -94,7 +94,7 @@ class MoreScreen extends GetView<MoreController> {
                 () => FeatureSettings.isEnabled('table_options')
                     ? MoreMenuTile(
                         icon: Icons.table_restaurant,
-                        label: 'Tables',
+                        label: 'Tables'.tr,
                         onTap: controller.openTables,
                       )
                     : const SizedBox.shrink(),
@@ -106,7 +106,7 @@ class MoreScreen extends GetView<MoreController> {
               ),
               MoreMenuTile(
                 icon: Iconsax.user,
-                label: 'Customer',
+                label: 'Customer'.tr,
                 onTap: controller.openCustomer,
               ),
               SizedBox(height: 24.h),
@@ -119,7 +119,7 @@ class MoreScreen extends GetView<MoreController> {
                   ),
                   SizedBox(width: 8.w),
                   Text(
-                    'Settings',
+                    'Settings'.tr,
                     style: getTextStyle(
                       fontSize: 14.6,
                       fontWeight: FontWeight.w500,
@@ -134,7 +134,7 @@ class MoreScreen extends GetView<MoreController> {
                   Expanded(
                     child: MoreMenuTile(
                       icon: Iconsax.printer,
-                      label: 'Printer',
+                      label: 'Printer'.tr,
                       centered: true,
                       onTap: controller.openPrinterSettings,
                     ),
@@ -143,7 +143,7 @@ class MoreScreen extends GetView<MoreController> {
                   Expanded(
                     child: MoreMenuTile(
                       icon: Iconsax.mobile,
-                      label: 'Apps',
+                      label: 'Apps'.tr,
                       centered: true,
                       onTap: controller.openAppsSettings,
                     ),
@@ -156,7 +156,7 @@ class MoreScreen extends GetView<MoreController> {
                   Expanded(
                     child: MoreMenuTile(
                       icon: Iconsax.cpu_setting,
-                      label: 'General',
+                      label: 'General'.tr,
                       centered: true,
                       onTap: controller.openGeneralSettings,
                     ),
@@ -165,7 +165,7 @@ class MoreScreen extends GetView<MoreController> {
                   Expanded(
                     child: MoreMenuTile(
                       icon: Iconsax.percentage_circle,
-                      label: 'Taxes',
+                      label: 'Taxes'.tr,
                       centered: true,
                       onTap: controller.openTaxesSettings,
                     ),
@@ -175,25 +175,25 @@ class MoreScreen extends GetView<MoreController> {
               SizedBox(height: 56.h),
               MoreMenuTile(
                 icon: Iconsax.element_2,
-                label: 'Back Office',
+                label: 'Back Office'.tr,
                 onTap: controller.openBackOffice,
               ),
               SizedBox(height: 12.h),
               MoreMenuTile(
                 icon: Iconsax.mobile,
-                label: 'Apps Integration',
+                label: 'Apps Integration'.tr,
                 onTap: controller.openAppsIntegration,
               ),
               SizedBox(height: 12.h),
               MoreMenuTile(
                 icon: Iconsax.headphone,
-                label: 'Supports',
+                label: 'Supports'.tr,
                 onTap: controller.openSupport,
               ),
               SizedBox(height: 52.h),
               Center(
                 child: PrimaryButton(
-                  label: 'Log out',
+                  label: 'Log out'.tr,
                   onPressed: controller.logout,
                   backgroundColor: AppColors.dangerRed,
                   textColor: Colors.white,

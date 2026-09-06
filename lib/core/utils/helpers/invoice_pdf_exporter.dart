@@ -2,6 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:file_picker/file_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+
 import '../../../features/checkout/models/cart_item.dart';
 import 'app_helper.dart';
 
@@ -20,7 +24,10 @@ class InvoicePdfExporter {
     required double changeToReturn,
   }) async {
     final fileName = '${invoiceNumber.replaceAll(' ', '_')}.pdf';
-    final file = File('${Directory.systemTemp.path}/$fileName');
+    // The documents directory persists across app restarts and OS cache
+    // clears, unlike systemTemp — a downloaded invoice shouldn't vanish.
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}/$fileName');
     await file.writeAsBytes(
       _buildPdf(
         invoiceNumber: invoiceNumber,
@@ -38,8 +45,28 @@ class InvoicePdfExporter {
     return file;
   }
 
-  static Future<void> open(File file) async {
-    AppHelperFunctions.showSuccessSnackBar('Invoice exported to ${file.path}');
+  /// Opens the native "Save As" dialog (Storage Access Framework on Android,
+  /// the document picker on iOS) so the user picks exactly where the PDF
+  /// lands on their device — e.g. Downloads — rather than just sharing it
+  /// to another app. Returns true if the user actually saved it somewhere.
+  static Future<bool> saveToDevice(File file) async {
+    final bytes = await file.readAsBytes();
+    final savedPath = await FilePicker.platform.saveFile(
+      dialogTitle: 'Save invoice PDF',
+      fileName: file.uri.pathSegments.last,
+      bytes: bytes,
+    );
+    if (savedPath == null) return false;
+    AppHelperFunctions.showSuccessSnackBar('Invoice saved.');
+    return true;
+  }
+
+  /// Hands the exported PDF to the OS share sheet so the user can send it to
+  /// another app (Drive, Messages, etc.) instead of saving it locally.
+  static Future<void> share(File file) async {
+    await SharePlus.instance.share(
+      ShareParams(files: [XFile(file.path)], fileNameOverrides: [file.uri.pathSegments.last]),
+    );
   }
 
   static Uint8List _buildPdf({

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../../../core/common/styles/global_text_style.dart';
 import '../../../core/utils/constants/colors.dart';
@@ -7,6 +8,9 @@ import '../../../core/utils/constants/colors.dart';
 const List<String> kLanguageOptions = [
   'Use device settings',
   'English',
+  'Bengali',
+  'Hindi',
+  'Arabic',
   'Spanish',
   'French',
 ];
@@ -28,7 +32,7 @@ Future<String?> showLanguagePicker({
           children: [
             SizedBox(height: 12.h),
             Text(
-              'Language',
+              'Language'.tr,
               style: getTextStyle(
                 fontSize: 16.4,
                 fontWeight: FontWeight.w500,
@@ -39,7 +43,7 @@ Future<String?> showLanguagePicker({
             for (final option in kLanguageOptions)
               ListTile(
                 title: Text(
-                  option,
+                  option.tr,
                   style: getTextStyle(
                     fontSize: 14.6,
                     color: option == selected

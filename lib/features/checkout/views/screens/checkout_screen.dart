@@ -64,9 +64,12 @@ class CheckoutScreen extends GetView<CheckoutController> {
           ),
           SizedBox(width: 15.w),
           Icon(Iconsax.notification, color: Colors.white, size: 26.sp),
-          SizedBox(width: 15.w),
-          Icon(Iconsax.more, color: Colors.white, size: 26.sp),
-          SizedBox(width: 16.w),
+          IconButton(
+            onPressed: controller.printEstimate,
+            icon: Icon(Iconsax.printer, color: Colors.white, size: 26.sp),
+            tooltip: 'Print estimate',
+          ),
+          SizedBox(width: 6.w),
         ],
       ),
       body: SafeArea(

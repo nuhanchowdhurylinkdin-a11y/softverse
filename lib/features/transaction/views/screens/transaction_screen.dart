@@ -39,21 +39,23 @@ class TransactionScreen extends GetView<TransactionController> {
         ),
         titleSpacing: 16.w,
         title: GestureDetector(
-          onTap: controller.openFilter,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Transaction',
-                style: getTextStyle(
-                  fontSize: 16.4,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white,
+          onTap: () => controller.openFilterSheet(context),
+          child: Obx(
+            () => Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  controller.filterLabel,
+                  style: getTextStyle(
+                    fontSize: 16.4,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
                 ),
-              ),
-              SizedBox(width: 4.w),
-              Icon(Iconsax.arrow_down, color: Colors.white, size: 22.sp),
-            ],
+                SizedBox(width: 4.w),
+                Icon(Iconsax.arrow_down, color: Colors.white, size: 22.sp),
+              ],
+            ),
           ),
         ),
         actions: [

@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   cupertino_icons: ^1.0.8
   http: ^1.6.0
@@ -30,6 +32,9 @@ dependencies:
   print_bluetooth_thermal: ^1.2.1
   esc_pos_utils_plus: ^2.0.4
   awesome_snackbar_content: ^0.1.8
+  share_plus: ^11.0.0
+  path_provider: ^2.1.5
+  file_picker: ^10.3.4
 
 dev_dependencies:
   flutter_test:
