@@ -127,7 +127,7 @@ class RefundScreen extends GetView<InvoiceController> {
               ReadOnlyBillCard(
                 subtotal: controller.subtotal,
                 tax: controller.tax,
-                taxRate: controller.taxRate,
+                taxRate: controller.effectiveTaxRate,
                 totalAmount: controller.totalAmount,
                 amountReceived: controller.amountReceived,
                 changeToReturn: controller.changeToReturn,

@@ -80,6 +80,12 @@ class InvoiceController extends GetxController {
 
   double get tax => _hasOrderData.value ? taxValue.value : subtotal * taxRate;
 
+  /// The rate actually reflected by [subtotal]/[tax], for the "TAX (X%)"
+  /// label - not [taxRate], which is only a pre-load display estimate and
+  /// stays 7.5% forever once real (possibly zero, or a different
+  /// configured rate) order data has loaded.
+  double get effectiveTaxRate => subtotal > 0 ? tax / subtotal : 0;
+
   double get totalAmount =>
       _hasOrderData.value ? totalValue.value : subtotal + tax;
 
