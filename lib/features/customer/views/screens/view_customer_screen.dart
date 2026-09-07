@@ -74,49 +74,84 @@ class ViewCustomerScreen extends GetView<CustomerController> {
         ),
         body: SafeArea(
           top: false,
-          child: RefreshIndicator(
-            onRefresh: controller.fetchCustomers,
-            child: showDetails
-                ? _CustomerDetails(customer: customer)
-                : customers.isEmpty && !controller.isLoading.value
-                ? ListView(
-                    padding: EdgeInsets.all(16.w),
-                    children: [
-                      SizedBox(height: 160.h),
-                      Icon(
-                        Iconsax.user,
-                        size: 58.sp,
-                        color: AppColors.chipInactiveText,
-                      ),
-                      SizedBox(height: 16.h),
-                      Text(
-                        'No customer found.',
-                        textAlign: TextAlign.center,
-                        style: getTextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.onboardingBackground,
+          child: showDetails
+              ? RefreshIndicator(
+                  onRefresh: controller.fetchCustomers,
+                  child: _CustomerDetails(customer: customer),
+                )
+              : Column(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 4.h),
+                      child: TextField(
+                        controller: controller.searchController,
+                        onChanged: controller.onSearchChanged,
+                        decoration: InputDecoration(
+                          hintText: 'Search customers by name, phone, email',
+                          prefixIcon: const Icon(Iconsax.search_normal),
+                          filled: true,
+                          fillColor: AppColors.chipBackground,
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 12.h,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                            borderSide: BorderSide.none,
+                          ),
                         ),
                       ),
-                    ],
-                  )
-                : ListView.separated(
-                    padding: EdgeInsets.all(16.w),
-                    itemCount:
-                        customers.length + (controller.isLoading.value ? 1 : 0),
-                    separatorBuilder: (context, index) =>
-                        SizedBox(height: 12.h),
-                    itemBuilder: (context, index) {
-                      if (controller.isLoading.value && index == 0) {
-                        return const LinearProgressIndicator(minHeight: 2);
-                      }
-                      final item =
-                          customers[index -
-                              (controller.isLoading.value ? 1 : 0)];
-                      return _CustomerTile(customer: item);
-                    },
-                  ),
-          ),
+                    ),
+                    Expanded(
+                      child: RefreshIndicator(
+                        onRefresh: controller.fetchCustomers,
+                        child: customers.isEmpty && !controller.isLoading.value
+                            ? ListView(
+                                padding: EdgeInsets.all(16.w),
+                                children: [
+                                  SizedBox(height: 160.h),
+                                  Icon(
+                                    Iconsax.user,
+                                    size: 58.sp,
+                                    color: AppColors.chipInactiveText,
+                                  ),
+                                  SizedBox(height: 16.h),
+                                  Text(
+                                    'No customer found.',
+                                    textAlign: TextAlign.center,
+                                    style: getTextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w500,
+                                      color: AppColors.onboardingBackground,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : ListView.separated(
+                                padding: EdgeInsets.all(16.w),
+                                itemCount:
+                                    customers.length +
+                                    (controller.isLoading.value ? 1 : 0),
+                                separatorBuilder: (context, index) =>
+                                    SizedBox(height: 12.h),
+                                itemBuilder: (context, index) {
+                                  if (controller.isLoading.value &&
+                                      index == 0) {
+                                    return const LinearProgressIndicator(
+                                      minHeight: 2,
+                                    );
+                                  }
+                                  final item =
+                                      customers[index -
+                                          (controller.isLoading.value
+                                              ? 1
+                                              : 0)];
+                                  return _CustomerTile(customer: item);
+                                },
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
         ),
       );
     });
@@ -291,8 +326,9 @@ class _CustomerDetails extends GetView<CustomerController> {
           ),
           SizedBox(height: 16.h),
           CustomerDetailRow(
-            icon: Iconsax.coin,
-            text: '${customer.points.toStringAsFixed(2)} Points',
+            icon: Iconsax.wallet,
+            text:
+                'Total Spent: \$${AppHelperFunctions.getFormattedMoney(customer.totalSpent)}',
           ),
           SizedBox(height: 16.h),
           CustomerDetailRow(
@@ -302,21 +338,9 @@ class _CustomerDetails extends GetView<CustomerController> {
           SizedBox(height: 16.h),
           CustomerDetailRow(
             icon: Iconsax.calendar_1,
-            text: '${customer.lastVisitDate}(Last Visit)',
+            text: _lastVisitLabel(customer.lastVisitDate),
           ),
           SizedBox(height: 40.h),
-          GestureDetector(
-            onTap: controller.redeemPoints,
-            child: Text(
-              'Redeem Points',
-              style: getTextStyle(
-                fontSize: 16.4,
-                fontWeight: FontWeight.w500,
-                color: AppColors.onboardingBackground,
-              ),
-            ),
-          ),
-          SizedBox(height: 8.h),
           GestureDetector(
             onTap: controller.viewPurchaseHistory,
             child: Text(
@@ -331,5 +355,11 @@ class _CustomerDetails extends GetView<CustomerController> {
         ],
       ),
     );
+  }
+
+  String _lastVisitLabel(String lastVisitDate) {
+    final parsed = DateTime.tryParse(lastVisitDate);
+    if (parsed == null) return 'No visits yet';
+    return '${AppHelperFunctions.getFormattedDate(parsed)} (Last Visit)';
   }
 }

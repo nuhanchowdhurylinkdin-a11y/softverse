@@ -44,6 +44,7 @@ class InvoiceController extends GetxController {
   final changeToReturnValue = 0.0.obs;
 
   final taxRate = 0.075;
+  final _hasOrderData = false.obs;
   double get refundAmount => totalAmount;
 
   final selectedRefundIndex = Rx<int?>(null);
@@ -69,18 +70,18 @@ class InvoiceController extends GetxController {
     ),
   ].obs;
 
-  double get subtotal => subtotalValue.value == 0
-      ? items.fold<double>(
+  double get subtotal => _hasOrderData.value
+      ? subtotalValue.value
+      : items.fold<double>(
           0,
           (sum, item) =>
               sum + (item.bundle?.subtotal ?? item.price) * item.quantity,
-        )
-      : subtotalValue.value;
+        );
 
-  double get tax => taxValue.value == 0 ? subtotal * taxRate : taxValue.value;
+  double get tax => _hasOrderData.value ? taxValue.value : subtotal * taxRate;
 
   double get totalAmount =>
-      totalValue.value == 0 ? subtotal + tax : totalValue.value;
+      _hasOrderData.value ? totalValue.value : subtotal + tax;
 
   double get amountReceived => amountReceivedValue.value;
 
@@ -109,6 +110,7 @@ class InvoiceController extends GetxController {
     totalValue.value = _toDouble(order['totalAmount']);
     amountReceivedValue.value = _toDouble(order['amountReceived']);
     changeToReturnValue.value = _toDouble(order['changeToReturn']);
+    _hasOrderData.value = true;
     paymentType.value = status.value == 'refunded'
         ? PaymentType.refund
         : _paymentTypeFrom(order['paymentMethod']?.toString());

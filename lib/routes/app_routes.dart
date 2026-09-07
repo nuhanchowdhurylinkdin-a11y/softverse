@@ -7,6 +7,7 @@ import '../features/customer/controller/add_customer_controller.dart';
 import '../features/customer/controller/edit_customer_controller.dart';
 import '../features/customer/views/screens/add_customer_screen.dart';
 import '../features/customer/views/screens/edit_customer_screen.dart';
+import '../features/customer/views/screens/purchase_history_screen.dart';
 import '../features/customer/views/screens/view_customer_screen.dart';
 import '../features/auth/views/screens/forget_password_screen.dart';
 import '../features/auth/views/screens/login_screen.dart';
@@ -89,6 +90,7 @@ class AppRoute {
   static String viewCustomerScreen = "/viewCustomerScreen";
   static String editCustomerScreen = "/editCustomerScreen";
   static String addCustomerScreen = "/addCustomerScreen";
+  static String purchaseHistoryScreen = "/purchaseHistoryScreen";
   static String printerListScreen = "/printerListScreen";
   static String printerDetailScreen = "/printerDetailScreen";
   static String addPrinterScreen = "/addPrinterScreen";
@@ -132,6 +134,7 @@ class AppRoute {
   static String getViewCustomerScreen() => viewCustomerScreen;
   static String getEditCustomerScreen() => editCustomerScreen;
   static String getAddCustomerScreen() => addCustomerScreen;
+  static String getPurchaseHistoryScreen() => purchaseHistoryScreen;
   static String getPrinterListScreen() => printerListScreen;
   static String getPrinterDetailScreen() => printerDetailScreen;
   static String getAddPrinterScreen() => addPrinterScreen;
@@ -240,6 +243,10 @@ class AppRoute {
       }),
     ),
     GetPage(name: viewCustomerScreen, page: () => const ViewCustomerScreen()),
+    GetPage(
+      name: purchaseHistoryScreen,
+      page: () => const PurchaseHistoryScreen(),
+    ),
     GetPage(
       name: editCustomerScreen,
       page: () => const EditCustomerScreen(),

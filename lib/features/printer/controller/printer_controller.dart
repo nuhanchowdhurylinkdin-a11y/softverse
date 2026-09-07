@@ -5,6 +5,7 @@ import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 
 import '../../../core/services/offline_database_service.dart';
 import '../../../core/utils/helpers/app_helper.dart';
+import '../../../routes/app_routes.dart';
 import '../../checkout/models/cart_item.dart';
 import '../models/printer_model.dart';
 
@@ -135,6 +136,18 @@ class PrinterController extends GetxController {
         printers.firstWhereOrNull((printer) => printer.printReceiptAndBills);
   }
 
+  /// Printing silently no-ops without this - from the tap it just looks
+  /// like the button did nothing. Explain why and send the user straight
+  /// to where they can fix it instead of leaving them to guess.
+  void _warnNoPrinterConfigured() {
+    AppHelperFunctions.showSnackBarWithTitle(
+      'No receipt printer set up',
+      'Add a printer and mark it as your default receipt printer to enable printing.',
+      type: AppSnackBarType.warning,
+    );
+    Get.toNamed(AppRoute.getPrinterListScreen());
+  }
+
   Future<bool> connectToPrinter(PrinterModel printer) async {
     if (printer.isVirtual) {
       _update(printer.id, (p) => p.copyWith(isConnected: true));
@@ -232,7 +245,7 @@ class PrinterController extends GetxController {
   }) async {
     final printer = receiptPrinter;
     if (printer == null) {
-      AppHelperFunctions.showWarningSnackBar('Add a receipt printer first.');
+      _warnNoPrinterConfigured();
       return false;
     }
 
@@ -331,7 +344,7 @@ class PrinterController extends GetxController {
   }) async {
     final printer = receiptPrinter;
     if (printer == null) {
-      AppHelperFunctions.showWarningSnackBar('Add a receipt printer first.');
+      _warnNoPrinterConfigured();
       return false;
     }
 

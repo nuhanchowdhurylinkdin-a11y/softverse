@@ -246,7 +246,7 @@ class CheckoutScreen extends GetView<CheckoutController> {
                             () => CheckoutActionButtons(
                               onSendToTable: controller.sendToTable,
                               onSaveOrder: controller.saveOrder,
-                              onClearOrder: controller.clearOrder,
+                              onClearOrder: controller.discardActiveOrder,
                               showSaveOrder: controller.isOpenOrderEnabled,
                               showSendToTable: controller.isTableOptionsEnabled,
                             ),
