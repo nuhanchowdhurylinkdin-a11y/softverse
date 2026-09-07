@@ -1,4 +1,8 @@
 class PrinterModel {
+  static const bluetoothConnection = 'Bluetooth';
+  static const virtualConnection = 'Virtual Printer';
+  static const virtualModel = 'Softverse Virtual ESC/POS';
+
   final String id;
   final String name;
   final String printerModel;
@@ -14,6 +18,8 @@ class PrinterModel {
   final String paperSize;
   final String printDensity;
   final bool autoCut;
+
+  bool get isVirtual => connectionType == virtualConnection;
 
   const PrinterModel({
     required this.id,

@@ -1,4 +1,5 @@
 import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 
@@ -7,8 +8,23 @@ import '../../../core/utils/helpers/app_helper.dart';
 import '../../checkout/models/cart_item.dart';
 import '../models/printer_model.dart';
 
+class VirtualPrintDocument {
+  final String title;
+  final String content;
+
+  const VirtualPrintDocument({required this.title, required this.content});
+}
+
+typedef VirtualPrintPresenter =
+    Future<void> Function(VirtualPrintDocument document);
+
 class PrinterController extends GetxController {
   static const _cacheKey = 'saved_printers';
+
+  final VirtualPrintPresenter? _virtualPrintPresenter;
+
+  PrinterController({VirtualPrintPresenter? virtualPrintPresenter})
+    : _virtualPrintPresenter = virtualPrintPresenter;
 
   final printers = <PrinterModel>[].obs;
 
@@ -31,11 +47,10 @@ class PrinterController extends GetxController {
     final cached = OfflineDatabaseService.readCache<List<dynamic>>(_cacheKey);
     if (cached == null) return;
     printers.assignAll(
-      cached.whereType<Map>().map(
-        (json) => PrinterModel.fromJson(
-          Map<String, dynamic>.from(json),
-        ).copyWith(isConnected: false),
-      ),
+      cached.whereType<Map>().map((json) {
+        final printer = PrinterModel.fromJson(Map<String, dynamic>.from(json));
+        return printer.copyWith(isConnected: printer.isVirtual);
+      }),
     );
   }
 
@@ -55,7 +70,9 @@ class PrinterController extends GetxController {
       );
     }
     final existingIndex = printers.indexWhere(
-      (p) => p.macAddress == savedPrinter.macAddress,
+      (p) => savedPrinter.isVirtual
+          ? p.isVirtual
+          : p.macAddress.isNotEmpty && p.macAddress == savedPrinter.macAddress,
     );
     if (existingIndex == -1) {
       printers.add(savedPrinter);
@@ -119,6 +136,10 @@ class PrinterController extends GetxController {
   }
 
   Future<bool> connectToPrinter(PrinterModel printer) async {
+    if (printer.isVirtual) {
+      _update(printer.id, (p) => p.copyWith(isConnected: true));
+      return true;
+    }
     if (printer.macAddress.isEmpty) return false;
     final connected = await PrintBluetoothThermal.connect(
       macPrinterAddress: printer.macAddress,
@@ -128,6 +149,15 @@ class PrinterController extends GetxController {
   }
 
   Future<bool> printTest(PrinterModel printer) async {
+    if (printer.isVirtual) {
+      await _showVirtualPrint(
+        VirtualPrintDocument(
+          title: 'Virtual printer test',
+          content: _testPreview(printer),
+        ),
+      );
+      return true;
+    }
     if (printer.macAddress.isEmpty) {
       AppHelperFunctions.showWarningSnackBar('Select a real printer first.');
       return false;
@@ -204,6 +234,27 @@ class PrinterController extends GetxController {
     if (printer == null) {
       AppHelperFunctions.showWarningSnackBar('Add a receipt printer first.');
       return false;
+    }
+
+    if (printer.isVirtual) {
+      await _showVirtualPrint(
+        VirtualPrintDocument(
+          title: 'Receipt $invoiceNumber',
+          content: _receiptPreview(
+            invoiceNumber: invoiceNumber,
+            customerName: customerName,
+            orderId: orderId,
+            items: items,
+            subtotal: subtotal,
+            tax: tax,
+            totalAmount: totalAmount,
+            amountReceived: amountReceived,
+            changeToReturn: changeToReturn,
+            paymentLabel: paymentLabel,
+          ),
+        ),
+      );
+      return true;
     }
 
     final connected = await connectToPrinter(printer);
@@ -343,4 +394,77 @@ class PrinterController extends GetxController {
   }
 
   String _money(double value) => '\$${value.toStringAsFixed(2)}';
+
+  String _testPreview(PrinterModel printer) =>
+      '''
+SOFTVERSE POS
+${printer.printerModel}
+--------------------------------
+PRINTER TEST PAGE
+Paper size: ${printer.paperSize}
+Print density: ${printer.printDensity}
+Auto cut: ${printer.autoCut ? 'On' : 'Off'}
+--------------------------------
+Virtual printer is ready.
+'''
+          .trim();
+
+  String _receiptPreview({
+    required String invoiceNumber,
+    required String customerName,
+    required String orderId,
+    required List<CartItem> items,
+    required double subtotal,
+    required double tax,
+    required double totalAmount,
+    required double amountReceived,
+    required double changeToReturn,
+    required String paymentLabel,
+  }) {
+    final output = StringBuffer()
+      ..writeln('SOFTVERSE POS')
+      ..writeln('Receipt')
+      ..writeln(invoiceNumber)
+      ..writeln(orderId)
+      ..writeln('Customer: $customerName')
+      ..writeln('Payment: $paymentLabel')
+      ..writeln('--------------------------------')
+      ..writeln('Items');
+    for (final item in items) {
+      output
+        ..writeln('${item.name} x${item.quantity}')
+        ..writeln(_money(item.lineSubtotal));
+    }
+    output
+      ..writeln('--------------------------------')
+      ..writeln('Subtotal: ${_money(subtotal)}')
+      ..writeln('Tax: ${_money(tax)}')
+      ..writeln('Total: ${_money(totalAmount)}')
+      ..writeln('Received: ${_money(amountReceived)}')
+      ..writeln('Change: ${_money(changeToReturn)}');
+    return output.toString().trim();
+  }
+
+  Future<void> _showVirtualPrint(VirtualPrintDocument document) async {
+    final presenter = _virtualPrintPresenter;
+    if (presenter != null) {
+      await presenter(document);
+      return;
+    }
+    await Get.dialog<void>(
+      AlertDialog(
+        title: Text(document.title),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420, maxHeight: 520),
+          child: SingleChildScrollView(
+            child: SelectableText(
+              document.content,
+              style: const TextStyle(fontFamily: 'monospace', height: 1.45),
+            ),
+          ),
+        ),
+        actions: [TextButton(onPressed: Get.back, child: const Text('Close'))],
+      ),
+    );
+  }
 }

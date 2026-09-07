@@ -8,6 +8,7 @@ import '../../../../core/common/widgets/primary_button.dart';
 import '../../../../core/utils/constants/colors.dart';
 import '../../../inventory/widgets/toggle_field_row.dart';
 import '../../controller/add_printer_controller.dart';
+import '../../models/printer_model.dart';
 import '../../widgets/printer_form_field.dart';
 import '../../widgets/printer_select_row.dart';
 
@@ -73,8 +74,11 @@ class AddPrinterScreen extends GetView<AddPrinterController> {
               SizedBox(height: 8.h),
               Obx(() {
                 final device = controller.selectedDevice.value;
+                final isVirtual =
+                    controller.connectionType.value ==
+                    PrinterModel.virtualConnection;
                 return GestureDetector(
-                  onTap: () => _openDevicePicker(context),
+                  onTap: isVirtual ? null : () => _openDevicePicker(context),
                   child: Container(
                     height: 55.h,
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -88,7 +92,9 @@ class AddPrinterScreen extends GetView<AddPrinterController> {
                       children: [
                         Expanded(
                           child: Text(
-                            device?.name ?? 'Select paired printer',
+                            isVirtual
+                                ? PrinterModel.virtualModel
+                                : device?.name ?? 'Select paired printer',
                             style: getTextStyle(
                               fontSize: 14.6,
                               color: AppColors.chipInactiveText,
@@ -121,10 +127,17 @@ class AddPrinterScreen extends GetView<AddPrinterController> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         GestureDetector(
-                          onTap: controller.scanForPrinters,
+                          onTap:
+                              controller.connectionType.value ==
+                                  PrinterModel.virtualConnection
+                              ? null
+                              : controller.scanForPrinters,
                           child: Obx(
                             () => Text(
-                              controller.isScanning.value
+                              controller.connectionType.value ==
+                                      PrinterModel.virtualConnection
+                                  ? 'No physical printer or Bluetooth pairing is required.'
+                                  : controller.isScanning.value
                                   ? 'Scanning for printers...'
                                   : "Can't find your printer? Tap to rescan.",
                               style: getTextStyle(
@@ -134,11 +147,16 @@ class AddPrinterScreen extends GetView<AddPrinterController> {
                             ),
                           ),
                         ),
-                        Text(
-                          'Make sure the printer is turned on and connected.',
-                          style: getTextStyle(
-                            fontSize: 10.9,
-                            color: AppColors.chipInactiveText,
+                        Obx(
+                          () => Text(
+                            controller.connectionType.value ==
+                                    PrinterModel.virtualConnection
+                                ? 'Print actions will open an on-screen receipt preview.'
+                                : 'Make sure the printer is turned on and connected.',
+                            style: getTextStyle(
+                              fontSize: 10.9,
+                              color: AppColors.chipInactiveText,
+                            ),
                           ),
                         ),
                       ],
@@ -157,30 +175,46 @@ class AddPrinterScreen extends GetView<AddPrinterController> {
               ),
               SizedBox(height: 8.h),
               Obx(
-                () => Container(
-                  height: 55.h,
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  decoration: BoxDecoration(
-                    color: AppColors.chipBackground,
-                    border: Border.all(color: AppColors.cardBorder),
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        controller.connectionType.value,
-                        style: getTextStyle(
-                          fontSize: 14.6,
+                () => GestureDetector(
+                  onTap: () async {
+                    final selected = await showPrinterOptionPicker(
+                      context: context,
+                      title: 'Connection Type',
+                      options: const [
+                        PrinterModel.bluetoothConnection,
+                        PrinterModel.virtualConnection,
+                      ],
+                      selected: controller.connectionType.value,
+                    );
+                    if (selected != null) {
+                      controller.setConnectionType(selected);
+                    }
+                  },
+                  child: Container(
+                    height: 55.h,
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    decoration: BoxDecoration(
+                      color: AppColors.chipBackground,
+                      border: Border.all(color: AppColors.cardBorder),
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          controller.connectionType.value,
+                          style: getTextStyle(
+                            fontSize: 14.6,
+                            color: AppColors.chipInactiveText,
+                          ),
+                        ),
+                        Icon(
+                          Iconsax.arrow_down_1,
+                          size: 22.sp,
                           color: AppColors.chipInactiveText,
                         ),
-                      ),
-                      Icon(
-                        Iconsax.arrow_down_1,
-                        size: 22.sp,
-                        color: AppColors.chipInactiveText,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -320,91 +354,109 @@ class AddPrinterScreen extends GetView<AddPrinterController> {
   void _openDevicePicker(BuildContext context) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16.r)),
       ),
       builder: (context) {
-        return SafeArea(
-          child: Obx(() {
-            final devices = controller.availableDevices;
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(height: 12.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    SizedBox(width: 16.w),
-                    Text(
-                      'Paired Printers',
-                      style: getTextStyle(
-                        fontSize: 16.4,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.onboardingBackground,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: controller.scanForPrinters,
-                      icon: Icon(
-                        Iconsax.refresh,
-                        size: 20.sp,
-                        color: AppColors.onboardingBackground,
-                      ),
-                    ),
-                  ],
-                ),
-                if (controller.isScanning.value)
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16.h),
-                    child: const CircularProgressIndicator(strokeWidth: 2),
-                  )
-                else if (devices.isEmpty)
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      vertical: 24.h,
-                      horizontal: 16.w,
-                    ),
-                    child: Text(
-                      'No paired Bluetooth printers found. Pair a printer in your device Bluetooth settings first, then tap rescan.',
-                      textAlign: TextAlign.center,
-                      style: getTextStyle(
-                        fontSize: 12.8,
-                        color: AppColors.chipInactiveText,
-                      ),
-                    ),
-                  )
-                else
-                  ...devices.map(
-                    (device) => ListTile(
-                      leading: Icon(
-                        Iconsax.printer,
-                        color: AppColors.onboardingBackground,
-                      ),
-                      title: Text(
-                        device.name,
+        return FractionallySizedBox(
+          heightFactor: 0.72,
+          child: SafeArea(
+            child: Obx(() {
+              final devices = controller.availableDevices;
+              return Column(
+                children: [
+                  SizedBox(height: 12.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(width: 16.w),
+                      Text(
+                        'Paired Printers',
                         style: getTextStyle(
-                          fontSize: 14.6,
-                          color: AppColors.authTextDark,
+                          fontSize: 16.4,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.onboardingBackground,
                         ),
                       ),
-                      subtitle: Text(
-                        device.macAdress,
-                        style: getTextStyle(
-                          fontSize: 11.6,
-                          color: AppColors.chipInactiveText,
+                      IconButton(
+                        onPressed: controller.scanForPrinters,
+                        icon: Icon(
+                          Iconsax.refresh,
+                          size: 20.sp,
+                          color: AppColors.onboardingBackground,
                         ),
                       ),
-                      onTap: () {
-                        Navigator.of(context).pop();
-                        controller.selectDevice(device);
-                      },
-                    ),
+                    ],
                   ),
-                SizedBox(height: 8.h),
-              ],
-            );
-          }),
+                  const Divider(height: 1),
+                  Expanded(
+                    child: controller.isScanning.value
+                        ? const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : devices.isEmpty
+                        ? Center(
+                            child: SingleChildScrollView(
+                              padding: EdgeInsets.symmetric(
+                                vertical: 24.h,
+                                horizontal: 16.w,
+                              ),
+                              child: Text(
+                                'No paired Bluetooth printers found. Pair a printer in your device Bluetooth settings first, then tap rescan.',
+                                textAlign: TextAlign.center,
+                                style: getTextStyle(
+                                  fontSize: 12.8,
+                                  color: AppColors.chipInactiveText,
+                                ),
+                              ),
+                            ),
+                          )
+                        : Scrollbar(
+                            child: ListView.separated(
+                              padding: EdgeInsets.only(bottom: 8.h),
+                              itemCount: devices.length,
+                              separatorBuilder: (_, _) =>
+                                  const Divider(height: 1, indent: 64),
+                              itemBuilder: (context, index) {
+                                final device = devices[index];
+                                return ListTile(
+                                  leading: Icon(
+                                    Iconsax.printer,
+                                    color: AppColors.onboardingBackground,
+                                  ),
+                                  title: Text(
+                                    device.name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: getTextStyle(
+                                      fontSize: 14.6,
+                                      color: AppColors.authTextDark,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    device.macAdress,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: getTextStyle(
+                                      fontSize: 11.6,
+                                      color: AppColors.chipInactiveText,
+                                    ),
+                                  ),
+                                  onTap: () {
+                                    Navigator.of(context).pop();
+                                    controller.selectDevice(device);
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                  ),
+                ],
+              );
+            }),
+          ),
         );
       },
     );
