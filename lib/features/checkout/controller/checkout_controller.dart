@@ -282,6 +282,28 @@ class CheckoutController extends GetxController {
     }
   }
 
+  /// The "Clear Order" button's handler. Unlike [clearOrder] (used
+  /// internally after a checkout already succeeded), this is the
+  /// user explicitly abandoning whatever order is currently loaded - if
+  /// that order already exists on the server (reopened via
+  /// [loadOrderForCheckout], or sent to a table earlier in this session),
+  /// delete it there too instead of just resetting local state and leaving
+  /// it (and the table it occupies) stuck forever.
+  Future<void> discardActiveOrder() async {
+    final id = activeOrderId.value;
+    if (id != null) {
+      final response = await _networkCaller.deleteRequest(
+        ApiConstants.checkoutOrder(id),
+      );
+      if (!response.isSuccess) {
+        AppHelperFunctions.showErrorSnackBar(response.errorMessage);
+      } else if (Get.isRegistered<HomeController>()) {
+        await Get.find<HomeController>().fetchTables();
+      }
+    }
+    clearOrder();
+  }
+
   Future<void> selectPaymentMethod(PaymentMethod method) async {
     if (!_isPaymentMethodEnabled(method.key)) return;
 
@@ -545,6 +567,11 @@ class CheckoutController extends GetxController {
                   ApiConstants.payCheckout(currentOrderId),
                   body: _paymentPayload(tableId: tableId, tableName: tableName),
                 )
+              : currentOrderId != null && saveOrder
+              ? await _networkCaller.patchRequest(
+                  ApiConstants.checkoutOrder(currentOrderId),
+                  body: _updateCheckoutPayload(),
+                )
               : await _networkCaller.postRequest(
                   ApiConstants.checkout,
                   body: payload,
@@ -616,6 +643,24 @@ class CheckoutController extends GetxController {
     );
   }
 
+  List<Map<String, dynamic>> _cartItemsPayload() {
+    return cartItems
+        .where((item) => item.itemId != null)
+        .map(
+          (item) => {
+            'itemId': item.itemId,
+            'quantity': item.quantity,
+            if (item.bundle != null)
+              'modifiers': [
+                {'name': item.bundle!.name, 'price': item.bundle!.price},
+              ],
+            if (item.bundle != null)
+              'discountAmount': item.bundle!.discountAmount,
+          },
+        )
+        .toList();
+  }
+
   Map<String, dynamic> _checkoutPayload({
     required bool sendToTable,
     required bool saveOrder,
@@ -626,21 +671,7 @@ class CheckoutController extends GetxController {
       'customerName': customerName.value == 'Not Registered'
           ? null
           : customerName.value,
-      'items': cartItems
-          .where((item) => item.itemId != null)
-          .map(
-            (item) => {
-              'itemId': item.itemId,
-              'quantity': item.quantity,
-              if (item.bundle != null)
-                'modifiers': [
-                  {'name': item.bundle!.name, 'price': item.bundle!.price},
-                ],
-              if (item.bundle != null)
-                'discountAmount': item.bundle!.discountAmount,
-            },
-          )
-          .toList(),
+      'items': _cartItemsPayload(),
       'taxAmount': _money(tax),
       'discountAmount': 0,
       'amountReceived': _money(amountReceived.value),
@@ -654,6 +685,21 @@ class CheckoutController extends GetxController {
       'sendToTable': sendToTable,
       'tableId': ?tableId,
       'tableName': ?tableName,
+    };
+  }
+
+  /// Body for `PATCH /checkout/:id` - updating an already-saved or
+  /// sent-to-table order's contents in place. Deliberately narrower than
+  /// [_checkoutPayload]: the backend's UpdateCheckoutDto only accepts these
+  /// three fields (payment/table/status don't change on a content edit),
+  /// and the global ValidationPipe rejects any extra property outright.
+  Map<String, dynamic> _updateCheckoutPayload() {
+    return {
+      'customerName': customerName.value == 'Not Registered'
+          ? null
+          : customerName.value,
+      'items': _cartItemsPayload(),
+      'discountAmount': 0,
     };
   }
 

@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/services/network_caller.dart';
@@ -7,6 +9,7 @@ import '../../../core/utils/constants/api_constants.dart';
 import '../../../core/utils/helpers/app_helper.dart';
 import '../../../routes/app_routes.dart';
 import '../models/customer_model.dart';
+import '../models/purchase_history_entry.dart';
 
 class CustomerController extends GetxController {
   final NetworkCaller _networkCaller = NetworkCaller();
@@ -25,6 +28,10 @@ class CustomerController extends GetxController {
   final customers = <CustomerModel>[].obs;
   final isLoading = false.obs;
   final showDetails = false.obs;
+  final searchController = TextEditingController();
+  final purchaseHistory = <PurchaseHistoryEntry>[].obs;
+  final isLoadingPurchaseHistory = false.obs;
+  Timer? _searchDebounce;
 
   @override
   void onInit() {
@@ -32,9 +39,29 @@ class CustomerController extends GetxController {
     fetchCustomers();
   }
 
-  Future<void> fetchCustomers() async {
+  @override
+  void onClose() {
+    _searchDebounce?.cancel();
+    searchController.dispose();
+    super.onClose();
+  }
+
+  void onSearchChanged(String query) {
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(
+      const Duration(milliseconds: 350),
+      () => fetchCustomers(search: query),
+    );
+  }
+
+  Future<void> fetchCustomers({String? search}) async {
     isLoading.value = true;
-    final response = await _networkCaller.getRequest(ApiConstants.customers);
+    final trimmed = search?.trim();
+    final response = await _networkCaller.getRequest(
+      trimmed == null || trimmed.isEmpty
+          ? ApiConstants.customers
+          : ApiConstants.customersSearch(trimmed),
+    );
     isLoading.value = false;
     if (!response.isSuccess || response.responseData is! List) {
       AppHelperFunctions.showErrorSnackBar(response.errorMessage);
@@ -48,7 +75,9 @@ class CustomerController extends GetxController {
         )
         .toList();
     customers.assignAll(fetched);
-    if (fetched.isNotEmpty) customer.value = fetched.first;
+    if (fetched.isNotEmpty && (trimmed == null || trimmed.isEmpty)) {
+      customer.value = fetched.first;
+    }
   }
 
   Future<bool> createCustomer(CustomerModel nextCustomer, {File? image}) async {
@@ -121,9 +150,31 @@ class CustomerController extends GetxController {
 
   void openAddCustomer() => Get.toNamed(AppRoute.getAddCustomerScreen());
 
-  void redeemPoints() {}
+  Future<void> viewPurchaseHistory() async {
+    final id = customer.value.id;
+    if (id.isEmpty) return;
 
-  void viewPurchaseHistory() {}
+    isLoadingPurchaseHistory.value = true;
+    final response = await _networkCaller.getRequest(
+      ApiConstants.customerPurchaseHistory(id),
+    );
+    isLoadingPurchaseHistory.value = false;
+
+    if (!response.isSuccess || response.responseData is! List) {
+      AppHelperFunctions.showErrorSnackBar(response.errorMessage);
+      return;
+    }
+
+    purchaseHistory.assignAll(
+      List<dynamic>.from(response.responseData as List)
+          .whereType<Map>()
+          .map(
+            (entry) =>
+                PurchaseHistoryEntry.fromJson(Map<String, dynamic>.from(entry)),
+          ),
+    );
+    Get.toNamed(AppRoute.getPurchaseHistoryScreen());
+  }
 
   Map<String, String> _fields(Map<String, dynamic> payload) {
     return payload.map((key, value) => MapEntry(key, '$value'));

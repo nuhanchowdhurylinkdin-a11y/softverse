@@ -30,6 +30,10 @@ class ApiConstants {
   static String category(String id) => '$baseUrl/categories/$id';
   static String get customers => '$baseUrl/customers';
   static String customer(String id) => '$baseUrl/customers/$id';
+  static String customerPurchaseHistory(String id) =>
+      '$baseUrl/customers/$id/purchase-history';
+  static String customersSearch(String query) =>
+      '$baseUrl/customers?search=${Uri.encodeQueryComponent(query)}';
   static String get items => '$baseUrl/items';
   static String get itemAdminFilters => '$baseUrl/items/admin/filters';
   static String get inventory => '$baseUrl/inventory';

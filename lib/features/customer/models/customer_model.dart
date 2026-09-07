@@ -12,9 +12,9 @@ class CustomerModel {
   final String imageUrl;
   final String note;
   final double creditLimit;
-  final double points;
   final int visitCount;
   final String lastVisitDate;
+  final double totalSpent;
 
   const CustomerModel({
     this.id = '',
@@ -30,9 +30,9 @@ class CustomerModel {
     required this.imageUrl,
     this.note = '',
     this.creditLimit = 0,
-    this.points = 0,
     this.visitCount = 0,
     this.lastVisitDate = '',
+    this.totalSpent = 0,
   });
 
   factory CustomerModel.fromJson(Map<String, dynamic> json) {
@@ -50,9 +50,9 @@ class CustomerModel {
       imageUrl: json['imageUrl']?.toString() ?? '',
       note: json['note']?.toString() ?? '',
       creditLimit: _doubleFrom(json['creditLimit']),
-      points: _doubleFrom(json['points']),
       visitCount: int.tryParse(json['visitCount']?.toString() ?? '') ?? 0,
       lastVisitDate: json['lastVisitDate']?.toString() ?? '',
+      totalSpent: _doubleFrom(json['totalSpent']),
     );
   }
 
@@ -119,9 +119,9 @@ class CustomerModel {
       imageUrl: imageUrl ?? this.imageUrl,
       note: note ?? this.note,
       creditLimit: creditLimit ?? this.creditLimit,
-      points: points,
       visitCount: visitCount,
       lastVisitDate: lastVisitDate,
+      totalSpent: totalSpent,
     );
   }
 
