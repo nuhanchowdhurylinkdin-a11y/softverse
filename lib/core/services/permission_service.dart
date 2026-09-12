@@ -3,6 +3,7 @@ import 'storage_service.dart';
 class AppPermission {
   static const createEditProducts = 'create_edit_products';
   static const createEditCategories = 'create_edit_categories';
+  static const giveDiscount = 'give_discount';
 }
 
 class PermissionService {

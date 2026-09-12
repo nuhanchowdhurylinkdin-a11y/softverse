@@ -148,15 +148,26 @@ class PrinterController extends GetxController {
     Get.toNamed(AppRoute.getPrinterListScreen());
   }
 
+  /// The native print_bluetooth_thermal Android plugin keeps a socket
+  /// reference between calls and silently refuses to open a new one
+  /// whenever that reference is still set — even if the physical
+  /// connection has already died. Forcing a disconnect first guarantees
+  /// the next connect() attempt actually opens a fresh socket instead of
+  /// returning false immediately.
+  Future<bool> connectToMacAddress(String macAddress) async {
+    final alreadyConnected = await PrintBluetoothThermal.connectionStatus;
+    if (alreadyConnected) return true;
+    await PrintBluetoothThermal.disconnect;
+    return PrintBluetoothThermal.connect(macPrinterAddress: macAddress);
+  }
+
   Future<bool> connectToPrinter(PrinterModel printer) async {
     if (printer.isVirtual) {
       _update(printer.id, (p) => p.copyWith(isConnected: true));
       return true;
     }
     if (printer.macAddress.isEmpty) return false;
-    final connected = await PrintBluetoothThermal.connect(
-      macPrinterAddress: printer.macAddress,
-    );
+    final connected = await connectToMacAddress(printer.macAddress);
     _update(printer.id, (p) => p.copyWith(isConnected: connected));
     return connected;
   }
@@ -176,13 +187,10 @@ class PrinterController extends GetxController {
       return false;
     }
 
-    final alreadyConnected = await PrintBluetoothThermal.connectionStatus;
-    if (!alreadyConnected) {
-      final connected = await connectToPrinter(printer);
-      if (!connected) {
-        AppHelperFunctions.showErrorSnackBar('Could not connect to printer.');
-        return false;
-      }
+    final connected = await connectToPrinter(printer);
+    if (!connected) {
+      AppHelperFunctions.showErrorSnackBar('Could not connect to printer.');
+      return false;
     }
 
     final profile = await CapabilityProfile.load();

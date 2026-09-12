@@ -38,10 +38,15 @@ class ApiConstants {
   static String get itemAdminFilters => '$baseUrl/items/admin/filters';
   static String get inventory => '$baseUrl/inventory';
   static String item(String id) => '$baseUrl/items/$id';
+  static String get discountRules => '$baseUrl/items/discount-rules';
+  static String discountRule(String id) =>
+      '$baseUrl/items/discount-rules/$id';
   static String get checkout => '$baseUrl/checkout';
   static String get pendingCheckout => '$baseUrl/checkout/pending';
   static String checkoutOrder(String id) => '$baseUrl/checkout/$id';
   static String payCheckout(String id) => '$baseUrl/checkout/$id/pay';
+  static String collectDuePayment(String id) =>
+      '$baseUrl/checkout/$id/due-payment';
   static String refundCheckout(String id) => '$baseUrl/checkout/$id/refund';
   static String checkoutReceipt(String id) => '$baseUrl/checkout/$id/receipt';
   static String get currentShift => '$baseUrl/shifts/current';

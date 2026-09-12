@@ -6,6 +6,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../../core/common/styles/global_text_style.dart';
 import '../../../../core/common/widgets/primary_button.dart';
 import '../../../../core/utils/constants/colors.dart';
+import '../../../../core/utils/helpers/app_helper.dart';
 import '../../controller/invoice_controller.dart';
 import '../../widgets/invoice_item_card.dart';
 import '../../widgets/payment_type_badge.dart';
@@ -157,6 +158,25 @@ class InvoiceScreen extends GetView<InvoiceController> {
               ),
               SizedBox(height: 16.h),
               Obx(
+                () => controller.canCollectDuePayment
+                    ? Padding(
+                        padding: EdgeInsets.only(bottom: 16.h),
+                        child: PrimaryButton(
+                          label:
+                              'Collect Due Payment (${AppHelperFunctions.getFormattedMoney(controller.amountDue)})',
+                          onPressed: () =>
+                              _showCollectDuePaymentDialog(context, controller),
+                          isLoading: controller.isCollectingDuePayment.value,
+                          backgroundColor: AppColors.onboardingBackground,
+                          textColor: Colors.white,
+                          height: 55,
+                          fontSize: 16.4,
+                          borderRadius: 12,
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+              ),
+              Obx(
                 () => PrimaryButton(
                   label: 'Print Receipt',
                   onPressed: controller.openPrint,
@@ -246,4 +266,50 @@ class InvoiceScreen extends GetView<InvoiceController> {
       ),
     );
   }
+}
+
+void _showCollectDuePaymentDialog(
+  BuildContext context,
+  InvoiceController controller,
+) {
+  final amountController = TextEditingController(
+    text: controller.amountDue.toStringAsFixed(2),
+  );
+  Get.dialog<void>(
+    AlertDialog(
+      title: const Text('Collect Due Payment'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Outstanding balance: ${AppHelperFunctions.getFormattedMoney(controller.amountDue)}',
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: amountController,
+            autofocus: true,
+            keyboardType: const TextInputType.numberWithOptions(
+              decimal: true,
+            ),
+            decoration: const InputDecoration(
+              labelText: 'Amount received',
+              border: OutlineInputBorder(),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(onPressed: Get.back, child: const Text('Cancel')),
+        FilledButton(
+          onPressed: () {
+            final amount = double.tryParse(amountController.text.trim());
+            Get.back();
+            if (amount != null) controller.collectDuePayment(amount);
+          },
+          child: const Text('Collect'),
+        ),
+      ],
+    ),
+  );
 }

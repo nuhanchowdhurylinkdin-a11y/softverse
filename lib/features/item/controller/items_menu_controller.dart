@@ -9,6 +9,8 @@ class ItemsMenuController extends GetxController {
       PermissionService.has(AppPermission.createEditProducts);
   bool get canEditCategories =>
       PermissionService.has(AppPermission.createEditCategories);
+  bool get canGiveDiscount =>
+      PermissionService.has(AppPermission.giveDiscount);
 
   void openCreateItems() {
     if (!canEditProducts) {
@@ -32,7 +34,15 @@ class ItemsMenuController extends GetxController {
 
   void openModifiers() {}
 
-  void openDiscounts() {}
+  void openDiscounts() {
+    if (!canGiveDiscount) {
+      AppHelperFunctions.showErrorSnackBar(
+        'You do not have permission to manage discounts.',
+      );
+      return;
+    }
+    Get.toNamed(AppRoute.getDiscountListScreen());
+  }
 
   void goToBackOffice() {}
 

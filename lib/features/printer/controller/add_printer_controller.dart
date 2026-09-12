@@ -81,8 +81,8 @@ class AddPrinterController extends GetxController {
     }
     isConnecting.value = true;
     try {
-      final connected = await PrintBluetoothThermal.connect(
-        macPrinterAddress: device.macAdress,
+      final connected = await _printerController.connectToMacAddress(
+        device.macAdress,
       );
       isConnected.value = connected;
       if (connected) {
