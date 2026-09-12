@@ -24,11 +24,14 @@ import '../features/invoice/views/screens/refund_invoice_screen.dart';
 import '../features/invoice/views/screens/refund_screen.dart';
 import '../features/item/controller/create_item_controller.dart';
 import '../features/item/controller/category_controller.dart';
+import '../features/item/controller/discount_controller.dart';
 import '../features/item/controller/items_menu_controller.dart';
 import '../features/item/controller/scan_barcode_controller.dart';
 import '../features/item/views/screens/create_item_screen.dart';
 import '../features/item/views/screens/category_form_screen.dart';
 import '../features/item/views/screens/category_list_screen.dart';
+import '../features/item/views/screens/discount_form_screen.dart';
+import '../features/item/views/screens/discount_list_screen.dart';
 import '../features/item/views/screens/items_menu_screen.dart';
 import '../features/item/views/screens/scan_barcode_screen.dart';
 import '../features/main_nav/views/screens/main_nav_screen.dart';
@@ -87,6 +90,8 @@ class AppRoute {
   static String scanBarcodeScreen = "/scanBarcodeScreen";
   static String categoryListScreen = "/categoryListScreen";
   static String categoryFormScreen = "/categoryFormScreen";
+  static String discountListScreen = "/discountListScreen";
+  static String discountFormScreen = "/discountFormScreen";
   static String viewCustomerScreen = "/viewCustomerScreen";
   static String editCustomerScreen = "/editCustomerScreen";
   static String addCustomerScreen = "/addCustomerScreen";
@@ -131,6 +136,8 @@ class AppRoute {
   static String getScanBarcodeScreen() => scanBarcodeScreen;
   static String getCategoryListScreen() => categoryListScreen;
   static String getCategoryFormScreen() => categoryFormScreen;
+  static String getDiscountListScreen() => discountListScreen;
+  static String getDiscountFormScreen() => discountFormScreen;
   static String getViewCustomerScreen() => viewCustomerScreen;
   static String getEditCustomerScreen() => editCustomerScreen;
   static String getAddCustomerScreen() => addCustomerScreen;
@@ -233,6 +240,20 @@ class AppRoute {
       page: () => const CategoryFormScreen(),
       binding: BindingsBuilder(() {
         Get.lazyPut<CategoryFormController>(() => CategoryFormController());
+      }),
+    ),
+    GetPage(
+      name: discountListScreen,
+      page: () => const DiscountListScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<DiscountController>(() => DiscountController());
+      }),
+    ),
+    GetPage(
+      name: discountFormScreen,
+      page: () => const DiscountFormScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<DiscountFormController>(() => DiscountFormController());
       }),
     ),
     GetPage(

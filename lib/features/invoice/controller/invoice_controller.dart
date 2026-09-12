@@ -42,6 +42,8 @@ class InvoiceController extends GetxController {
   final totalValue = 0.0.obs;
   final amountReceivedValue = 0.0.obs;
   final changeToReturnValue = 0.0.obs;
+  final amountDueValue = 0.0.obs;
+  final isCollectingDuePayment = false.obs;
 
   final taxRate = 0.075;
   final _hasOrderData = false.obs;
@@ -93,6 +95,11 @@ class InvoiceController extends GetxController {
 
   double get changeToReturn => changeToReturnValue.value;
 
+  double get amountDue => amountDueValue.value;
+
+  bool get canCollectDuePayment =>
+      paymentType.value == PaymentType.due && amountDue > 0 && !isRefunded;
+
   void loadFromOrder(
     Map<String, dynamic> order, {
     String? fallbackTableId,
@@ -116,6 +123,11 @@ class InvoiceController extends GetxController {
     totalValue.value = _toDouble(order['totalAmount']);
     amountReceivedValue.value = _toDouble(order['amountReceived']);
     changeToReturnValue.value = _toDouble(order['changeToReturn']);
+    amountDueValue.value = order.containsKey('amountDue')
+        ? _toDouble(order['amountDue'])
+        : (totalValue.value - amountReceivedValue.value)
+              .clamp(0, totalValue.value)
+              .toDouble();
     _hasOrderData.value = true;
     paymentType.value = status.value == 'refunded'
         ? PaymentType.refund
@@ -188,6 +200,39 @@ class InvoiceController extends GetxController {
     }
     AppHelperFunctions.showSuccessSnackBar('Invoice refunded.');
     Get.offNamed(AppRoute.getRefundInvoiceScreen());
+  }
+
+  Future<void> collectDuePayment(double amount) async {
+    final id = checkoutOrderId.value;
+    if (id == null || id.isEmpty || isCollectingDuePayment.value) return;
+    if (amount <= 0) {
+      AppHelperFunctions.showWarningSnackBar('Enter an amount to collect.');
+      return;
+    }
+    if (amount > amountDue) {
+      AppHelperFunctions.showWarningSnackBar(
+        'Amount cannot exceed the outstanding due balance.',
+      );
+      return;
+    }
+
+    isCollectingDuePayment.value = true;
+    final response = await _networkCaller.postRequest(
+      ApiConstants.collectDuePayment(id),
+      body: {'amount': amount},
+    );
+    isCollectingDuePayment.value = false;
+
+    if (!response.isSuccess || response.responseData is! Map) {
+      AppHelperFunctions.showErrorSnackBar(response.errorMessage);
+      return;
+    }
+
+    loadFromOrder(Map<String, dynamic>.from(response.responseData as Map));
+    if (Get.isRegistered<TransactionController>()) {
+      await Get.find<TransactionController>().fetchTransactions();
+    }
+    AppHelperFunctions.showSuccessSnackBar('Payment collected.');
   }
 
   void viewOriginalInvoice() {
