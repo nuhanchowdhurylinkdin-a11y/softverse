@@ -30,6 +30,20 @@ void main() {
     expect(restored.macAddress, 'virtual://softverse');
   });
 
+  test('BLE printer survives cache serialization', () {
+    final blePrinter = virtualPrinter.copyWith(
+      connectionType: PrinterModel.bleConnection,
+      macAddress: 'AA:BB:CC:DD:EE:FF',
+      isConnected: false,
+    );
+
+    final restored = PrinterModel.fromJson(blePrinter.toJson());
+
+    expect(restored.isBle, isTrue);
+    expect(restored.isVirtual, isFalse);
+    expect(restored.macAddress, 'AA:BB:CC:DD:EE:FF');
+  });
+
   test('virtual print test produces a preview without Bluetooth', () async {
     final documents = <VirtualPrintDocument>[];
     final controller = PrinterController(

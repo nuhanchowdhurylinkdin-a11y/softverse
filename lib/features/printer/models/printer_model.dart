@@ -1,5 +1,6 @@
 class PrinterModel {
   static const bluetoothConnection = 'Bluetooth';
+  static const bleConnection = 'BLE Printer';
   static const virtualConnection = 'Virtual Printer';
   static const virtualModel = 'Softverse Virtual ESC/POS';
 
@@ -20,6 +21,7 @@ class PrinterModel {
   final bool autoCut;
 
   bool get isVirtual => connectionType == virtualConnection;
+  bool get isBle => connectionType == bleConnection;
 
   const PrinterModel({
     required this.id,
