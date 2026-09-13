@@ -1,5 +1,6 @@
 import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 
@@ -21,6 +22,7 @@ typedef VirtualPrintPresenter =
 
 class PrinterController extends GetxController {
   static const _cacheKey = 'saved_printers';
+  static const _bleChannel = MethodChannel('softverse/ble_printer');
 
   final VirtualPrintPresenter? _virtualPrintPresenter;
 
@@ -167,6 +169,36 @@ class PrinterController extends GetxController {
       return true;
     }
     if (printer.macAddress.isEmpty) return false;
+    if (printer.isBle) {
+      try {
+        final resolvedPrinter = printer.isConnected
+            ? printer
+            : await _resolveBlePrinter(printer);
+        final connected =
+            await _bleChannel.invokeMethod<bool>(
+              'connect',
+              resolvedPrinter.macAddress,
+            ) ??
+            false;
+        _update(
+          printer.id,
+          (p) => p.copyWith(
+            isConnected: connected,
+            macAddress: connected ? resolvedPrinter.macAddress : p.macAddress,
+            printerModel: connected
+                ? resolvedPrinter.printerModel
+                : p.printerModel,
+          ),
+        );
+        return connected;
+      } on PlatformException catch (error) {
+        _update(printer.id, (p) => p.copyWith(isConnected: false));
+        AppHelperFunctions.showErrorSnackBar(
+          error.message ?? 'Could not connect to the BLE printer.',
+        );
+        return false;
+      }
+    }
     final connected = await connectToMacAddress(printer.macAddress);
     _update(printer.id, (p) => p.copyWith(isConnected: connected));
     return connected;
@@ -187,10 +219,15 @@ class PrinterController extends GetxController {
       return false;
     }
 
-    final connected = await connectToPrinter(printer);
-    if (!connected) {
-      AppHelperFunctions.showErrorSnackBar('Could not connect to printer.');
-      return false;
+    final alreadyConnected = printer.isBle
+        ? await _bleConnectionStatus()
+        : await PrintBluetoothThermal.connectionStatus;
+    if (!alreadyConnected) {
+      final connected = await connectToPrinter(printer);
+      if (!connected) {
+        AppHelperFunctions.showErrorSnackBar('Could not connect to printer.');
+        return false;
+      }
     }
 
     final profile = await CapabilityProfile.load();
@@ -230,7 +267,7 @@ class PrinterController extends GetxController {
       if (printer.autoCut) ...generator.cut(),
     ];
 
-    final sent = await PrintBluetoothThermal.writeBytes(bytes);
+    final sent = await _writePrinterBytesWithReconnect(printer, bytes);
     if (sent) {
       AppHelperFunctions.showSuccessSnackBar('Test page sent to printer.');
     } else {
@@ -331,7 +368,7 @@ class PrinterController extends GetxController {
       if (printer.autoCut) ...generator.cut(),
     ];
 
-    final sent = await PrintBluetoothThermal.writeBytes(bytes);
+    final sent = await _writePrinterBytesWithReconnect(printer, bytes);
     if (sent) {
       AppHelperFunctions.showSuccessSnackBar('Receipt sent to printer.');
     } else {
@@ -405,7 +442,7 @@ class PrinterController extends GetxController {
       if (printer.autoCut) ...generator.cut(),
     ];
 
-    final sent = await PrintBluetoothThermal.writeBytes(bytes);
+    final sent = await _writePrinterBytesWithReconnect(printer, bytes);
     if (sent) {
       AppHelperFunctions.showSuccessSnackBar('Estimate sent to printer.');
     } else {
@@ -415,6 +452,79 @@ class PrinterController extends GetxController {
   }
 
   String _money(double value) => '\$${value.toStringAsFixed(2)}';
+
+  Future<bool> _bleConnectionStatus() async {
+    try {
+      return await _bleChannel.invokeMethod<bool>('connectionStatus') ?? false;
+    } on PlatformException {
+      return false;
+    }
+  }
+
+  Future<PrinterModel> _resolveBlePrinter(PrinterModel printer) async {
+    try {
+      final values =
+          await _bleChannel.invokeMethod<List<dynamic>>(
+            'scan',
+            printer.macAddress.isNotEmpty ? printer.macAddress : null,
+          ) ??
+          <dynamic>[];
+      final devices = values
+          .whereType<Map>()
+          .map((value) => Map<String, dynamic>.from(value))
+          .where(
+            (value) => value['address']?.toString().trim().isNotEmpty == true,
+          )
+          .toList();
+      if (devices.isEmpty) return printer;
+
+      Map<String, dynamic>? match = devices.firstWhereOrNull(
+        (value) => value['address']?.toString() == printer.macAddress,
+      );
+      match ??= devices.firstWhereOrNull(
+        (value) => value['name']?.toString() == printer.printerModel,
+      );
+      match ??= devices.length == 1 ? devices.single : null;
+      if (match == null) return printer;
+
+      return printer.copyWith(
+        macAddress: match['address']!.toString(),
+        printerModel: match['name']?.toString() ?? printer.printerModel,
+      );
+    } on PlatformException {
+      return printer;
+    }
+  }
+
+  Future<bool> _writePrinterBytes(PrinterModel printer, List<int> bytes) async {
+    if (!printer.isBle) return PrintBluetoothThermal.writeBytes(bytes);
+    try {
+      return await _bleChannel.invokeMethod<bool>('writeBytes', bytes) ?? false;
+    } on PlatformException {
+      return false;
+    }
+  }
+
+  Future<bool> _writePrinterBytesWithReconnect(
+    PrinterModel printer,
+    List<int> bytes,
+  ) async {
+    final sent = await _writePrinterBytes(printer, bytes);
+    if (sent || !printer.isBle) return sent;
+
+    try {
+      await _bleChannel.invokeMethod<bool>('disconnect');
+    } on PlatformException {
+      // The reconnect below also replaces any stale native GATT state.
+    }
+    _update(printer.id, (p) => p.copyWith(isConnected: false));
+    final latestPrinter = printers.firstWhereOrNull((p) => p.id == printer.id);
+    final connected = await connectToPrinter(
+      (latestPrinter ?? printer).copyWith(isConnected: false),
+    );
+    if (!connected) return false;
+    return _writePrinterBytes(latestPrinter ?? printer, bytes);
+  }
 
   String _testPreview(PrinterModel printer) =>
       '''

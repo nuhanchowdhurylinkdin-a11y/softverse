@@ -11,6 +11,7 @@ import 'printer_controller.dart';
 
 class AddPrinterController extends GetxController {
   static const _settingsChannel = MethodChannel('softverse/app_settings');
+  static const _bleChannel = MethodChannel('softverse/ble_printer');
   final PrinterController _printerController = Get.find<PrinterController>();
 
   final nameController = TextEditingController();
@@ -53,11 +54,34 @@ class AddPrinterController extends GetxController {
         availableDevices.clear();
         return;
       }
-      final devices = await PrintBluetoothThermal.pairedBluetooths;
+      final devices = connectionType.value == PrinterModel.bleConnection
+          ? await _scanBlePrinters()
+          : await PrintBluetoothThermal.pairedBluetooths;
       availableDevices.assignAll(devices);
+    } on PlatformException catch (error) {
+      availableDevices.clear();
+      AppHelperFunctions.showErrorSnackBar(
+        error.message ?? 'Could not scan for BLE printers.',
+      );
     } finally {
       isScanning.value = false;
     }
+  }
+
+  Future<List<BluetoothInfo>> _scanBlePrinters() async {
+    final values =
+        await _bleChannel.invokeMethod<List<dynamic>>('scan') ?? <dynamic>[];
+    return values
+        .whereType<Map>()
+        .map((value) {
+          final device = Map<String, dynamic>.from(value);
+          return BluetoothInfo(
+            name: device['name']?.toString() ?? 'BLE Printer',
+            macAdress: device['address']?.toString() ?? '',
+          );
+        })
+        .where((device) => device.macAdress.isNotEmpty)
+        .toList();
   }
 
   Future<bool> _ensureBluetoothPermission() async {
@@ -81,8 +105,8 @@ class AddPrinterController extends GetxController {
     }
     isConnecting.value = true;
     try {
-      final connected = await _printerController.connectToMacAddress(
-        device.macAdress,
+      final connected = await _printerController.connectToPrinter(
+        _draftPrinter()!,
       );
       isConnected.value = connected;
       if (connected) {
@@ -112,6 +136,10 @@ class AddPrinterController extends GetxController {
     } else if (type == PrinterModel.bluetoothConnection &&
         nameController.text.trim() == 'Virtual Printer') {
       nameController.clear();
+    }
+    availableDevices.clear();
+    if (type != PrinterModel.virtualConnection) {
+      scanForPrinters();
     }
   }
 

@@ -13,6 +13,7 @@ clang \
   -fobjc-arc \
   -fblocks \
   -framework Foundation \
+  -framework CoreBluetooth \
   -framework IOBluetooth \
   "$SCRIPT_DIR/main.m" \
   -o "$MACOS_DIR/softverse-thermal-printer-emulator"

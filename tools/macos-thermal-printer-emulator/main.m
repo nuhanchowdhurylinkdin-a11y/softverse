@@ -1,5 +1,11 @@
 #import <Foundation/Foundation.h>
+#import <CoreBluetooth/CoreBluetooth.h>
 #import <IOBluetooth/IOBluetooth.h>
+
+static NSString *const SoftverseBLEServiceUUID =
+    @"49535343-FE7D-4AE5-8FA9-9FAFD205E455";
+static NSString *const SoftverseBLEWriteUUID =
+    @"49535343-8841-43F4-A8D4-ECBE34729BB3";
 
 static NSData *UUID16(uint16_t value) {
   uint8_t bytes[] = {(uint8_t)(value >> 8), (uint8_t)(value & 0xff)};
@@ -15,12 +21,17 @@ static NSDictionary *UnsignedByte(uint8_t value) {
 }
 
 @interface ThermalPrinterEmulator
-    : NSObject <IOBluetoothRFCOMMChannelDelegate>
+    : NSObject <IOBluetoothRFCOMMChannelDelegate, CBPeripheralManagerDelegate>
 @property(nonatomic, strong) IOBluetoothSDPServiceRecord *serviceRecord;
 @property(nonatomic, strong) IOBluetoothUserNotification *openNotification;
 @property(nonatomic, strong) IOBluetoothRFCOMMChannel *activeChannel;
 @property(nonatomic, strong) NSFileHandle *captureHandle;
 @property(nonatomic, strong) NSURL *captureDirectory;
+@property(nonatomic, strong) CBPeripheralManager *peripheralManager;
+@property(nonatomic, strong) CBMutableCharacteristic *bleWriteCharacteristic;
+@property(nonatomic, strong) NSFileHandle *bleCaptureHandle;
+@property(nonatomic, strong) NSMutableData *livePreviewData;
+@property(nonatomic, strong) NSTimer *livePreviewTimer;
 @end
 
 @implementation ThermalPrinterEmulator
@@ -29,11 +40,16 @@ static NSDictionary *UnsignedByte(uint8_t value) {
   self = [super init];
   if (self) {
     _captureDirectory = captureDirectory;
+    _livePreviewData = [[NSMutableData alloc] init];
   }
   return self;
 }
 
 - (BOOL)start:(NSError **)error {
+  self.peripheralManager =
+      [[CBPeripheralManager alloc] initWithDelegate:self
+                                             queue:dispatch_get_main_queue()];
+
   NSDictionary *service = @{
     @"0001 - ServiceClassIDList" : @[ UUID16(0x1101) ],
     @"0004 - ProtocolDescriptorList" : @[
@@ -106,6 +122,141 @@ static NSDictionary *UnsignedByte(uint8_t value) {
   return YES;
 }
 
+- (void)peripheralManagerDidUpdateState:(CBPeripheralManager *)peripheral {
+  if (peripheral.state != CBManagerStatePoweredOn) {
+    NSLog(@"BLE printer is not ready (Bluetooth state: %ld).",
+          (long)peripheral.state);
+    return;
+  }
+
+  CBUUID *writeUUID = [CBUUID UUIDWithString:SoftverseBLEWriteUUID];
+  self.bleWriteCharacteristic = [[CBMutableCharacteristic alloc]
+      initWithType:writeUUID
+        properties:(CBCharacteristicPropertyWrite |
+                    CBCharacteristicPropertyWriteWithoutResponse)
+             value:nil
+       permissions:CBAttributePermissionsWriteable];
+  CBMutableService *service = [[CBMutableService alloc]
+      initWithType:[CBUUID UUIDWithString:SoftverseBLEServiceUUID]
+           primary:YES];
+  service.characteristics = @[ self.bleWriteCharacteristic ];
+  [peripheral addService:service];
+}
+
+- (void)peripheralManager:(CBPeripheralManager *)peripheral
+             didAddService:(CBService *)service
+                     error:(NSError *)error {
+  if (error != nil) {
+    NSLog(@"Could not publish BLE printer service: %@", error.localizedDescription);
+    return;
+  }
+  [peripheral startAdvertising:@{
+    CBAdvertisementDataLocalNameKey : @"Softverse BLE Printer",
+    CBAdvertisementDataServiceUUIDsKey :
+        @[ [CBUUID UUIDWithString:SoftverseBLEServiceUUID] ],
+  }];
+}
+
+- (void)peripheralManagerDidStartAdvertising:(CBPeripheralManager *)peripheral
+                                       error:(NSError *)error {
+  if (error != nil) {
+    NSLog(@"Could not advertise BLE printer: %@", error.localizedDescription);
+    return;
+  }
+  NSLog(@"Softverse BLE Printer is advertising and ready for Android.");
+  NSLog(@"In Softverse choose Connection Type > BLE Printer; OS pairing is not required.");
+}
+
+- (void)peripheralManager:(CBPeripheralManager *)peripheral
+  didReceiveWriteRequests:(NSArray<CBATTRequest *> *)requests {
+  for (CBATTRequest *request in requests) {
+    if (![request.characteristic.UUID
+            isEqual:[CBUUID UUIDWithString:SoftverseBLEWriteUUID]]) {
+      [peripheral respondToRequest:request
+                       withResult:CBATTErrorAttributeNotFound];
+      continue;
+    }
+    if (request.value.length == 0) {
+      [peripheral respondToRequest:request
+                       withResult:CBATTErrorInvalidAttributeValueLength];
+      continue;
+    }
+    if (self.bleCaptureHandle == nil) {
+      [self.livePreviewData setLength:0];
+      NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+      formatter.dateFormat = @"yyyyMMdd-HHmmss";
+      NSString *stamp = [formatter stringFromDate:[NSDate date]];
+      NSString *fileName =
+          [NSString stringWithFormat:@"escpos-ble-%@.bin", stamp];
+      NSURL *captureURL =
+          [self.captureDirectory URLByAppendingPathComponent:fileName];
+      [[NSFileManager defaultManager] createFileAtPath:captureURL.path
+                                              contents:nil
+                                            attributes:nil];
+      self.bleCaptureHandle =
+          [NSFileHandle fileHandleForWritingToURL:captureURL error:nil];
+      NSLog(@"BLE client connected. Capturing to %@", captureURL.path);
+    }
+    [self.bleCaptureHandle writeData:request.value];
+    [self.bleCaptureHandle synchronizeFile];
+    [self scheduleLivePreviewWithData:request.value];
+    NSLog(@"Received %lu BLE ESC/POS bytes (total offset: %llu).",
+          (unsigned long)request.value.length,
+          self.bleCaptureHandle.offsetInFile);
+    [peripheral respondToRequest:request withResult:CBATTErrorSuccess];
+  }
+}
+
+- (void)scheduleLivePreviewWithData:(NSData *)data {
+  [self.livePreviewData appendData:data];
+  [self.livePreviewTimer invalidate];
+  __weak ThermalPrinterEmulator *weakSelf = self;
+  self.livePreviewTimer =
+      [NSTimer scheduledTimerWithTimeInterval:0.35
+                                      repeats:NO
+                                        block:^(NSTimer *timer) {
+    [weakSelf printLivePreview];
+  }];
+}
+
+- (void)printLivePreview {
+  const uint8_t *bytes = self.livePreviewData.bytes;
+  NSUInteger length = self.livePreviewData.length;
+  NSMutableArray<NSString *> *lines = [[NSMutableArray alloc] init];
+  NSMutableString *run = [[NSMutableString alloc] init];
+
+  void (^flushRun)(void) = ^{
+    if (run.length < 4) {
+      [run setString:@""];
+      return;
+    }
+    while ([run hasPrefix:@"."]) {
+      [run deleteCharactersInRange:NSMakeRange(0, 1)];
+    }
+    if (run.length > 0) {
+      [lines addObject:[run copy]];
+    }
+    [run setString:@""];
+  };
+
+  for (NSUInteger index = 0; index < length; index++) {
+    uint8_t byte = bytes[index];
+    if (byte >= 0x20 && byte <= 0x7e) {
+      [run appendFormat:@"%c", byte];
+    } else {
+      flushRun();
+    }
+  }
+  flushRun();
+
+  NSString *page = [lines componentsJoinedByString:@"\n"];
+  fprintf(stdout,
+          "\n================ LIVE PRINT ================\n%s\n"
+          "============== END LIVE PRINT ==============\n\n",
+          page.UTF8String ?: "");
+  fflush(stdout);
+}
+
 - (void)channelOpened:(IOBluetoothUserNotification *)notification
                channel:(IOBluetoothRFCOMMChannel *)channel {
   if (self.activeChannel != nil) {
@@ -113,6 +264,7 @@ static NSDictionary *UnsignedByte(uint8_t value) {
   }
   self.activeChannel = channel;
   [channel setDelegate:self];
+  [self.livePreviewData setLength:0];
 
   NSString *deviceName = [channel getDevice].name ?: @"Android device";
   NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
@@ -134,6 +286,7 @@ static NSDictionary *UnsignedByte(uint8_t value) {
   NSData *data = [NSData dataWithBytes:dataPointer length:dataLength];
   [self.captureHandle writeData:data];
   [self.captureHandle synchronizeFile];
+  [self scheduleLivePreviewWithData:data];
   NSLog(@"Received %zu ESC/POS bytes (total offset: %llu).", dataLength,
         self.captureHandle.offsetInFile);
 }
@@ -146,6 +299,11 @@ static NSDictionary *UnsignedByte(uint8_t value) {
 }
 
 - (void)stop {
+  [self.livePreviewTimer invalidate];
+  [self.bleCaptureHandle closeFile];
+  self.bleCaptureHandle = nil;
+  [self.peripheralManager stopAdvertising];
+  [self.peripheralManager removeAllServices];
   [self.captureHandle closeFile];
   [self.activeChannel closeChannel];
   [self.openNotification unregister];

@@ -13,9 +13,14 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterActivity() {
     private val bluetoothPermissionRequestCode = 9102
     private var bluetoothPermissionResult: MethodChannel.Result? = null
+    private var blePrinterBridge: BlePrinterBridge? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        blePrinterBridge = BlePrinterBridge(
+            this,
+            flutterEngine.dartExecutor.binaryMessenger
+        )
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "softverse/app_settings")
             .setMethodCallHandler { call, result ->
                 when (call.method) {
@@ -34,14 +39,20 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun requestBluetoothPermissions(result: MethodChannel.Result) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            arrayOf(
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_CONNECT
+            )
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+        } else {
+            emptyArray()
+        }
+        if (permissions.isEmpty()) {
             result.success(true)
             return
         }
-        val permissions = arrayOf(
-            Manifest.permission.BLUETOOTH_SCAN,
-            Manifest.permission.BLUETOOTH_CONNECT
-        )
         if (permissions.all { checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED }) {
             result.success(true)
             return
@@ -65,5 +76,11 @@ class MainActivity : FlutterActivity() {
             grantResults.all { it == PackageManager.PERMISSION_GRANTED }
         bluetoothPermissionResult?.success(granted)
         bluetoothPermissionResult = null
+    }
+
+    override fun onDestroy() {
+        blePrinterBridge?.dispose()
+        blePrinterBridge = null
+        super.onDestroy()
     }
 }

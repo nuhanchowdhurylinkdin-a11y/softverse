@@ -182,6 +182,7 @@ class AddPrinterScreen extends GetView<AddPrinterController> {
                       title: 'Connection Type',
                       options: const [
                         PrinterModel.bluetoothConnection,
+                        PrinterModel.bleConnection,
                         PrinterModel.virtualConnection,
                       ],
                       selected: controller.connectionType.value,
@@ -365,6 +366,8 @@ class AddPrinterScreen extends GetView<AddPrinterController> {
           child: SafeArea(
             child: Obx(() {
               final devices = controller.availableDevices;
+              final isBle =
+                  controller.connectionType.value == PrinterModel.bleConnection;
               return Column(
                 children: [
                   SizedBox(height: 12.h),
@@ -373,7 +376,7 @@ class AddPrinterScreen extends GetView<AddPrinterController> {
                     children: [
                       SizedBox(width: 16.w),
                       Text(
-                        'Paired Printers',
+                        isBle ? 'Nearby BLE Printers' : 'Paired Printers',
                         style: getTextStyle(
                           fontSize: 16.4,
                           fontWeight: FontWeight.w500,
@@ -404,7 +407,9 @@ class AddPrinterScreen extends GetView<AddPrinterController> {
                                 horizontal: 16.w,
                               ),
                               child: Text(
-                                'No paired Bluetooth printers found. Pair a printer in your device Bluetooth settings first, then tap rescan.',
+                                isBle
+                                    ? 'No compatible BLE printers found. Keep the Mac emulator running and tap rescan.'
+                                    : 'No paired Bluetooth printers found. Pair a printer in your device Bluetooth settings first, then tap rescan.',
                                 textAlign: TextAlign.center,
                                 style: getTextStyle(
                                   fontSize: 12.8,

@@ -1,9 +1,8 @@
 # Softverse macOS thermal printer emulator
 
-This native macOS utility publishes the Bluetooth Classic Serial Port Profile
-(SPP) service used by the Android `print_bluetooth_thermal` plugin. It accepts
-incoming RFCOMM connections and stores each received ESC/POS print job as a
-timestamped `.bin` file in `captures/`.
+This native macOS utility publishes both a BLE GATT thermal-printer service and
+a legacy Bluetooth Classic Serial Port Profile (SPP) service. It accepts raw
+ESC/POS print jobs and stores them as timestamped `.bin` files in `captures/`.
 
 ## Build and start
 
@@ -16,22 +15,24 @@ cd tools/macos-thermal-printer-emulator
 Keep the terminal open. On first use, allow Bluetooth access for the emulator
 or Terminal in macOS System Settings if prompted.
 
-## Connect an Android device
+## Connect an Android device (recommended BLE path)
 
-1. Turn on Bluetooth on the Mac and Android device.
-2. Open Bluetooth Settings on both devices and pair the Android device with the
-   Mac. The Softverse Android plugin only lists already paired devices.
-3. Keep `./run.sh` running.
-4. In Softverse, open **More > Printer > Add Printer**.
-5. Leave **Connection Type** set to **Bluetooth**.
-6. Open **Printer Model**, rescan, and select the Mac's Bluetooth name.
-7. Tap **PRINT TEST** or save it and print a receipt.
-8. Confirm that a new `captures/escpos-*.bin` file appears.
+1. Turn on Bluetooth on the Mac and Android device and keep `./run.sh` running.
+2. In Softverse, open **More > Printer > Add Printer**.
+3. Set **Connection Type** to **BLE Printer**.
+4. Open **Printer Model**, rescan, and select **Softverse BLE Printer**.
+5. Tap **PRINT TEST** or save it and print a receipt.
+6. The printable receipt page appears live in the emulator Terminal between
+   `LIVE PRINT` markers. A raw `captures/escpos-ble-*.bin` file is also saved.
+
+BLE does not require pairing the phone and Mac in the operating-system
+Bluetooth settings. The legacy **Bluetooth** option remains available for real
+Classic SPP printers and writes captures named `escpos-*.bin` when macOS permits
+an incoming RFCOMM connection.
 
 ## Important limitations
 
-- This targets the Android app's Bluetooth Classic SPP transport, not BLE GATT.
-- Current macOS versions and Bluetooth adapters may restrict discoverability,
+- Current macOS versions and Bluetooth adapters may restrict Classic discoverability,
   phone-to-Mac pairing, or third-party incoming RFCOMM services. The utility
   reports failure if macOS refuses to publish the service.
 - Captured files contain the exact raw ESC/POS bytes. Successful capture proves
