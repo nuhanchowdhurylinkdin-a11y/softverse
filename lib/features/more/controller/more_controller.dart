@@ -46,6 +46,8 @@ class MoreController extends GetxController {
     Get.toNamed(AppRoute.getViewCustomerScreen());
   }
 
+  void openDueBalances() => Get.toNamed(AppRoute.getCustomerDueListScreen());
+
   void openPrinterSettings() => Get.toNamed(AppRoute.getPrinterListScreen());
 
   void openAppsSettings() => Get.toNamed(AppRoute.getAppsMenuScreen());

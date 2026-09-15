@@ -2,8 +2,10 @@ import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:image/image.dart' as img;
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 
+import '../../../core/services/business_profile_service.dart';
 import '../../../core/services/offline_database_service.dart';
 import '../../../core/utils/helpers/app_helper.dart';
 import '../../../routes/app_routes.dart';
@@ -238,15 +240,7 @@ class PrinterController extends GetxController {
     final isDark = printer.printDensity == 'Dark';
 
     final bytes = <int>[
-      ...generator.text(
-        'Softverse POS',
-        styles: PosStyles(
-          align: PosAlign.center,
-          bold: true,
-          height: PosTextSize.size2,
-          width: PosTextSize.size2,
-        ),
-      ),
+      ...await _businessHeaderBytes(generator),
       ...generator.text(
         printer.printerModel,
         styles: const PosStyles(align: PosAlign.center),
@@ -329,15 +323,7 @@ class PrinterController extends GetxController {
     final isDark = printer.printDensity == 'Dark';
 
     final bytes = <int>[
-      ...generator.text(
-        'Softverse POS',
-        styles: PosStyles(
-          align: PosAlign.center,
-          bold: true,
-          height: PosTextSize.size2,
-          width: PosTextSize.size2,
-        ),
-      ),
+      ...await _businessHeaderBytes(generator),
       ...generator.text(
         'Receipt',
         styles: const PosStyles(align: PosAlign.center),
@@ -407,15 +393,7 @@ class PrinterController extends GetxController {
     final isDark = printer.printDensity == 'Dark';
 
     final bytes = <int>[
-      ...generator.text(
-        'Softverse POS',
-        styles: PosStyles(
-          align: PosAlign.center,
-          bold: true,
-          height: PosTextSize.size2,
-          width: PosTextSize.size2,
-        ),
-      ),
+      ...await _businessHeaderBytes(generator),
       ...generator.text(
         'ESTIMATE (not a receipt)',
         styles: const PosStyles(align: PosAlign.center),
@@ -449,6 +427,47 @@ class PrinterController extends GetxController {
       AppHelperFunctions.showErrorSnackBar('Failed to print estimate.');
     }
     return sent;
+  }
+
+  /// Business name/address/phone (and logo, when reachable) for the top of
+  /// every real print - pulled from [BusinessProfileService] instead of a
+  /// hardcoded "Softverse POS" so receipts reflect what the merchant
+  /// actually entered on the Business Admin dashboard.
+  Future<List<int>> _businessHeaderBytes(Generator generator) async {
+    final bytes = <int>[];
+    final logo = await BusinessProfileService.loadLogoImage();
+    if (logo != null) {
+      final resized = logo.width > 300 ? img.copyResize(logo, width: 300) : logo;
+      bytes.addAll(generator.image(resized));
+    }
+    bytes.addAll(
+      generator.text(
+        BusinessProfileService.name,
+        styles: PosStyles(
+          align: PosAlign.center,
+          bold: true,
+          height: PosTextSize.size2,
+          width: PosTextSize.size2,
+        ),
+      ),
+    );
+    if (BusinessProfileService.address.isNotEmpty) {
+      bytes.addAll(
+        generator.text(
+          BusinessProfileService.address,
+          styles: const PosStyles(align: PosAlign.center),
+        ),
+      );
+    }
+    if (BusinessProfileService.phone.isNotEmpty) {
+      bytes.addAll(
+        generator.text(
+          'Tel: ${BusinessProfileService.phone}',
+          styles: const PosStyles(align: PosAlign.center),
+        ),
+      );
+    }
+    return bytes;
   }
 
   String _money(double value) => '\$${value.toStringAsFixed(2)}';
@@ -528,7 +547,7 @@ class PrinterController extends GetxController {
 
   String _testPreview(PrinterModel printer) =>
       '''
-SOFTVERSE POS
+${_businessHeaderPreview()}
 ${printer.printerModel}
 --------------------------------
 PRINTER TEST PAGE
@@ -539,6 +558,16 @@ Auto cut: ${printer.autoCut ? 'On' : 'Off'}
 Virtual printer is ready.
 '''
           .trim();
+
+  String _businessHeaderPreview() {
+    final lines = [
+      BusinessProfileService.name,
+      if (BusinessProfileService.address.isNotEmpty) BusinessProfileService.address,
+      if (BusinessProfileService.phone.isNotEmpty)
+        'Tel: ${BusinessProfileService.phone}',
+    ];
+    return lines.join('\n');
+  }
 
   String _receiptPreview({
     required String invoiceNumber,
@@ -553,7 +582,7 @@ Virtual printer is ready.
     required String paymentLabel,
   }) {
     final output = StringBuffer()
-      ..writeln('SOFTVERSE POS')
+      ..writeln(_businessHeaderPreview())
       ..writeln('Receipt')
       ..writeln(invoiceNumber)
       ..writeln(orderId)

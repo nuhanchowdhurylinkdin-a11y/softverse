@@ -4,8 +4,12 @@ import '../features/apps/views/screens/app_device_list_screen.dart';
 import '../features/apps/views/screens/apps_menu_screen.dart';
 import '../features/auth/views/screens/enter_otp_screen.dart';
 import '../features/customer/controller/add_customer_controller.dart';
+import '../features/customer/controller/customer_due_controller.dart';
+import '../features/customer/controller/customer_due_orders_controller.dart';
 import '../features/customer/controller/edit_customer_controller.dart';
 import '../features/customer/views/screens/add_customer_screen.dart';
+import '../features/customer/views/screens/customer_due_list_screen.dart';
+import '../features/customer/views/screens/customer_due_orders_screen.dart';
 import '../features/customer/views/screens/edit_customer_screen.dart';
 import '../features/customer/views/screens/purchase_history_screen.dart';
 import '../features/customer/views/screens/view_customer_screen.dart';
@@ -96,6 +100,8 @@ class AppRoute {
   static String editCustomerScreen = "/editCustomerScreen";
   static String addCustomerScreen = "/addCustomerScreen";
   static String purchaseHistoryScreen = "/purchaseHistoryScreen";
+  static String customerDueListScreen = "/customerDueListScreen";
+  static String customerDueOrdersScreen = "/customerDueOrdersScreen";
   static String printerListScreen = "/printerListScreen";
   static String printerDetailScreen = "/printerDetailScreen";
   static String addPrinterScreen = "/addPrinterScreen";
@@ -142,6 +148,8 @@ class AppRoute {
   static String getEditCustomerScreen() => editCustomerScreen;
   static String getAddCustomerScreen() => addCustomerScreen;
   static String getPurchaseHistoryScreen() => purchaseHistoryScreen;
+  static String getCustomerDueListScreen() => customerDueListScreen;
+  static String getCustomerDueOrdersScreen() => customerDueOrdersScreen;
   static String getPrinterListScreen() => printerListScreen;
   static String getPrinterDetailScreen() => printerDetailScreen;
   static String getAddPrinterScreen() => addPrinterScreen;
@@ -267,6 +275,22 @@ class AppRoute {
     GetPage(
       name: purchaseHistoryScreen,
       page: () => const PurchaseHistoryScreen(),
+    ),
+    GetPage(
+      name: customerDueListScreen,
+      page: () => const CustomerDueListScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<CustomerDueController>(() => CustomerDueController());
+      }),
+    ),
+    GetPage(
+      name: customerDueOrdersScreen,
+      page: () => const CustomerDueOrdersScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<CustomerDueOrdersController>(
+          () => CustomerDueOrdersController(),
+        );
+      }),
     ),
     GetPage(
       name: editCustomerScreen,

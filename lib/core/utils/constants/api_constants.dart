@@ -16,6 +16,8 @@ class ApiConstants {
   static String get refresh => '$baseUrl/auth/refresh';
   static String get logout => '$baseUrl/auth/logout';
   static String get me => '$baseUrl/auth/me';
+  static String get businessProfile =>
+      '$baseUrl/business-admin-dashboard/profile';
   static String get forgotPassword => '$baseUrl/auth/forgot-password';
   static String get verifyForgotPasswordOtp =>
       '$baseUrl/auth/forgot-password/verify-otp';
@@ -34,6 +36,9 @@ class ApiConstants {
       '$baseUrl/customers/$id/purchase-history';
   static String customersSearch(String query) =>
       '$baseUrl/customers?search=${Uri.encodeQueryComponent(query)}';
+  static String get customerDues => '$baseUrl/customers/dues';
+  static String customerDueOrders(String id) =>
+      '$baseUrl/customers/$id/due-orders';
   static String get items => '$baseUrl/items';
   static String get itemAdminFilters => '$baseUrl/items/admin/filters';
   static String get inventory => '$baseUrl/inventory';
