@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:softverse/core/services/business_profile_service.dart';
@@ -10,6 +11,7 @@ void main() {
   late Directory databaseDirectory;
 
   setUpAll(() async {
+    dotenv.testLoad(fileInput: 'BASE_URL=https://phase-one.test');
     databaseDirectory = await Directory.systemTemp.createTemp(
       'softverse_business_profile_test_',
     );
@@ -63,5 +65,39 @@ void main() {
     });
 
     expect(BusinessProfileService.name, 'Softverse POS');
+  });
+
+  test('reads receipt settings header/footer once cached', () async {
+    await OfflineDatabaseService.saveCache('business_profile', {
+      'businessName': 'Louis Cafe',
+      'receiptHeader': 'Welcome!',
+      'receiptFooter': 'See you again',
+    });
+
+    expect(BusinessProfileService.header, 'Welcome!');
+    expect(BusinessProfileService.footer, 'See you again');
+  });
+
+  test(
+    'prefers the receipt settings logo over the business profile logo',
+    () async {
+      await OfflineDatabaseService.saveCache('business_profile', {
+        'businessName': 'Louis Cafe',
+        'businessLogoUrl': '/media/uploads/profile-logo.png',
+        'printedReceiptLogoUrl': '/media/uploads/receipt-logo.png',
+      });
+
+      expect(BusinessProfileService.logoUrl, contains('receipt-logo.png'));
+    },
+  );
+
+  test('falls back to the business profile logo with no receipt logo set', () async {
+    await OfflineDatabaseService.saveCache('business_profile', {
+      'businessName': 'Louis Cafe',
+      'businessLogoUrl': '/media/uploads/profile-logo.png',
+      'printedReceiptLogoUrl': null,
+    });
+
+    expect(BusinessProfileService.logoUrl, contains('profile-logo.png'));
   });
 }

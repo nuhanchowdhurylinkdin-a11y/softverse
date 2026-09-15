@@ -1,9 +1,43 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:softverse/core/services/offline_database_service.dart';
+import 'package:softverse/core/services/storage_service.dart';
 import 'package:softverse/features/checkout/models/cart_item.dart';
 import 'package:softverse/features/printer/controller/printer_controller.dart';
 import 'package:softverse/features/printer/models/printer_model.dart';
 
 void main() {
+  late Directory databaseDirectory;
+
+  setUpAll(() async {
+    databaseDirectory = await Directory.systemTemp.createTemp(
+      'softverse_virtual_printer_test_',
+    );
+    SharedPreferences.setMockInitialValues({});
+    await StorageService.init();
+    await OfflineDatabaseService.init(
+      testPath: databaseDirectory.path,
+      boxSuffix: '_virtual_printer_test',
+    );
+    await StorageService.saveUserSession(
+      id: 'user-id',
+      fullName: 'Owner',
+      email: 'owner@example.com',
+      accessToken: 'token',
+      refreshToken: 'refresh',
+      role: 'owner',
+      businessId: 'business-id',
+      permissions: const [],
+    );
+  });
+
+  tearDownAll(() async {
+    await OfflineDatabaseService.closeForTesting();
+    await databaseDirectory.delete(recursive: true);
+  });
+
   const virtualPrinter = PrinterModel(
     id: 'virtual-printer',
     name: 'Development Printer',
@@ -92,5 +126,35 @@ void main() {
     expect(documents.single.content, contains('Coffee x2'));
     expect(documents.single.content, contains('Total: \$11.00'));
     expect(documents.single.content, contains('Change: \$9.00'));
+  });
+
+  test('virtual receipt includes the configured header and footer', () async {
+    await OfflineDatabaseService.saveCache('business_profile', {
+      'businessName': 'Louis Cafe',
+      'receiptHeader': 'Welcome!',
+      'receiptFooter': 'See you again',
+    });
+
+    final documents = <VirtualPrintDocument>[];
+    final controller = PrinterController(
+      virtualPrintPresenter: (document) async => documents.add(document),
+    )..printers.add(virtualPrinter);
+
+    await controller.printReceipt(
+      invoiceNumber: 'INV-1002',
+      customerName: 'Walk-in Customer',
+      orderId: 'ORDER-10',
+      items: const [],
+      subtotal: 0,
+      tax: 0,
+      totalAmount: 0,
+      amountReceived: 0,
+      changeToReturn: 0,
+      paymentLabel: 'Cash',
+    );
+
+    expect(documents.single.content, contains('Welcome!'));
+    expect(documents.single.content, contains('Louis Cafe'));
+    expect(documents.single.content, contains('See you again'));
   });
 }

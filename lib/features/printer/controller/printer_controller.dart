@@ -350,6 +350,7 @@ class PrinterController extends GetxController {
       ),
       ...generator.text('Received: ${_money(amountReceived)}'),
       ...generator.text('Change: ${_money(changeToReturn)}'),
+      ..._businessFooterBytes(generator),
       ...generator.feed(2),
       if (printer.autoCut) ...generator.cut(),
     ];
@@ -416,6 +417,7 @@ class PrinterController extends GetxController {
         'Total: ${_money(totalAmount)}',
         styles: PosStyles(bold: isDark),
       ),
+      ..._businessFooterBytes(generator),
       ...generator.feed(2),
       if (printer.autoCut) ...generator.cut(),
     ];
@@ -435,6 +437,14 @@ class PrinterController extends GetxController {
   /// actually entered on the Business Admin dashboard.
   Future<List<int>> _businessHeaderBytes(Generator generator) async {
     final bytes = <int>[];
+    if (BusinessProfileService.header.isNotEmpty) {
+      bytes.addAll(
+        generator.text(
+          BusinessProfileService.header,
+          styles: const PosStyles(align: PosAlign.center, bold: true),
+        ),
+      );
+    }
     final logo = await BusinessProfileService.loadLogoImage();
     if (logo != null) {
       final resized = logo.width > 300 ? img.copyResize(logo, width: 300) : logo;
@@ -468,6 +478,16 @@ class PrinterController extends GetxController {
       );
     }
     return bytes;
+  }
+
+  /// Configured Receipt Settings footer text, printed at the bottom of
+  /// every real print - empty (no bytes) when nothing is configured.
+  List<int> _businessFooterBytes(Generator generator) {
+    if (BusinessProfileService.footer.isEmpty) return const [];
+    return generator.text(
+      BusinessProfileService.footer,
+      styles: const PosStyles(align: PosAlign.center),
+    );
   }
 
   String _money(double value) => '\$${value.toStringAsFixed(2)}';
@@ -561,6 +581,7 @@ Virtual printer is ready.
 
   String _businessHeaderPreview() {
     final lines = [
+      if (BusinessProfileService.header.isNotEmpty) BusinessProfileService.header,
       BusinessProfileService.name,
       if (BusinessProfileService.address.isNotEmpty) BusinessProfileService.address,
       if (BusinessProfileService.phone.isNotEmpty)
@@ -602,6 +623,9 @@ Virtual printer is ready.
       ..writeln('Total: ${_money(totalAmount)}')
       ..writeln('Received: ${_money(amountReceived)}')
       ..writeln('Change: ${_money(changeToReturn)}');
+    if (BusinessProfileService.footer.isNotEmpty) {
+      output.writeln(BusinessProfileService.footer);
+    }
     return output.toString().trim();
   }
 

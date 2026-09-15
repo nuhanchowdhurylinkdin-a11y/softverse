@@ -38,24 +38,59 @@ class BusinessProfileService {
     return _cached()?['businessPhone']?.toString().trim() ?? '';
   }
 
+  /// The Receipt Settings' dedicated printed-receipt logo takes priority
+  /// over the business profile's own logo, matching the backend PDF
+  /// generator's precedence.
   static String get logoUrl {
     _version.value;
-    final raw = _cached()?['businessLogoUrl']?.toString().trim();
+    final cached = _cached();
+    final printed = cached?['printedReceiptLogoUrl']?.toString().trim();
+    final raw = (printed != null && printed.isNotEmpty)
+        ? printed
+        : cached?['businessLogoUrl']?.toString().trim();
     return (raw == null || raw.isEmpty) ? '' : ApiConstants.resolveAssetUrl(raw);
+  }
+
+  static String get header {
+    _version.value;
+    return _cached()?['receiptHeader']?.toString().trim() ?? '';
+  }
+
+  static String get footer {
+    _version.value;
+    return _cached()?['receiptFooter']?.toString().trim() ?? '';
   }
 
   static Map<String, dynamic>? _cached() =>
       OfflineDatabaseService.readCache<Map<String, dynamic>>(_cacheKey);
 
+  /// Fetches the business profile and receipt settings independently, so a
+  /// role without receipt-settings access (or a temporary failure on either
+  /// call) still keeps whichever half succeeds instead of losing both.
   static Future<void> fetch() async {
-    final response = await NetworkCaller().getRequest(
-      ApiConstants.businessProfile,
-    );
-    if (!response.isSuccess || response.responseData is! Map) return;
-    await OfflineDatabaseService.saveCache(
-      _cacheKey,
-      Map<String, dynamic>.from(response.responseData as Map),
-    );
+    final networkCaller = NetworkCaller();
+    final responses = await Future.wait([
+      networkCaller.getRequest(ApiConstants.businessProfile),
+      networkCaller.getRequest(ApiConstants.receiptSettings),
+    ]);
+
+    final merged = <String, dynamic>{};
+    final profileResponse = responses[0];
+    if (profileResponse.isSuccess && profileResponse.responseData is Map) {
+      merged.addAll(Map<String, dynamic>.from(profileResponse.responseData as Map));
+    }
+    final receiptResponse = responses[1];
+    if (receiptResponse.isSuccess && receiptResponse.responseData is Map) {
+      final receipt = Map<String, dynamic>.from(
+        receiptResponse.responseData as Map,
+      );
+      merged['receiptHeader'] = receipt['header'];
+      merged['receiptFooter'] = receipt['footer'];
+      merged['printedReceiptLogoUrl'] = receipt['printedReceiptLogoUrl'];
+    }
+    if (merged.isEmpty) return;
+
+    await OfflineDatabaseService.saveCache(_cacheKey, merged);
     _version.value++;
   }
 
