@@ -109,6 +109,12 @@ class MoreScreen extends GetView<MoreController> {
                 label: 'Customer'.tr,
                 onTap: controller.openCustomer,
               ),
+              SizedBox(height: 12.h),
+              MoreMenuTile(
+                icon: Iconsax.wallet_2,
+                label: 'Due Balances'.tr,
+                onTap: controller.openDueBalances,
+              ),
               SizedBox(height: 24.h),
               Row(
                 children: [

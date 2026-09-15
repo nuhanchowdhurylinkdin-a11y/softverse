@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../../../core/services/business_profile_service.dart';
 import '../../../core/services/feature_settings.dart';
 import '../../../core/common/widgets/catalog_search_sheet.dart';
 import '../../../core/services/network_caller.dart';
@@ -63,6 +64,7 @@ class HomeController extends GetxController {
     _loadCachedCatalog();
     _loadCachedTables();
     forceSync(showMessage: false);
+    BusinessProfileService.fetch();
   }
 
   Future<void> openTableOrder(TableOrder tableOrder) async {
