@@ -18,6 +18,8 @@ class ApiConstants {
   static String get me => '$baseUrl/auth/me';
   static String get businessProfile =>
       '$baseUrl/business-admin-dashboard/profile';
+  static String get receiptSettings =>
+      '$baseUrl/business-admin-dashboard/settings/receipt';
   static String get forgotPassword => '$baseUrl/auth/forgot-password';
   static String get verifyForgotPasswordOtp =>
       '$baseUrl/auth/forgot-password/verify-otp';
