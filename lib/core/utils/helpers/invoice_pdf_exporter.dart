@@ -22,6 +22,9 @@ class InvoicePdfExporter {
     required double totalAmount,
     required double amountReceived,
     required double changeToReturn,
+    String businessName = 'Softverse POS',
+    String businessAddress = '',
+    String businessPhone = '',
   }) async {
     final fileName = '${invoiceNumber.replaceAll(' ', '_')}.pdf';
     // The documents directory persists across app restarts and OS cache
@@ -39,6 +42,9 @@ class InvoicePdfExporter {
         totalAmount: totalAmount,
         amountReceived: amountReceived,
         changeToReturn: changeToReturn,
+        businessName: businessName,
+        businessAddress: businessAddress,
+        businessPhone: businessPhone,
       ),
       flush: true,
     );
@@ -79,9 +85,14 @@ class InvoicePdfExporter {
     required double totalAmount,
     required double amountReceived,
     required double changeToReturn,
+    required String businessName,
+    required String businessAddress,
+    required String businessPhone,
   }) {
     final lines = [
-      'Softverse POS Invoice',
+      businessName,
+      if (businessAddress.isNotEmpty) businessAddress,
+      if (businessPhone.isNotEmpty) 'Tel: $businessPhone',
       'Invoice: $invoiceNumber',
       'Order: $orderId',
       'Customer: $customerName',

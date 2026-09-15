@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../core/services/business_profile_service.dart';
 import '../../../core/services/feature_settings.dart';
 import '../../../core/services/network_caller.dart';
 import '../../../core/services/kds_order_sender.dart';
@@ -361,6 +362,9 @@ class InvoiceController extends GetxController {
       totalAmount: totalAmount,
       amountReceived: amountReceived,
       changeToReturn: changeToReturn,
+      businessName: BusinessProfileService.name,
+      businessAddress: BusinessProfileService.address,
+      businessPhone: BusinessProfileService.phone,
     );
   }
 

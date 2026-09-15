@@ -5,6 +5,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 import '../../../../core/common/styles/global_text_style.dart';
 import '../../../../core/common/widgets/primary_button.dart';
+import '../../../../core/services/business_profile_service.dart';
 import '../../../../core/utils/constants/colors.dart';
 import '../../../../core/utils/helpers/app_helper.dart';
 import '../../controller/invoice_controller.dart';
@@ -101,7 +102,7 @@ class ReceiptPreviewScreen extends GetView<InvoiceController> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Softverse POS Receipt',
+                                  '${BusinessProfileService.name} Receipt',
                                   style: getTextStyle(
                                     fontSize: 17,
                                     fontWeight: FontWeight.w600,
