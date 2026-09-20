@@ -42,13 +42,6 @@ class CustomerDueController extends GetxController {
   }
 
   void openCustomerDueOrders(CustomerDueModel due) {
-    final id = due.customerId;
-    if (id == null || id.isEmpty) {
-      AppHelperFunctions.showWarningSnackBar(
-        'This customer has no matching customer record to open.',
-      );
-      return;
-    }
     Get.toNamed(AppRoute.getCustomerDueOrdersScreen(), arguments: due);
   }
 }

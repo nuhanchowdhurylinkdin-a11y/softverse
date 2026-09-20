@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 import '../../../../core/common/styles/global_text_style.dart';
 import '../../../../core/common/widgets/product_image.dart';
@@ -51,6 +52,12 @@ class ItemDetailScreen extends GetView<ItemDetailController> {
             color: Colors.white,
           ),
         ),
+        actions: [
+          IconButton(
+            onPressed: controller.openEdit,
+            icon: Icon(Iconsax.edit, color: Colors.white, size: 22.sp),
+          ),
+        ],
       ),
       body: SafeArea(
         top: false,

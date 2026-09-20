@@ -83,7 +83,9 @@ class TransactionRecord {
       orderId: _clean(json['orderNumber']) ?? _clean(json['id']) ?? '',
       dateTime: createdAt == null
           ? ''
-          : DateFormat('dd/MM/yyyy hh:mma').format(createdAt).toLowerCase(),
+          : DateFormat(
+              'dd/MM/yyyy hh:mma',
+            ).format(createdAt.toLocal()).toLowerCase(),
       paymentType: status == 'refunded'
           ? PaymentType.refund
           : _paymentTypeFrom(payment),

@@ -46,379 +46,397 @@ class CreateItemScreen extends GetView<CreateItemController> {
             ),
           ),
         ),
-        title: Text(
-          'Create item',
-          style: getTextStyle(
-            fontSize: 21.9,
-            fontWeight: FontWeight.w500,
-            color: Colors.white,
+        title: Obx(
+          () => Text(
+            controller.isEditing ? 'Edit item' : 'Create item',
+            style: getTextStyle(
+              fontSize: 21.9,
+              fontWeight: FontWeight.w500,
+              color: Colors.white,
+            ),
           ),
         ),
       ),
       body: SafeArea(
         top: false,
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(16.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              AppTextField(
-                controller: controller.nameController,
-                hintText: 'A4tec mouse',
-                backgroundColor: AppColors.chipBackground,
-                borderStyle: AppTextFieldBorder.outline,
-                borderColor: AppColors.cardBorder,
-                hintColor: AppColors.chipInactiveText,
-                textColor: AppColors.chipInactiveText,
-                fontSize: 16.4,
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 16.w,
-                  vertical: 16.h,
-                ),
-              ),
-              SizedBox(height: 24.h),
-              CreateItemField(
-                label: 'Description',
-                controller: controller.descriptionController,
-                hintText: 'Item description',
-              ),
-              SizedBox(height: 24.h),
-              GestureDetector(
-                onTap: controller.openCategoryPicker,
-                child: Container(
-                  height: 60.h,
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  decoration: BoxDecoration(
-                    color: AppColors.chipBackground,
-                    border: Border.all(color: AppColors.cardBorder),
-                    borderRadius: BorderRadius.circular(12.r),
+        child: Obx(() {
+          if (controller.isLoadingItem.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          return SingleChildScrollView(
+            padding: EdgeInsets.all(16.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                AppTextField(
+                  controller: controller.nameController,
+                  hintText: 'A4tec mouse',
+                  backgroundColor: AppColors.chipBackground,
+                  borderStyle: AppTextFieldBorder.outline,
+                  borderColor: AppColors.cardBorder,
+                  hintColor: AppColors.chipInactiveText,
+                  textColor: AppColors.chipInactiveText,
+                  fontSize: 16.4,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 16.h,
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      ValueListenableBuilder<TextEditingValue>(
-                        valueListenable: controller.categoryController,
-                        builder: (context, value, _) => Text(
-                          value.text.isEmpty ? 'No Category' : value.text,
-                          style: getTextStyle(
-                            fontSize: 16.4,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.chipInactiveText,
+                ),
+                SizedBox(height: 24.h),
+                CreateItemField(
+                  label: 'Description',
+                  controller: controller.descriptionController,
+                  hintText: 'Item description',
+                ),
+                SizedBox(height: 24.h),
+                GestureDetector(
+                  onTap: controller.openCategoryPicker,
+                  child: Container(
+                    height: 60.h,
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    decoration: BoxDecoration(
+                      color: AppColors.chipBackground,
+                      border: Border.all(color: AppColors.cardBorder),
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        ValueListenableBuilder<TextEditingValue>(
+                          valueListenable: controller.categoryController,
+                          builder: (context, value, _) => Text(
+                            value.text.isEmpty ? 'No Category' : value.text,
+                            style: getTextStyle(
+                              fontSize: 16.4,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.chipInactiveText,
+                            ),
                           ),
                         ),
+                        Icon(
+                          Iconsax.arrow_down_2,
+                          size: 22.sp,
+                          color: AppColors.chipInactiveText,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(height: 24.h),
+                Text(
+                  'Sold by',
+                  style: getTextStyle(
+                    fontSize: 16.4,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.onboardingBackground,
+                  ),
+                ),
+                SizedBox(height: 20.h),
+                Obx(
+                  () => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      LabeledRadioOption(
+                        label: 'PCS',
+                        selected: controller.soldBy.value == SoldBy.pcs,
+                        onTap: () => controller.selectSoldBy(SoldBy.pcs),
                       ),
-                      Icon(
-                        Iconsax.arrow_down_2,
-                        size: 22.sp,
-                        color: AppColors.chipInactiveText,
+                      SizedBox(height: 16.h),
+                      LabeledRadioOption(
+                        label: 'Weight',
+                        selected: controller.soldBy.value == SoldBy.weight,
+                        onTap: () => controller.selectSoldBy(SoldBy.weight),
                       ),
                     ],
                   ),
                 ),
-              ),
-              SizedBox(height: 24.h),
-              Text(
-                'Sold by',
-                style: getTextStyle(
-                  fontSize: 16.4,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.onboardingBackground,
+                SizedBox(height: 24.h),
+                CreateItemField(
+                  label: 'Price',
+                  controller: controller.priceController,
+                  hintText: '\$0.00',
+                  keyboardType: TextInputType.number,
+                  helperText:
+                      'To indicate the price upon sale, leave the field blank',
                 ),
-              ),
-              SizedBox(height: 20.h),
-              Obx(
-                () => Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    LabeledRadioOption(
-                      label: 'PCS',
-                      selected: controller.soldBy.value == SoldBy.pcs,
-                      onTap: () => controller.selectSoldBy(SoldBy.pcs),
-                    ),
-                    SizedBox(height: 16.h),
-                    LabeledRadioOption(
-                      label: 'Weight',
-                      selected: controller.soldBy.value == SoldBy.weight,
-                      onTap: () => controller.selectSoldBy(SoldBy.weight),
-                    ),
-                  ],
+                SizedBox(height: 24.h),
+                CreateItemField(
+                  label: 'Cost',
+                  controller: controller.costController,
+                  hintText: '\$0.00',
+                  keyboardType: TextInputType.number,
                 ),
-              ),
-              SizedBox(height: 24.h),
-              CreateItemField(
-                label: 'Price',
-                controller: controller.priceController,
-                hintText: '\$0.00',
-                keyboardType: TextInputType.number,
-                helperText:
-                    'To indicate the price upon sale, leave the field blank',
-              ),
-              SizedBox(height: 24.h),
-              CreateItemField(
-                label: 'Cost',
-                controller: controller.costController,
-                hintText: '\$0.00',
-                keyboardType: TextInputType.number,
-              ),
-              SizedBox(height: 24.h),
-              CreateItemField(
-                label: 'SKU',
-                controller: controller.skuController,
-                hintText: '00000',
-                helperText:
-                    'To indicate the price upon sale, leave the field blank',
-              ),
-              SizedBox(height: 24.h),
-              CreateItemField(
-                label: 'Barcode',
-                controller: controller.barcodeController,
-                hintText: 'Scan or Manually enter',
-                suffixIcon: GestureDetector(
-                  onTap: controller.openScanBarcode,
-                  child: Icon(
-                    Iconsax.barcode,
-                    size: 22.sp,
-                    color: AppColors.chipInactiveText,
-                  ),
+                SizedBox(height: 24.h),
+                CreateItemField(
+                  label: 'SKU',
+                  controller: controller.skuController,
+                  hintText: '00000',
+                  helperText:
+                      'To indicate the price upon sale, leave the field blank',
                 ),
-              ),
-              SizedBox(height: 24.h),
-              Text(
-                'Inventory',
-                style: getTextStyle(
-                  fontSize: 16.4,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.onboardingBackground,
-                ),
-              ),
-              SizedBox(height: 8.h),
-              Obx(
-                () => ToggleFieldRow(
-                  label: 'Track stock',
-                  value: controller.trackStock.value,
-                  onChanged: (_) => controller.toggleTrackStock(),
-                  boxed: true,
-                ),
-              ),
-              Obx(
-                () => Padding(
-                  padding: EdgeInsets.only(top: 6.h),
-                  child: Text(
-                    controller.trackStock.value
-                        ? 'On: stock is reduced after each sale and shown as In stock, Low stock, or Out of stock.'
-                        : 'Off: this item is always sellable; quantities are not tracked.',
-                    style: getTextStyle(
-                      fontSize: 11.8,
-                      color: AppColors.mutedText,
+                SizedBox(height: 24.h),
+                CreateItemField(
+                  label: 'Barcode',
+                  controller: controller.barcodeController,
+                  hintText: 'Scan or Manually enter',
+                  suffixIcon: GestureDetector(
+                    onTap: controller.openScanBarcode,
+                    child: Icon(
+                      Iconsax.barcode,
+                      size: 22.sp,
+                      color: AppColors.chipInactiveText,
                     ),
                   ),
                 ),
-              ),
-              Obx(
-                () => controller.trackStock.value
-                    ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          SizedBox(height: 8.h),
-                          CreateItemField(
-                            label: 'In Stock',
-                            controller: controller.inStockController,
-                            keyboardType: TextInputType.number,
-                          ),
-                          SizedBox(height: 24.h),
-                          CreateItemField(
-                            label: 'Low Stock',
-                            controller: controller.lowStockController,
-                            keyboardType: TextInputType.number,
-                            helperText:
-                                'Quantity at which you will be notified about low stock',
-                          ),
-                        ],
-                      )
-                    : const SizedBox.shrink(),
-              ),
-              _StoreInventorySection(controller: controller),
-              Obx(
-                () =>
-                    FeatureSettings.isEnabled('product_expiration_information')
-                    ? Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          SizedBox(height: 24.h),
-                          Text(
-                            'Expire Date',
-                            style: getTextStyle(
-                              fontSize: 16.4,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.onboardingBackground,
-                            ),
-                          ),
-                          SizedBox(height: 8.h),
-                          Obx(
-                            () => ToggleFieldRow(
-                              label: 'Track Date',
-                              value: controller.trackDate.value,
-                              onChanged: (_) => controller.toggleTrackDate(),
-                              boxed: true,
-                            ),
-                          ),
-                          Obx(
-                            () => controller.trackDate.value
-                                ? Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      SizedBox(height: 24.h),
-                                      Text(
-                                        'Manufacturing Date',
-                                        style: getTextStyle(
-                                          fontSize: 16.4,
-                                          fontWeight: FontWeight.w500,
-                                          color: AppColors.onboardingBackground,
-                                        ),
-                                      ),
-                                      SizedBox(height: 8.h),
-                                      DateFieldRow(
-                                        value:
-                                            controller.manufacturingDate.value,
-                                        onTap: controller.pickManufacturingDate,
-                                      ),
-                                      SizedBox(height: 24.h),
-                                      Text(
-                                        'Expire Date',
-                                        style: getTextStyle(
-                                          fontSize: 16.4,
-                                          fontWeight: FontWeight.w500,
-                                          color: AppColors.onboardingBackground,
-                                        ),
-                                      ),
-                                      SizedBox(height: 8.h),
-                                      DateFieldRow(
-                                        value: controller.expireDate.value,
-                                        onTap: controller.pickExpireDate,
-                                      ),
-                                      SizedBox(height: 24.h),
-                                      CreateItemField(
-                                        label: 'Expiration alert quantity',
-                                        controller: controller
-                                            .expirationAlertQuantityController,
-                                        keyboardType: TextInputType.number,
-                                        helperText:
-                                            'Quantity at which you will be notified about the expiration date',
-                                      ),
-                                    ],
-                                  )
-                                : const SizedBox.shrink(),
-                          ),
-                        ],
-                      )
-                    : const SizedBox.shrink(),
-              ),
-              SizedBox(height: 24.h),
-              Obx(
-                () => ComboPackEditorSection(
-                  enabled: controller.modifierEnabled.value,
-                  onEnabledChanged: (_) => controller.toggleModifier(),
-                  comboPacks: controller.comboPacks,
-                  onSelectionToggle: controller.toggleComboPackSelection,
-                  onEdit: (index) =>
-                      controller.openComboPackEditor(index: index),
-                  onDelete: controller.removeComboPack,
-                  onAdd: controller.openComboPackEditor,
-                ),
-              ),
-              SizedBox(height: 24.h),
-              _CompositeItemSection(controller: controller),
-              SizedBox(height: 24.h),
-              _VariantOptionsSection(controller: controller),
-              SizedBox(height: 24.h),
-              _VariantsSection(controller: controller),
-              SizedBox(height: 24.h),
-              Text(
-                'Representation on POS',
-                style: getTextStyle(
-                  fontSize: 16.4,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.onboardingBackground,
-                ),
-              ),
-              SizedBox(height: 20.h),
-              Obx(
-                () => Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    LabeledRadioOption(
-                      label: 'Color and shape',
-                      selected:
-                          controller.representation.value ==
-                          ItemRepresentation.colorAndShape,
-                      onTap: () => controller.selectRepresentation(
-                        ItemRepresentation.colorAndShape,
-                      ),
-                    ),
-                    SizedBox(height: 16.h),
-                    LabeledRadioOption(
-                      label: 'Image',
-                      selected:
-                          controller.representation.value ==
-                          ItemRepresentation.image,
-                      onTap: () => controller.selectRepresentation(
-                        ItemRepresentation.image,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 24.h),
-              Obx(
-                () =>
-                    controller.representation.value ==
-                        ItemRepresentation.colorAndShape
-                    ? ColorShapePicker(
-                        selectedColorIndex: controller.selectedColorIndex.value,
-                        onColorSelected: controller.selectColor,
-                        selectedShapeIndex: controller.selectedShapeIndex.value,
-                        onShapeSelected: controller.selectShape,
-                      )
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          ItemPhotoPicker(
-                            selectedImage: controller.selectedImage.value,
-                            onChoosePhoto: controller.choosePhoto,
-                            onTakePhoto: controller.takePhoto,
-                          ),
-                          SizedBox(height: 16.h),
-                          CreateItemField(
-                            label: 'Image URL',
-                            controller: controller.imageUrlController,
-                            hintText: 'https://example.com/item.jpg',
-                            helperText:
-                                'Optional when a photo is selected above',
-                          ),
-                        ],
-                      ),
-              ),
-              SizedBox(height: 40.h),
-              Center(
-                child: Obx(
-                  () => PrimaryButton(
-                    label: 'Save',
-                    isLoading: controller.isSaving.value,
-                    onPressed: controller.save,
-                    gradient: const LinearGradient(
-                      colors: [AppColors.gradientStart, AppColors.gradientEnd],
-                    ),
-                    textColor: Colors.white,
-                    width: 197.w,
-                    height: 68,
+                SizedBox(height: 24.h),
+                Text(
+                  'Inventory',
+                  style: getTextStyle(
                     fontSize: 16.4,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.onboardingBackground,
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
+                SizedBox(height: 8.h),
+                Obx(
+                  () => ToggleFieldRow(
+                    label: 'Track stock',
+                    value: controller.trackStock.value,
+                    onChanged: (_) => controller.toggleTrackStock(),
+                    boxed: true,
+                  ),
+                ),
+                Obx(
+                  () => Padding(
+                    padding: EdgeInsets.only(top: 6.h),
+                    child: Text(
+                      controller.trackStock.value
+                          ? 'On: stock is reduced after each sale and shown as In stock, Low stock, or Out of stock.'
+                          : 'Off: this item is always sellable; quantities are not tracked.',
+                      style: getTextStyle(
+                        fontSize: 11.8,
+                        color: AppColors.mutedText,
+                      ),
+                    ),
+                  ),
+                ),
+                Obx(
+                  () => controller.trackStock.value
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            SizedBox(height: 8.h),
+                            CreateItemField(
+                              label: 'In Stock',
+                              controller: controller.inStockController,
+                              keyboardType: TextInputType.number,
+                            ),
+                            SizedBox(height: 24.h),
+                            CreateItemField(
+                              label: 'Low Stock',
+                              controller: controller.lowStockController,
+                              keyboardType: TextInputType.number,
+                              helperText:
+                                  'Quantity at which you will be notified about low stock',
+                            ),
+                          ],
+                        )
+                      : const SizedBox.shrink(),
+                ),
+                _StoreInventorySection(controller: controller),
+                Obx(
+                  () =>
+                      FeatureSettings.isEnabled(
+                        'product_expiration_information',
+                      )
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            SizedBox(height: 24.h),
+                            Text(
+                              'Expire Date',
+                              style: getTextStyle(
+                                fontSize: 16.4,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.onboardingBackground,
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            Obx(
+                              () => ToggleFieldRow(
+                                label: 'Track Date',
+                                value: controller.trackDate.value,
+                                onChanged: (_) => controller.toggleTrackDate(),
+                                boxed: true,
+                              ),
+                            ),
+                            Obx(
+                              () => controller.trackDate.value
+                                  ? Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        SizedBox(height: 24.h),
+                                        Text(
+                                          'Manufacturing Date',
+                                          style: getTextStyle(
+                                            fontSize: 16.4,
+                                            fontWeight: FontWeight.w500,
+                                            color:
+                                                AppColors.onboardingBackground,
+                                          ),
+                                        ),
+                                        SizedBox(height: 8.h),
+                                        DateFieldRow(
+                                          value: controller
+                                              .manufacturingDate
+                                              .value,
+                                          onTap:
+                                              controller.pickManufacturingDate,
+                                        ),
+                                        SizedBox(height: 24.h),
+                                        Text(
+                                          'Expire Date',
+                                          style: getTextStyle(
+                                            fontSize: 16.4,
+                                            fontWeight: FontWeight.w500,
+                                            color:
+                                                AppColors.onboardingBackground,
+                                          ),
+                                        ),
+                                        SizedBox(height: 8.h),
+                                        DateFieldRow(
+                                          value: controller.expireDate.value,
+                                          onTap: controller.pickExpireDate,
+                                        ),
+                                        SizedBox(height: 24.h),
+                                        CreateItemField(
+                                          label: 'Expiration alert quantity',
+                                          controller: controller
+                                              .expirationAlertQuantityController,
+                                          keyboardType: TextInputType.number,
+                                          helperText:
+                                              'Quantity at which you will be notified about the expiration date',
+                                        ),
+                                      ],
+                                    )
+                                  : const SizedBox.shrink(),
+                            ),
+                          ],
+                        )
+                      : const SizedBox.shrink(),
+                ),
+                SizedBox(height: 24.h),
+                Obx(
+                  () => ComboPackEditorSection(
+                    enabled: controller.modifierEnabled.value,
+                    onEnabledChanged: (_) => controller.toggleModifier(),
+                    comboPacks: controller.comboPacks,
+                    onSelectionToggle: controller.toggleComboPackSelection,
+                    onEdit: (index) =>
+                        controller.openComboPackEditor(index: index),
+                    onDelete: controller.removeComboPack,
+                    onAdd: controller.openComboPackEditor,
+                  ),
+                ),
+                SizedBox(height: 24.h),
+                _CompositeItemSection(controller: controller),
+                SizedBox(height: 24.h),
+                _VariantOptionsSection(controller: controller),
+                SizedBox(height: 24.h),
+                _VariantsSection(controller: controller),
+                SizedBox(height: 24.h),
+                Text(
+                  'Representation on POS',
+                  style: getTextStyle(
+                    fontSize: 16.4,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.onboardingBackground,
+                  ),
+                ),
+                SizedBox(height: 20.h),
+                Obx(
+                  () => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      LabeledRadioOption(
+                        label: 'Color and shape',
+                        selected:
+                            controller.representation.value ==
+                            ItemRepresentation.colorAndShape,
+                        onTap: () => controller.selectRepresentation(
+                          ItemRepresentation.colorAndShape,
+                        ),
+                      ),
+                      SizedBox(height: 16.h),
+                      LabeledRadioOption(
+                        label: 'Image',
+                        selected:
+                            controller.representation.value ==
+                            ItemRepresentation.image,
+                        onTap: () => controller.selectRepresentation(
+                          ItemRepresentation.image,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 24.h),
+                Obx(
+                  () =>
+                      controller.representation.value ==
+                          ItemRepresentation.colorAndShape
+                      ? ColorShapePicker(
+                          selectedColorIndex:
+                              controller.selectedColorIndex.value,
+                          onColorSelected: controller.selectColor,
+                          selectedShapeIndex:
+                              controller.selectedShapeIndex.value,
+                          onShapeSelected: controller.selectShape,
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            ItemPhotoPicker(
+                              selectedImage: controller.selectedImage.value,
+                              onChoosePhoto: controller.choosePhoto,
+                              onTakePhoto: controller.takePhoto,
+                            ),
+                            SizedBox(height: 16.h),
+                            CreateItemField(
+                              label: 'Image URL',
+                              controller: controller.imageUrlController,
+                              hintText: 'https://example.com/item.jpg',
+                              helperText:
+                                  'Optional when a photo is selected above',
+                            ),
+                          ],
+                        ),
+                ),
+                SizedBox(height: 40.h),
+                Center(
+                  child: Obx(
+                    () => PrimaryButton(
+                      label: 'Save',
+                      isLoading: controller.isSaving.value,
+                      onPressed: controller.save,
+                      gradient: const LinearGradient(
+                        colors: [
+                          AppColors.gradientStart,
+                          AppColors.gradientEnd,
+                        ],
+                      ),
+                      textColor: Colors.white,
+                      width: 197.w,
+                      height: 68,
+                      fontSize: 16.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
       ),
     );
   }
