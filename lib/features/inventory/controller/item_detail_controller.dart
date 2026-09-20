@@ -1,5 +1,8 @@
 import 'package:get/get.dart';
 
+import '../../../core/services/permission_service.dart';
+import '../../../core/utils/helpers/app_helper.dart';
+import '../../../routes/app_routes.dart';
 import '../models/inventory_product.dart';
 import '../models/modifier_group.dart';
 
@@ -45,4 +48,23 @@ class ItemDetailController extends GetxController {
 
   void selectModifierOption(int index) =>
       selectedModifierOptionIndex.value = index;
+
+  bool get canEdit => PermissionService.has(AppPermission.createEditProducts);
+
+  void openEdit() {
+    if (!canEdit) {
+      AppHelperFunctions.showErrorSnackBar(
+        'You do not have permission to edit items.',
+      );
+      return;
+    }
+    final id = product.id;
+    if (id == null || id.isEmpty) {
+      AppHelperFunctions.showWarningSnackBar(
+        'This item cannot be edited yet - it hasn\'t finished syncing.',
+      );
+      return;
+    }
+    Get.toNamed(AppRoute.getCreateItemScreen(), arguments: id);
+  }
 }

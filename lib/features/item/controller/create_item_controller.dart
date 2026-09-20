@@ -73,11 +73,203 @@ class CreateItemController extends GetxController {
   final selectedImage = Rxn<File>();
   final isSaving = false.obs;
 
+  final itemId = RxnString();
+  final isLoadingItem = false.obs;
+  bool get isEditing => itemId.value != null;
+
   @override
   void onInit() {
     super.onInit();
     fetchCategories();
-    fetchStores();
+    final storesLoaded = fetchStores();
+    if (Get.arguments is String) {
+      final id = Get.arguments as String;
+      itemId.value = id;
+      _loadItemForEdit(id, storesLoaded);
+    }
+  }
+
+  Future<void> _loadItemForEdit(String id, Future<void> storesLoaded) async {
+    isLoadingItem.value = true;
+    final response = await _networkCaller.getRequest(ApiConstants.item(id));
+    // Store selection needs the full store list to match against, so make
+    // sure that request has landed before applying per-store quantities.
+    await storesLoaded;
+    isLoadingItem.value = false;
+    if (!response.isSuccess || response.responseData is! Map) {
+      AppHelperFunctions.showErrorSnackBar(response.errorMessage);
+      return;
+    }
+    _populateFromItem(Map<String, dynamic>.from(response.responseData as Map));
+  }
+
+  void _populateFromItem(Map<String, dynamic> item) {
+    nameController.text = item['name']?.toString() ?? '';
+    descriptionController.text = item['description']?.toString() ?? '';
+    final categoryId = item['categoryId']?.toString();
+    if (categoryId != null && categoryId.isNotEmpty) {
+      selectCategory(categoryId, item['categoryName']?.toString() ?? '');
+    }
+    soldBy.value = item['soldBy']?.toString() == 'weight'
+        ? SoldBy.weight
+        : SoldBy.pcs;
+    if (item['price'] != null) {
+      priceController.text = item['price'].toString();
+    }
+    if (item['cost'] != null) costController.text = item['cost'].toString();
+    skuController.text = item['sku']?.toString() ?? '';
+    barcodeController.text = item['barcode']?.toString() ?? '';
+
+    final inventory = item['inventory'];
+    if (inventory is Map) {
+      trackStock.value = inventory['trackStock'] == true;
+      if (inventory['inStock'] != null) {
+        inStockController.text = inventory['inStock'].toString();
+      }
+      if (inventory['lowStock'] != null) {
+        lowStockController.text = inventory['lowStock'].toString();
+      }
+    }
+
+    final rawStores = item['stores'];
+    if (rawStores is List) {
+      for (final entry in rawStores.whereType<Map>()) {
+        final storeId = entry['id']?.toString();
+        final draft = stores.firstWhereOrNull((s) => s.storeId == storeId);
+        if (draft == null) continue;
+        draft.selected.value = true;
+        draft.inStockController.text = (entry['inStock'] ?? 0).toString();
+        draft.lowStockController.text = (entry['lowStock'] ?? 0).toString();
+      }
+    }
+
+    final expiration = item['expiration'];
+    if (expiration is Map) {
+      trackDate.value = expiration['trackExpiration'] == true;
+      if (expiration['manufacturingDate'] != null) {
+        manufacturingDate.value = expiration['manufacturingDate'].toString();
+      }
+      if (expiration['expirationDate'] != null) {
+        expireDate.value = expiration['expirationDate'].toString();
+      }
+      if (expiration['alertQuantity'] != null) {
+        expirationAlertQuantityController.text = expiration['alertQuantity']
+            .toString();
+      }
+    }
+
+    final modifiers = item['modifiers'];
+    if (modifiers is Map) {
+      modifierEnabled.value = modifiers['enabled'] == true;
+      final groups = modifiers['groups'];
+      if (groups is List) {
+        comboPacks.assignAll(
+          groups.whereType<Map>().map((group) {
+            final products = (group['products'] as List? ?? const [])
+                .whereType<Map>()
+                .map(
+                  (product) => ModifierProduct(
+                    name: product['name']?.toString() ?? '',
+                    price:
+                        double.tryParse(product['price']?.toString() ?? '') ??
+                        0,
+                  ),
+                )
+                .toList();
+            return ComboPackDraft(
+              id: DateTime.now().microsecondsSinceEpoch.toString(),
+              label: group['label']?.toString() ?? '',
+              products: products,
+            );
+          }),
+        );
+      }
+    }
+
+    final composite = item['composite'];
+    if (composite is Map) {
+      compositeItem.value = composite['enabled'] == true;
+      final components = composite['components'];
+      if (components is List) {
+        for (final component in compositeComponents) {
+          component.dispose();
+        }
+        compositeComponents.assignAll(
+          components.whereType<Map>().map((component) {
+            final draft = CompositeComponentDraft();
+            draft.itemIdController.text = component['itemId']?.toString() ?? '';
+            draft.nameController.text = component['name']?.toString() ?? '';
+            draft.quantityController.text = (component['quantity'] ?? 1)
+                .toString();
+            if (component['cost'] != null) {
+              draft.costController.text = component['cost'].toString();
+            }
+            return draft;
+          }),
+        );
+      }
+    }
+
+    final rawVariantOptions = item['variantOption'];
+    if (rawVariantOptions is List && rawVariantOptions.isNotEmpty) {
+      for (final option in variantOptions) {
+        option.dispose();
+      }
+      variantOptions.assignAll(
+        rawVariantOptions.whereType<Map>().map((option) {
+          final draft = VariantOptionDraft();
+          draft.optionNameController.text =
+              option['optionName']?.toString() ?? '';
+          final values = option['optionValue'];
+          draft.optionValuesController.text = values is List
+              ? values.map((value) => value.toString()).join(', ')
+              : '';
+          return draft;
+        }),
+      );
+    }
+
+    final rawVariants = item['variants'];
+    if (rawVariants is List && rawVariants.isNotEmpty) {
+      for (final variant in variants) {
+        variant.dispose();
+      }
+      variants.assignAll(
+        rawVariants.whereType<Map>().map((variant) {
+          final draft = ItemVariantDraft();
+          draft.nameController.text = variant['name']?.toString() ?? '';
+          draft.sizeController.text = variant['size']?.toString() ?? '';
+          draft.colorController.text = variant['color']?.toString() ?? '';
+          if (variant['price'] != null) {
+            draft.priceController.text = variant['price'].toString();
+          }
+          if (variant['cost'] != null) {
+            draft.costController.text = variant['cost'].toString();
+          }
+          draft.skuController.text = variant['sku']?.toString() ?? '';
+          draft.barcodeController.text = variant['barcode']?.toString() ?? '';
+          draft.availableForSale.value = variant['availableForSale'] != false;
+          return draft;
+        }),
+      );
+    }
+
+    final representationData = item['representation'];
+    if (representationData is Map) {
+      representation.value = representationData['type']?.toString() == 'image'
+          ? ItemRepresentation.image
+          : ItemRepresentation.colorAndShape;
+      final colorIndex = representationData['colorIndex'];
+      if (colorIndex != null) {
+        selectedColorIndex.value = int.tryParse(colorIndex.toString()) ?? 0;
+      }
+      final shape = representationData['shape']?.toString();
+      selectedShapeIndex.value = _shapeIndex(shape);
+      final imageUrl = representationData['imageUrl']?.toString();
+      if (imageUrl != null && imageUrl.isNotEmpty) {
+        imageUrlController.text = imageUrl;
+      }
+    }
   }
 
   void selectSoldBy(SoldBy value) => soldBy.value = value;
@@ -285,10 +477,36 @@ class CreateItemController extends GetxController {
     final payload = buildPayload();
     if (payload == null) return;
 
-    isSaving.value = true;
     final online = Get.isRegistered<SyncService>()
         ? Get.find<SyncService>().isOnline.value
         : true;
+
+    if (isEditing) {
+      if (!online) {
+        AppHelperFunctions.showWarningSnackBar(
+          'Connect to the internet to save changes to this item.',
+        );
+        return;
+      }
+      isSaving.value = true;
+      final response = await _sendUpdateItem(payload);
+      isSaving.value = false;
+      if (!response.isSuccess) {
+        AppHelperFunctions.showErrorSnackBar(response.errorMessage);
+        return;
+      }
+      AppHelperFunctions.showSuccessSnackBar('Item updated.');
+      if (Get.isRegistered<HomeController>()) {
+        await Get.find<HomeController>().forceSync(showMessage: false);
+      }
+      if (Get.isRegistered<InventoryController>()) {
+        await Get.find<InventoryController>().fetchInventory();
+      }
+      Get.back();
+      return;
+    }
+
+    isSaving.value = true;
     final response = online ? await _sendCreateItem(payload) : null;
     isSaving.value = false;
 
@@ -346,6 +564,25 @@ class CreateItemController extends GetxController {
       );
     }
     return _networkCaller.postRequest(ApiConstants.items, body: payload);
+  }
+
+  Future<dynamic> _sendUpdateItem(Map<String, dynamic> payload) {
+    final id = itemId.value!;
+    if (selectedImage.value != null &&
+        representation.value == ItemRepresentation.image) {
+      return _networkCaller.multipartRequest(
+        ApiConstants.item(id),
+        fields: payload.map(
+          (key, value) => MapEntry(
+            key,
+            value is List || value is Map ? jsonEncode(value) : '$value',
+          ),
+        ),
+        file: selectedImage.value,
+        method: 'PATCH',
+      );
+    }
+    return _networkCaller.patchRequest(ApiConstants.item(id), body: payload);
   }
 
   Map<String, dynamic>? buildPayload() {
@@ -554,6 +791,15 @@ class CreateItemController extends GetxController {
       2 => 'star',
       3 => 'hexagon',
       _ => 'square',
+    };
+  }
+
+  int _shapeIndex(String? shape) {
+    return switch (shape?.toLowerCase()) {
+      'circle' => 1,
+      'star' => 2,
+      'hexagon' => 3,
+      _ => 0,
     };
   }
 

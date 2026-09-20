@@ -75,11 +75,15 @@ class AppHelperFunctions {
     return ContentType.failure;
   }
 
+  /// Callers almost always hand this a `DateTime` freshly parsed from a
+  /// backend ISO timestamp (UTC) - `.toLocal()` here (a no-op if it's
+  /// already local) is what actually converts it to the device's clock
+  /// instead of silently printing UTC wall-clock time as if it were local.
   static String getFormattedDate(
     DateTime date, {
     String format = 'dd MMM yyyy',
   }) {
-    return DateFormat(format).format(date);
+    return DateFormat(format).format(date.toLocal());
   }
 
   static String getFormattedMoney(double value) {

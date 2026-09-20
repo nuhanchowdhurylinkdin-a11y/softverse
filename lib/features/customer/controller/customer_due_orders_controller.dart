@@ -15,27 +15,35 @@ class CustomerDueOrdersController extends GetxController {
   final isLoading = false.obs;
   final collectingOrderId = RxnString();
 
-  String get _customerId =>
-      (Get.arguments is CustomerDueModel)
-          ? (Get.arguments as CustomerDueModel).customerId ?? ''
-          : '';
+  CustomerDueModel? get _due =>
+      Get.arguments is CustomerDueModel ? Get.arguments as CustomerDueModel : null;
+
+  /// Walk-in due sales have no customerId at all (no FK, and no name to
+  /// even match by) - they're reached through a dedicated "unassigned"
+  /// endpoint instead of /customers/:id/due-orders.
+  bool get _isWalkIn => _due != null && _due!.customerId == null;
+
+  String get _customerId => _due?.customerId ?? '';
 
   @override
   void onInit() {
     super.onInit();
-    if (Get.arguments is CustomerDueModel) {
-      customerName.value = (Get.arguments as CustomerDueModel).customerName;
+    if (_due != null) {
+      customerName.value = _due!.customerName;
     }
     fetchDueOrders();
   }
 
   Future<void> fetchDueOrders() async {
+    final isWalkIn = _isWalkIn;
     final id = _customerId;
-    if (id.isEmpty) return;
+    if (!isWalkIn && id.isEmpty) return;
 
     isLoading.value = true;
     final response = await _networkCaller.getRequest(
-      ApiConstants.customerDueOrders(id),
+      isWalkIn
+          ? ApiConstants.unassignedDueOrders
+          : ApiConstants.customerDueOrders(id),
     );
     isLoading.value = false;
     if (!response.isSuccess || response.responseData is! Map) {

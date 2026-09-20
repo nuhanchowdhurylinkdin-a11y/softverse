@@ -41,6 +41,8 @@ class ApiConstants {
   static String get customerDues => '$baseUrl/customers/dues';
   static String customerDueOrders(String id) =>
       '$baseUrl/customers/$id/due-orders';
+  static String get unassignedDueOrders =>
+      '$baseUrl/customers/dues/unassigned';
   static String get items => '$baseUrl/items';
   static String get itemAdminFilters => '$baseUrl/items/admin/filters';
   static String get inventory => '$baseUrl/inventory';
