@@ -26,7 +26,6 @@ void main() {
     final file = await InvoicePdfExporter.exportInvoice(
       invoiceNumber: 'INV-1',
       customerName: 'Jane Doe',
-      orderId: 'POS-1',
       items: const [
         CartItem(name: 'Mouse', price: 20, imageUrl: '', quantity: 2),
       ],
@@ -35,6 +34,7 @@ void main() {
       totalAmount: 40,
       amountReceived: 40,
       changeToReturn: 0,
+      paymentLabel: 'Cash Payment',
       businessName: 'Softverse ERP2',
       businessAddress: '12 Main St',
       businessPhone: '+1 555-0100',
@@ -47,17 +47,39 @@ void main() {
     expect(text, isNot(contains('Softverse POS Invoice')));
   });
 
+  test('shows amount due instead of received/change for a due sale', () async {
+    final file = await InvoicePdfExporter.exportInvoice(
+      invoiceNumber: 'INV-3',
+      customerName: 'Jane Doe',
+      items: const [
+        CartItem(name: 'Test', price: 100, imageUrl: '', quantity: 2),
+      ],
+      subtotal: 200,
+      tax: 0,
+      totalAmount: 200,
+      amountReceived: 200,
+      changeToReturn: 0,
+      paymentLabel: 'Due Payment',
+    );
+
+    final text = latin1.decode(await file.readAsBytes(), allowInvalid: true);
+    expect(text, contains('Amount Due: \$200.00'));
+    expect(text, isNot(contains('Amount Received')));
+    expect(text, isNot(contains('Change to Return')));
+    expect(text, contains('@ \$100.00'));
+  });
+
   test('falls back to the generic name when the business has none set', () async {
     final file = await InvoicePdfExporter.exportInvoice(
       invoiceNumber: 'INV-2',
       customerName: 'Jane Doe',
-      orderId: 'POS-2',
       items: const [],
       subtotal: 0,
       tax: 0,
       totalAmount: 0,
       amountReceived: 0,
       changeToReturn: 0,
+      paymentLabel: 'Cash Payment',
     );
 
     final text = latin1.decode(await file.readAsBytes(), allowInvalid: true);

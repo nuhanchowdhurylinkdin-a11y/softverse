@@ -40,14 +40,18 @@ class BusinessProfileService {
 
   /// The Receipt Settings' dedicated printed-receipt logo takes priority
   /// over the business profile's own logo, matching the backend PDF
-  /// generator's precedence.
+  /// generator's precedence. Once that logo was explicitly removed on the
+  /// dashboard, it must stay gone - falling back to the business logo here
+  /// (like an unconfigured logo does) would silently bring it right back.
   static String get logoUrl {
     _version.value;
     final cached = _cached();
     final printed = cached?['printedReceiptLogoUrl']?.toString().trim();
-    final raw = (printed != null && printed.isNotEmpty)
-        ? printed
-        : cached?['businessLogoUrl']?.toString().trim();
+    if (printed != null && printed.isNotEmpty) {
+      return ApiConstants.resolveAssetUrl(printed);
+    }
+    if (cached?['printedReceiptLogoRemoved'] == true) return '';
+    final raw = cached?['businessLogoUrl']?.toString().trim();
     return (raw == null || raw.isEmpty) ? '' : ApiConstants.resolveAssetUrl(raw);
   }
 
@@ -87,6 +91,7 @@ class BusinessProfileService {
       merged['receiptHeader'] = receipt['header'];
       merged['receiptFooter'] = receipt['footer'];
       merged['printedReceiptLogoUrl'] = receipt['printedReceiptLogoUrl'];
+      merged['printedReceiptLogoRemoved'] = receipt['printedReceiptLogoRemoved'];
     }
     if (merged.isEmpty) return;
 

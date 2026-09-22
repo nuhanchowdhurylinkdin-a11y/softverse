@@ -15,13 +15,13 @@ class InvoicePdfExporter {
   static Future<File> exportInvoice({
     required String invoiceNumber,
     required String customerName,
-    required String orderId,
     required List<CartItem> items,
     required double subtotal,
     required double tax,
     required double totalAmount,
     required double amountReceived,
     required double changeToReturn,
+    required String paymentLabel,
     String businessName = 'Softverse POS',
     String businessAddress = '',
     String businessPhone = '',
@@ -35,13 +35,13 @@ class InvoicePdfExporter {
       _buildPdf(
         invoiceNumber: invoiceNumber,
         customerName: customerName,
-        orderId: orderId,
         items: items,
         subtotal: subtotal,
         tax: tax,
         totalAmount: totalAmount,
         amountReceived: amountReceived,
         changeToReturn: changeToReturn,
+        paymentLabel: paymentLabel,
         businessName: businessName,
         businessAddress: businessAddress,
         businessPhone: businessPhone,
@@ -78,34 +78,43 @@ class InvoicePdfExporter {
   static Uint8List _buildPdf({
     required String invoiceNumber,
     required String customerName,
-    required String orderId,
     required List<CartItem> items,
     required double subtotal,
     required double tax,
     required double totalAmount,
     required double amountReceived,
     required double changeToReturn,
+    required String paymentLabel,
     required String businessName,
     required String businessAddress,
     required String businessPhone,
   }) {
+    final isDue = paymentLabel == 'Due Payment';
     final lines = [
       businessName,
       if (businessAddress.isNotEmpty) businessAddress,
       if (businessPhone.isNotEmpty) 'Tel: $businessPhone',
       'Invoice: $invoiceNumber',
-      'Order: $orderId',
       'Customer: $customerName',
+      'Payment: $paymentLabel',
       '',
       'Items',
-      for (final item in items)
-        '${item.name} x${item.quantity}    \$${AppHelperFunctions.getFormattedMoney(item.price * item.quantity)}',
+      for (final item in items) ...[
+        '${item.name}  x${item.quantity}    \$${AppHelperFunctions.getFormattedMoney(item.price * item.quantity)}',
+        '  @ \$${AppHelperFunctions.getFormattedMoney(item.price)}',
+      ],
       '',
       'Subtotal: \$${AppHelperFunctions.getFormattedMoney(subtotal)}',
       'Tax: \$${AppHelperFunctions.getFormattedMoney(tax)}',
       'Total: \$${AppHelperFunctions.getFormattedMoney(totalAmount)}',
-      'Amount Received: \$${AppHelperFunctions.getFormattedMoney(amountReceived)}',
-      'Change to Return: \$${AppHelperFunctions.getFormattedMoney(changeToReturn)}',
+      // A due/credit sale hasn't actually received anything yet - showing
+      // "Amount Received"/"Change" on it would make it look already paid.
+      if (isDue)
+        'Amount Due: \$${AppHelperFunctions.getFormattedMoney(totalAmount)}'
+      else ...[
+        'Amount Received: \$${AppHelperFunctions.getFormattedMoney(amountReceived)}',
+        'Change to Return: \$${AppHelperFunctions.getFormattedMoney(changeToReturn)}',
+      ],
     ];
 
     final content = StringBuffer()
