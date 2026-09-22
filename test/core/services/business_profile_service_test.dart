@@ -100,4 +100,21 @@ void main() {
 
     expect(BusinessProfileService.logoUrl, contains('profile-logo.png'));
   });
+
+  test(
+    'stays logo-free once the printed-receipt logo was explicitly removed',
+    () async {
+      // Regression: removing the logo on the dashboard kept coming back
+      // because an unconfigured logo and a removed one looked identical
+      // (both null) without this flag to tell them apart.
+      await OfflineDatabaseService.saveCache('business_profile', {
+        'businessName': 'Louis Cafe',
+        'businessLogoUrl': '/media/uploads/profile-logo.png',
+        'printedReceiptLogoUrl': null,
+        'printedReceiptLogoRemoved': true,
+      });
+
+      expect(BusinessProfileService.logoUrl, '');
+    },
+  );
 }

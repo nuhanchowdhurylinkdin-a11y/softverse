@@ -328,17 +328,20 @@ class PrinterController extends GetxController {
         'Receipt',
         styles: const PosStyles(align: PosAlign.center),
       ),
-      ...generator.text(invoiceNumber),
-      ...generator.text(orderId),
+      ...generator.text('Order: $invoiceNumber'),
       ...generator.text('Customer: $customerName'),
       ...generator.text('Payment: $paymentLabel'),
       ...generator.hr(),
       ...generator.text('Items', styles: PosStyles(bold: isDark)),
       for (final item in items) ...[
-        ...generator.text('${item.name} x${item.quantity}'),
+        ...generator.text('${item.name}  x${item.quantity}'),
         ...generator.text(
           _money(item.lineSubtotal),
           styles: const PosStyles(align: PosAlign.right),
+        ),
+        ...generator.text(
+          '  @ ${_money(item.price)}',
+          styles: const PosStyles(height: PosTextSize.size1),
         ),
       ],
       ...generator.hr(),
@@ -348,8 +351,17 @@ class PrinterController extends GetxController {
         'Total: ${_money(totalAmount)}',
         styles: PosStyles(bold: isDark),
       ),
-      ...generator.text('Received: ${_money(amountReceived)}'),
-      ...generator.text('Change: ${_money(changeToReturn)}'),
+      // A due/credit sale hasn't actually received anything yet - showing
+      // "Received"/"Change" on it would make it look already paid in full.
+      if (paymentLabel == 'Due Payment') ...[
+        ...generator.text(
+          'Amount due: ${_money(totalAmount)}',
+          styles: PosStyles(bold: isDark),
+        ),
+      ] else ...[
+        ...generator.text('Received: ${_money(amountReceived)}'),
+        ...generator.text('Change: ${_money(changeToReturn)}'),
+      ],
       ..._businessFooterBytes(generator),
       ...generator.feed(2),
       if (printer.autoCut) ...generator.cut(),
@@ -605,24 +617,29 @@ Virtual printer is ready.
     final output = StringBuffer()
       ..writeln(_businessHeaderPreview())
       ..writeln('Receipt')
-      ..writeln(invoiceNumber)
-      ..writeln(orderId)
+      ..writeln('Order: $invoiceNumber')
       ..writeln('Customer: $customerName')
       ..writeln('Payment: $paymentLabel')
       ..writeln('--------------------------------')
       ..writeln('Items');
     for (final item in items) {
       output
-        ..writeln('${item.name} x${item.quantity}')
-        ..writeln(_money(item.lineSubtotal));
+        ..writeln('${item.name}  x${item.quantity}')
+        ..writeln(_money(item.lineSubtotal))
+        ..writeln('  @ ${_money(item.price)}');
     }
     output
       ..writeln('--------------------------------')
       ..writeln('Subtotal: ${_money(subtotal)}')
       ..writeln('Tax: ${_money(tax)}')
-      ..writeln('Total: ${_money(totalAmount)}')
-      ..writeln('Received: ${_money(amountReceived)}')
-      ..writeln('Change: ${_money(changeToReturn)}');
+      ..writeln('Total: ${_money(totalAmount)}');
+    if (paymentLabel == 'Due Payment') {
+      output.writeln('Amount due: ${_money(totalAmount)}');
+    } else {
+      output
+        ..writeln('Received: ${_money(amountReceived)}')
+        ..writeln('Change: ${_money(changeToReturn)}');
+    }
     if (BusinessProfileService.footer.isNotEmpty) {
       output.writeln(BusinessProfileService.footer);
     }

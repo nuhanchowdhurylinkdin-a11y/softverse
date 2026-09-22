@@ -123,9 +123,40 @@ void main() {
     expect(result, isTrue);
     expect(documents, hasLength(1));
     expect(documents.single.title, 'Receipt INV-1001');
-    expect(documents.single.content, contains('Coffee x2'));
+    expect(documents.single.content, contains('Coffee  x2'));
+    expect(documents.single.content, contains('@ \$5.00'));
     expect(documents.single.content, contains('Total: \$11.00'));
     expect(documents.single.content, contains('Change: \$9.00'));
+    // The order number must only be printed once, not once unlabeled and
+    // once again as a bare duplicate.
+    expect('INV-1001'.allMatches(documents.single.content).length, 1);
+  });
+
+  test('virtual receipt hides received/change for a due sale', () async {
+    final documents = <VirtualPrintDocument>[];
+    final controller = PrinterController(
+      virtualPrintPresenter: (document) async => documents.add(document),
+    )..printers.add(virtualPrinter);
+
+    await controller.printReceipt(
+      invoiceNumber: 'INV-1003',
+      customerName: 'Daniel Jean',
+      orderId: 'INV-1003',
+      items: const [
+        CartItem(name: 'Test', price: 100, imageUrl: '', quantity: 2),
+      ],
+      subtotal: 200,
+      tax: 0,
+      totalAmount: 200,
+      amountReceived: 200,
+      changeToReturn: 0,
+      paymentLabel: 'Due Payment',
+    );
+
+    final content = documents.single.content;
+    expect(content, contains('Amount due: \$200.00'));
+    expect(content, isNot(contains('Received:')));
+    expect(content, isNot(contains('Change:')));
   });
 
   test('virtual receipt includes the configured header and footer', () async {
