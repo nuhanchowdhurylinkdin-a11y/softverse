@@ -88,16 +88,16 @@ class TransactionCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(18.r),
                     gradient: LinearGradient(
-                      colors: transaction.paymentType.gradient
+                      colors: transaction.displayGradient
                           .map((c) => c.withValues(alpha: 0.2))
                           .toList(),
                     ),
                   ),
                   child: Text(
-                    transaction.paymentType.label,
+                    transaction.displayLabel,
                     style: getTextStyle(
                       fontSize: 12.8,
-                      color: transaction.paymentType.textColor,
+                      color: transaction.displayTextColor,
                     ),
                   ),
                 ),

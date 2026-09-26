@@ -178,7 +178,14 @@ class CheckoutController extends GetxController {
   }
 
   void decrementQuantity(int index) {
-    if (cartItems[index].quantity <= 1) return;
+    if (cartItems[index].quantity <= 1) {
+      // Decrementing an item already at 1 means "take it out of the cart" -
+      // there was previously no way to remove a line item at all once added.
+      cartItems.removeAt(index);
+      _syncAmountReceivedWithTotal();
+      _syncCds();
+      return;
+    }
     cartItems[index] = cartItems[index].copyWith(
       quantity: cartItems[index].quantity - 1,
     );

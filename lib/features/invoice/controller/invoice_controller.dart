@@ -45,6 +45,7 @@ class InvoiceController extends GetxController {
   final changeToReturnValue = 0.0.obs;
   final amountDueValue = 0.0.obs;
   final isCollectingDuePayment = false.obs;
+  final orderCreatedAt = Rxn<DateTime>();
 
   final taxRate = 0.075;
   final _hasOrderData = false.obs;
@@ -109,6 +110,7 @@ class InvoiceController extends GetxController {
     invoiceNumber.value =
         order['orderNumber']?.toString() ?? invoiceNumber.value;
     checkoutOrderId.value = _cleanText(order['id']);
+    orderCreatedAt.value = DateTime.tryParse(order['createdAt']?.toString() ?? '');
     customerName.value =
         order['customerName']?.toString().trim().isNotEmpty == true
         ? order['customerName'].toString()
@@ -257,6 +259,7 @@ class InvoiceController extends GetxController {
       invoiceNumber: invoiceNumber.value,
       customerName: customerName.value,
       orderId: orderId.value,
+      dateTime: orderCreatedAt.value ?? DateTime.now(),
       items: items.toList(),
       subtotal: subtotal,
       tax: tax,
@@ -355,6 +358,7 @@ class InvoiceController extends GetxController {
     return InvoicePdfExporter.exportInvoice(
       invoiceNumber: invoiceNumber.value,
       customerName: customerName.value,
+      dateTime: orderCreatedAt.value ?? DateTime.now(),
       items: items.toList(),
       subtotal: subtotal,
       tax: tax,

@@ -26,6 +26,7 @@ void main() {
     final file = await InvoicePdfExporter.exportInvoice(
       invoiceNumber: 'INV-1',
       customerName: 'Jane Doe',
+      dateTime: DateTime(2026, 9, 26, 14, 30),
       items: const [
         CartItem(name: 'Mouse', price: 20, imageUrl: '', quantity: 2),
       ],
@@ -44,6 +45,7 @@ void main() {
     expect(text, contains('Softverse ERP2'));
     expect(text, contains('12 Main St'));
     expect(text, contains('Tel: +1 555-0100'));
+    expect(text, contains('26 Sep 2026'));
     expect(text, isNot(contains('Softverse POS Invoice')));
   });
 
@@ -51,6 +53,7 @@ void main() {
     final file = await InvoicePdfExporter.exportInvoice(
       invoiceNumber: 'INV-3',
       customerName: 'Jane Doe',
+      dateTime: DateTime(2026, 9, 26, 14, 30),
       items: const [
         CartItem(name: 'Test', price: 100, imageUrl: '', quantity: 2),
       ],
@@ -73,6 +76,7 @@ void main() {
     final file = await InvoicePdfExporter.exportInvoice(
       invoiceNumber: 'INV-2',
       customerName: 'Jane Doe',
+      dateTime: DateTime(2026, 9, 26, 14, 30),
       items: const [],
       subtotal: 0,
       tax: 0,

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../core/services/feature_settings.dart';
 import '../../../core/services/network_caller.dart';
 import '../../../core/services/offline_database_service.dart';
+import '../../../core/services/storage_service.dart';
 import '../../../core/utils/constants/api_constants.dart';
 import '../../auth/controller/auth_controller.dart';
 import '../../customer/controller/customer_controller.dart';
@@ -10,10 +11,17 @@ import '../../../routes/app_routes.dart';
 
 class MoreController extends GetxController {
   final NetworkCaller _networkCaller = NetworkCaller();
-  final profileName = 'Liam Macey';
-  final profileRole = 'Softvence';
+
+  // The logged-in staff member, not a hardcoded placeholder profile.
+  String get profileName => StorageService.fullName ?? 'Softverse User';
+  String get profileRole => _capitalize(StorageService.role);
   final posLabel = 'POS-1';
   final profileImageUrl = 'https://randomuser.me/api/portraits/men/32.jpg';
+
+  String _capitalize(String? value) {
+    if (value == null || value.isEmpty) return '';
+    return value[0].toUpperCase() + value.substring(1);
+  }
 
   @override
   void onInit() {
