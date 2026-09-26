@@ -20,6 +20,10 @@ class ApiConstants {
       '$baseUrl/business-admin-dashboard/profile';
   static String get receiptSettings =>
       '$baseUrl/business-admin-dashboard/settings/receipt';
+  static String get posDevices =>
+      '$baseUrl/business-admin-dashboard/settings/pos-devices';
+  static String posDevice(String id) =>
+      '$baseUrl/business-admin-dashboard/settings/pos-devices/$id';
   static String get forgotPassword => '$baseUrl/auth/forgot-password';
   static String get verifyForgotPasswordOtp =>
       '$baseUrl/auth/forgot-password/verify-otp';

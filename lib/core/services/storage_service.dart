@@ -15,6 +15,11 @@ class StorageService {
   static const String _featureSettingsCompleteKey = 'featureSettingsComplete';
   static const String _themeModeKey = 'themeMode';
   static const String _languageKey = 'language';
+  // Which physical till this app install has been set up as - a property of
+  // the device itself, not of whoever happens to be logged in right now, so
+  // (like theme/language) this deliberately survives logoutUser().
+  static const String _posDeviceIdKey = 'posDeviceId';
+  static const String _posDeviceNameKey = 'posDeviceName';
 
   static SharedPreferences? _preferences;
 
@@ -128,5 +133,22 @@ class StorageService {
 
   static Future<void> setLanguage(String value) async {
     await _preferences?.setString(_languageKey, value);
+  }
+
+  static String? get posDeviceId => _preferences?.getString(_posDeviceIdKey);
+  static String? get posDeviceName =>
+      _preferences?.getString(_posDeviceNameKey);
+
+  static Future<void> setPosDevice({
+    required String id,
+    required String name,
+  }) async {
+    await _preferences?.setString(_posDeviceIdKey, id);
+    await _preferences?.setString(_posDeviceNameKey, name);
+  }
+
+  static Future<void> clearPosDevice() async {
+    await _preferences?.remove(_posDeviceIdKey);
+    await _preferences?.remove(_posDeviceNameKey);
   }
 }

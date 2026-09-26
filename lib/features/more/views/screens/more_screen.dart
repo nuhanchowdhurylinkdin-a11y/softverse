@@ -62,12 +62,14 @@ class MoreScreen extends GetView<MoreController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              MoreProfileCard(
-                imageUrl: controller.profileImageUrl,
-                name: controller.profileName,
-                role: controller.profileRole,
-                posLabel: controller.posLabel,
-                onSwitchPos: controller.switchPos,
+              Obx(
+                () => MoreProfileCard(
+                  imageUrl: controller.profileImageUrl,
+                  name: controller.profileName,
+                  role: controller.profileRole,
+                  posLabel: controller.posLabel.value,
+                  onSwitchPos: controller.switchPos,
+                ),
               ),
               SizedBox(height: 16.h),
               Obx(

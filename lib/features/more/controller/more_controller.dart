@@ -15,7 +15,7 @@ class MoreController extends GetxController {
   // The logged-in staff member, not a hardcoded placeholder profile.
   String get profileName => StorageService.fullName ?? 'Softverse User';
   String get profileRole => _capitalize(StorageService.role);
-  final posLabel = 'POS-1';
+  final posLabel = 'Switch POS'.obs;
   final profileImageUrl = 'https://randomuser.me/api/portraits/men/32.jpg';
 
   String _capitalize(String? value) {
@@ -26,7 +26,12 @@ class MoreController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _refreshPosLabel();
     loadFeatureVisibility();
+  }
+
+  void _refreshPosLabel() {
+    posLabel.value = StorageService.posDeviceName ?? 'Switch POS';
   }
 
   // Refreshes the cache; the More screen reads FeatureSettings.isEnabled(...)
@@ -71,7 +76,10 @@ class MoreController extends GetxController {
 
   void openSupport() {}
 
-  void switchPos() {}
+  Future<void> switchPos() async {
+    await Get.toNamed(AppRoute.getPosDeviceScreen());
+    _refreshPosLabel();
+  }
 
   void openNotifications() {}
 
