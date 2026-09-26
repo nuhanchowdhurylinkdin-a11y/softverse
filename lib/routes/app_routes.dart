@@ -43,6 +43,7 @@ import '../features/onboarding/views/screens/onboarding_screen.dart';
 import '../features/printer/controller/add_printer_controller.dart';
 import '../features/printer/views/screens/add_printer_screen.dart';
 import '../features/printer/views/screens/printer_detail_screen.dart';
+import '../features/pos_device/views/screens/pos_device_screen.dart';
 import '../features/printer/views/screens/printer_list_screen.dart';
 import '../features/shift/controller/cash_management_controller.dart';
 import '../features/shift/controller/close_shift_controller.dart';
@@ -103,6 +104,7 @@ class AppRoute {
   static String customerDueListScreen = "/customerDueListScreen";
   static String customerDueOrdersScreen = "/customerDueOrdersScreen";
   static String printerListScreen = "/printerListScreen";
+  static String posDeviceScreen = "/posDeviceScreen";
   static String printerDetailScreen = "/printerDetailScreen";
   static String addPrinterScreen = "/addPrinterScreen";
   static String appsMenuScreen = "/appsMenuScreen";
@@ -151,6 +153,7 @@ class AppRoute {
   static String getCustomerDueListScreen() => customerDueListScreen;
   static String getCustomerDueOrdersScreen() => customerDueOrdersScreen;
   static String getPrinterListScreen() => printerListScreen;
+  static String getPosDeviceScreen() => posDeviceScreen;
   static String getPrinterDetailScreen() => printerDetailScreen;
   static String getAddPrinterScreen() => addPrinterScreen;
   static String getAppsMenuScreen() => appsMenuScreen;
@@ -307,6 +310,7 @@ class AppRoute {
       }),
     ),
     GetPage(name: printerListScreen, page: () => const PrinterListScreen()),
+    GetPage(name: posDeviceScreen, page: () => const PosDeviceScreen()),
     GetPage(name: printerDetailScreen, page: () => const PrinterDetailScreen()),
     GetPage(
       name: addPrinterScreen,

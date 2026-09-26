@@ -231,11 +231,39 @@ class InvoiceController extends GetxController {
       return;
     }
 
-    loadFromOrder(Map<String, dynamic>.from(response.responseData as Map));
+    final data = Map<String, dynamic>.from(response.responseData as Map);
+    loadFromOrder(data);
     if (Get.isRegistered<TransactionController>()) {
       await Get.find<TransactionController>().fetchTransactions();
     }
     AppHelperFunctions.showSuccessSnackBar('Payment collected.');
+
+    final paymentReceiptUrl = _cleanText(data['paymentReceiptUrl']);
+    if (paymentReceiptUrl != null) {
+      final file = await _downloadPaymentReceipt(paymentReceiptUrl);
+      if (file != null) await InvoicePdfExporter.saveToDevice(file);
+    }
+  }
+
+  /// The payment-collection receipt lives at a plain static URL (like a
+  /// logo/upload, not the auth-gated `/checkout/:id/receipt`), so unlike
+  /// [_downloadBackendReceipt] this needs no bearer token.
+  Future<File?> _downloadPaymentReceipt(String url) async {
+    try {
+      final resolved = Uri.parse(url).isAbsolute
+          ? url
+          : ApiConstants.resolveAssetUrl(url);
+      final response = await http.get(Uri.parse(resolved));
+      if (response.statusCode != 200) return null;
+
+      final filename =
+          'Payment_${invoiceNumber.value.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_')}.pdf';
+      final file = File('${Directory.systemTemp.path}/$filename');
+      await file.writeAsBytes(response.bodyBytes, flush: true);
+      return file;
+    } catch (_) {
+      return null;
+    }
   }
 
   void viewOriginalInvoice() {
