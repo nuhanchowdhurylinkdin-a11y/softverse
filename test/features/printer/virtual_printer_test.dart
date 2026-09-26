@@ -103,6 +103,7 @@ void main() {
       invoiceNumber: 'INV-1001',
       customerName: 'Walk-in Customer',
       orderId: 'ORDER-9',
+      dateTime: DateTime(2026, 9, 26, 14, 30),
       items: const [
         CartItem(
           itemId: 'item-1',
@@ -127,6 +128,7 @@ void main() {
     expect(documents.single.content, contains('@ \$5.00'));
     expect(documents.single.content, contains('Total: \$11.00'));
     expect(documents.single.content, contains('Change: \$9.00'));
+    expect(documents.single.content, contains('26 Sep 2026'));
     // The order number must only be printed once, not once unlabeled and
     // once again as a bare duplicate.
     expect('INV-1001'.allMatches(documents.single.content).length, 1);
@@ -142,6 +144,7 @@ void main() {
       invoiceNumber: 'INV-1003',
       customerName: 'Daniel Jean',
       orderId: 'INV-1003',
+      dateTime: DateTime(2026, 9, 26, 14, 30),
       items: const [
         CartItem(name: 'Test', price: 100, imageUrl: '', quantity: 2),
       ],
@@ -175,6 +178,7 @@ void main() {
       invoiceNumber: 'INV-1002',
       customerName: 'Walk-in Customer',
       orderId: 'ORDER-10',
+      dateTime: DateTime(2026, 9, 26, 14, 30),
       items: const [],
       subtotal: 0,
       tax: 0,

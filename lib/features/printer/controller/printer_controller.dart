@@ -274,6 +274,7 @@ class PrinterController extends GetxController {
     required String invoiceNumber,
     required String customerName,
     required String orderId,
+    required DateTime dateTime,
     required List<CartItem> items,
     required double subtotal,
     required double tax,
@@ -296,6 +297,7 @@ class PrinterController extends GetxController {
             invoiceNumber: invoiceNumber,
             customerName: customerName,
             orderId: orderId,
+            dateTime: dateTime,
             items: items,
             subtotal: subtotal,
             tax: tax,
@@ -329,6 +331,12 @@ class PrinterController extends GetxController {
         styles: const PosStyles(align: PosAlign.center),
       ),
       ...generator.text('Order: $invoiceNumber'),
+      ...generator.text(
+        AppHelperFunctions.getFormattedDate(
+          dateTime,
+          format: 'dd MMM yyyy, hh:mm a',
+        ),
+      ),
       ...generator.text('Customer: $customerName'),
       ...generator.text('Payment: $paymentLabel'),
       ...generator.hr(),
@@ -460,7 +468,18 @@ class PrinterController extends GetxController {
     final logo = await BusinessProfileService.loadLogoImage();
     if (logo != null) {
       final resized = logo.width > 300 ? img.copyResize(logo, width: 300) : logo;
-      bytes.addAll(generator.image(resized));
+      // A logo exported with transparency often has black (or garbage)
+      // RGB underneath the transparent pixels - the printer only sees RGB
+      // and has no idea alpha exists, so it dithered every "invisible"
+      // pixel as solid black instead of leaving it white. Flattening onto
+      // a white background first makes transparent areas actually white.
+      final flattened = img.Image(
+        width: resized.width,
+        height: resized.height,
+        numChannels: 3,
+      )..clear(img.ColorRgb8(255, 255, 255));
+      img.compositeImage(flattened, resized);
+      bytes.addAll(generator.image(flattened));
     }
     bytes.addAll(
       generator.text(
@@ -606,6 +625,7 @@ Virtual printer is ready.
     required String invoiceNumber,
     required String customerName,
     required String orderId,
+    required DateTime dateTime,
     required List<CartItem> items,
     required double subtotal,
     required double tax,
@@ -618,6 +638,12 @@ Virtual printer is ready.
       ..writeln(_businessHeaderPreview())
       ..writeln('Receipt')
       ..writeln('Order: $invoiceNumber')
+      ..writeln(
+        AppHelperFunctions.getFormattedDate(
+          dateTime,
+          format: 'dd MMM yyyy, hh:mm a',
+        ),
+      )
       ..writeln('Customer: $customerName')
       ..writeln('Payment: $paymentLabel')
       ..writeln('--------------------------------')

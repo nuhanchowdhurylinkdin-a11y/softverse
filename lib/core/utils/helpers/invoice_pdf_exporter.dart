@@ -15,6 +15,7 @@ class InvoicePdfExporter {
   static Future<File> exportInvoice({
     required String invoiceNumber,
     required String customerName,
+    required DateTime dateTime,
     required List<CartItem> items,
     required double subtotal,
     required double tax,
@@ -35,6 +36,7 @@ class InvoicePdfExporter {
       _buildPdf(
         invoiceNumber: invoiceNumber,
         customerName: customerName,
+        dateTime: dateTime,
         items: items,
         subtotal: subtotal,
         tax: tax,
@@ -78,6 +80,7 @@ class InvoicePdfExporter {
   static Uint8List _buildPdf({
     required String invoiceNumber,
     required String customerName,
+    required DateTime dateTime,
     required List<CartItem> items,
     required double subtotal,
     required double tax,
@@ -95,6 +98,7 @@ class InvoicePdfExporter {
       if (businessAddress.isNotEmpty) businessAddress,
       if (businessPhone.isNotEmpty) 'Tel: $businessPhone',
       'Invoice: $invoiceNumber',
+      AppHelperFunctions.getFormattedDate(dateTime, format: 'dd MMM yyyy, hh:mm a'),
       'Customer: $customerName',
       'Payment: $paymentLabel',
       '',

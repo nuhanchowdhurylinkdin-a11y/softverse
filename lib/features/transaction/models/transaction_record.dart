@@ -54,6 +54,7 @@ class TransactionRecord {
   final PaymentType paymentType;
   final String status;
   final double totalAmount;
+  final double amountDue;
 
   const TransactionRecord({
     required this.id,
@@ -65,7 +66,24 @@ class TransactionRecord {
     required this.paymentType,
     required this.status,
     required this.totalAmount,
+    this.amountDue = 0,
   });
+
+  /// A due sale that's since been fully collected shouldn't keep reading as
+  /// "Due Payment" forever - the payment method itself is left alone (it's
+  /// still historically true that this was a credit sale), only the badge
+  /// shown for it changes once nothing is left outstanding.
+  bool get isDuePaidOff => paymentType == PaymentType.due && amountDue <= 0;
+
+  String get displayLabel =>
+      isDuePaidOff ? 'Paid (was due)' : paymentType.label;
+
+  Color get displayTextColor =>
+      isDuePaidOff ? AppColors.stockBadgeText : paymentType.textColor;
+
+  List<Color> get displayGradient => isDuePaidOff
+      ? [AppColors.completeBadgeStart, AppColors.completeBadgeEnd]
+      : paymentType.gradient;
 
   factory TransactionRecord.fromApi(Map<String, dynamic> json) {
     final payment = json['paymentMethod']?.toString();
@@ -91,6 +109,7 @@ class TransactionRecord {
           : _paymentTypeFrom(payment),
       status: status,
       totalAmount: double.tryParse(json['totalAmount']?.toString() ?? '') ?? 0,
+      amountDue: double.tryParse(json['amountDue']?.toString() ?? '') ?? 0,
     );
   }
 
