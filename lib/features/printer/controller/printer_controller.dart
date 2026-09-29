@@ -457,14 +457,17 @@ class PrinterController extends GetxController {
   /// actually entered on the Business Admin dashboard.
   Future<List<int>> _businessHeaderBytes(Generator generator) async {
     final bytes = <int>[];
-    if (BusinessProfileService.header.isNotEmpty) {
-      bytes.addAll(
-        generator.text(
-          BusinessProfileService.header,
-          styles: const PosStyles(align: PosAlign.center, bold: true),
+    bytes.addAll(
+      generator.text(
+        BusinessProfileService.name,
+        styles: PosStyles(
+          align: PosAlign.center,
+          bold: true,
+          height: PosTextSize.size2,
+          width: PosTextSize.size2,
         ),
-      );
-    }
+      ),
+    );
     final logo = await BusinessProfileService.loadLogoImage();
     if (logo != null) {
       final resized = logo.width > 300 ? img.copyResize(logo, width: 300) : logo;
@@ -481,17 +484,17 @@ class PrinterController extends GetxController {
       img.compositeImage(flattened, resized);
       bytes.addAll(generator.image(flattened));
     }
-    bytes.addAll(
-      generator.text(
-        BusinessProfileService.name,
-        styles: PosStyles(
-          align: PosAlign.center,
-          bold: true,
-          height: PosTextSize.size2,
-          width: PosTextSize.size2,
+    // The logo sits between the business name and the header message -
+    // the client specifically wants the header to print after the logo,
+    // not before it.
+    if (BusinessProfileService.header.isNotEmpty) {
+      bytes.addAll(
+        generator.text(
+          BusinessProfileService.header,
+          styles: const PosStyles(align: PosAlign.center, bold: true),
         ),
-      ),
-    );
+      );
+    }
     if (BusinessProfileService.address.isNotEmpty) {
       bytes.addAll(
         generator.text(
@@ -612,8 +615,8 @@ Virtual printer is ready.
 
   String _businessHeaderPreview() {
     final lines = [
-      if (BusinessProfileService.header.isNotEmpty) BusinessProfileService.header,
       BusinessProfileService.name,
+      if (BusinessProfileService.header.isNotEmpty) BusinessProfileService.header,
       if (BusinessProfileService.address.isNotEmpty) BusinessProfileService.address,
       if (BusinessProfileService.phone.isNotEmpty)
         'Tel: ${BusinessProfileService.phone}',

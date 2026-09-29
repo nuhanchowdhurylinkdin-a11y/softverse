@@ -191,5 +191,9 @@ void main() {
     expect(documents.single.content, contains('Welcome!'));
     expect(documents.single.content, contains('Louis Cafe'));
     expect(documents.single.content, contains('See you again'));
+    // The client wants the header message printed after the business
+    // name/logo, not before it.
+    final content = documents.single.content;
+    expect(content.indexOf('Louis Cafe'), lessThan(content.indexOf('Welcome!')));
   });
 }
