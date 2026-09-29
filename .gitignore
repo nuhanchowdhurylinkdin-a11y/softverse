@@ -57,3 +57,9 @@ temp_interactive_push.bat
 .gitignore
 # Widget Preview related
 .widget_preview/
+
+# Stray tool output that isn't part of this Flutter app - graphify-out is a
+# code-analysis tool's generated cache, venv/requirements.txt are leftover
+# Python tooling from an unrelated task, never meant to live in this repo.
+graphify-out/
+requirements.txt
