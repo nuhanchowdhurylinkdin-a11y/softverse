@@ -40,6 +40,7 @@ class InvoiceController extends GetxController {
   final localPdfPath = RxnString();
   final subtotalValue = 0.0.obs;
   final taxValue = 0.0.obs;
+  final discountValue = 0.0.obs;
   final totalValue = 0.0.obs;
   final amountReceivedValue = 0.0.obs;
   final changeToReturnValue = 0.0.obs;
@@ -99,6 +100,13 @@ class InvoiceController extends GetxController {
 
   double get amountDue => amountDueValue.value;
 
+  /// A due sale that's since been fully collected prints as paid - it used
+  /// to keep printing "Due Payment" and an amount due forever.
+  String get _printPaymentLabel =>
+      paymentType.value == PaymentType.due && amountDue <= 0
+      ? 'Paid'
+      : paymentType.value.label;
+
   bool get canCollectDuePayment =>
       paymentType.value == PaymentType.due && amountDue > 0 && !isRefunded;
 
@@ -123,6 +131,7 @@ class InvoiceController extends GetxController {
         _cleanText(order['tableName']) ?? _cleanText(fallbackTableName);
     subtotalValue.value = _toDouble(order['subtotal']);
     taxValue.value = _toDouble(order['taxAmount']);
+    discountValue.value = _toDouble(order['discountAmount']);
     totalValue.value = _toDouble(order['totalAmount']);
     amountReceivedValue.value = _toDouble(order['amountReceived']);
     changeToReturnValue.value = _toDouble(order['changeToReturn']);
@@ -219,6 +228,7 @@ class InvoiceController extends GetxController {
       return;
     }
 
+    final previousDue = amountDue;
     isCollectingDuePayment.value = true;
     final response = await _networkCaller.postRequest(
       ApiConstants.collectDuePayment(id),
@@ -237,6 +247,20 @@ class InvoiceController extends GetxController {
       await Get.find<TransactionController>().fetchTransactions();
     }
     AppHelperFunctions.showSuccessSnackBar('Payment collected.');
+
+    // Hand the customer proof of payment: on the receipt printer when one
+    // is set up, otherwise the generated PDF via the save/share sheet.
+    final printed =
+        Get.isRegistered<PrinterController>() &&
+        await Get.find<PrinterController>().printPaymentReceipt(
+          orderNumber: invoiceNumber.value,
+          customerName: customerName.value,
+          dateTime: DateTime.now(),
+          previousDue: previousDue,
+          amountPaid: amount,
+          remainingDue: amountDue,
+        );
+    if (printed) return;
 
     final paymentReceiptUrl = _cleanText(data['paymentReceiptUrl']);
     if (paymentReceiptUrl != null) {
@@ -290,11 +314,13 @@ class InvoiceController extends GetxController {
       dateTime: orderCreatedAt.value ?? DateTime.now(),
       items: items.toList(),
       subtotal: subtotal,
+      discount: discountValue.value,
       tax: tax,
       totalAmount: totalAmount,
       amountReceived: amountReceived,
       changeToReturn: changeToReturn,
-      paymentLabel: paymentType.value.label,
+      amountDue: amountDue,
+      paymentLabel: _printPaymentLabel,
     );
     isPrinting.value = false;
   }
@@ -389,11 +415,13 @@ class InvoiceController extends GetxController {
       dateTime: orderCreatedAt.value ?? DateTime.now(),
       items: items.toList(),
       subtotal: subtotal,
+      discount: discountValue.value,
       tax: tax,
       totalAmount: totalAmount,
       amountReceived: amountReceived,
       changeToReturn: changeToReturn,
-      paymentLabel: paymentType.value.label,
+      amountDue: amountDue,
+      paymentLabel: _printPaymentLabel,
       businessName: BusinessProfileService.name,
       businessAddress: BusinessProfileService.address,
       businessPhone: BusinessProfileService.phone,

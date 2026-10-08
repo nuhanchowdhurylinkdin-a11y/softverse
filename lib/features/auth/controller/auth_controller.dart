@@ -9,6 +9,7 @@ import '../../../core/services/storage_service.dart';
 import '../../../core/utils/constants/api_constants.dart';
 import '../../../core/utils/helpers/app_helper.dart';
 import '../../../routes/app_routes.dart';
+import '../../store/controller/store_controller.dart';
 
 enum OtpFlow { signup, resetPassword }
 
@@ -282,6 +283,7 @@ class AuthController extends GetxController {
       return;
     }
     Get.offAllNamed(AppRoute.getHomeScreen());
+    Get.find<StoreController>().ensureSelected();
   }
 
   void _startOtpFlow(OtpFlow flow, String email) {

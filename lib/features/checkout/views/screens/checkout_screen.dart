@@ -231,6 +231,9 @@ class CheckoutScreen extends GetView<CheckoutController> {
                           Obx(
                             () => BillSummaryCard(
                               subtotal: controller.subtotal,
+                              discount: controller.discountAmount,
+                              discountLabel:
+                                  controller.appliedDiscount.value?.name,
                               tax: controller.tax,
                               taxRate: controller.taxRate,
                               totalAmount: controller.totalAmount,

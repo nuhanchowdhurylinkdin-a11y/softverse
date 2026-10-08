@@ -27,7 +27,7 @@ class HomeController extends GetxController {
   final isLoadingCatalog = false.obs;
   final isLoadingTables = false.obs;
 
-  final orderId = 'POS-1 Order-1';
+  String get orderId => Get.find<CheckoutController>().orderId;
 
   int get orderItemCount => Get.find<CheckoutController>().cartItems.fold(
     0,
@@ -178,7 +178,7 @@ class HomeController extends GetxController {
   Future<void> forceSync({bool showMessage = true}) async {
     await Future.wait([fetchCategories(), fetchItems(), fetchTables()]);
     if (showMessage) {
-      AppHelperFunctions.showSuccessSnackBar('Sales data synced.');
+      AppHelperFunctions.showSuccessSnackBar('Synced');
     }
   }
 

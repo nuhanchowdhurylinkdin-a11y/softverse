@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
+import '../../../../core/common/widgets/till_identity_title.dart';
+
 import '../../../../core/common/styles/global_text_style.dart';
 import '../../../../core/common/widgets/app_nav_drawer.dart';
 import '../../../../core/common/widgets/primary_button.dart';
@@ -40,14 +42,7 @@ class MoreScreen extends GetView<MoreController> {
           ),
         ),
         titleSpacing: 16.w,
-        title: Text(
-          'POS-1',
-          style: getTextStyle(
-            fontSize: 21.9,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-          ),
-        ),
+        title: const TillIdentityTitle(),
         actions: [
           Icon(Iconsax.mobile, color: Colors.white, size: 26.sp),
           SizedBox(width: 15.w),
@@ -64,7 +59,6 @@ class MoreScreen extends GetView<MoreController> {
             children: [
               Obx(
                 () => MoreProfileCard(
-                  imageUrl: controller.profileImageUrl,
                   name: controller.profileName,
                   role: controller.profileRole,
                   posLabel: controller.posLabel.value,
@@ -185,12 +179,6 @@ class MoreScreen extends GetView<MoreController> {
                 icon: Iconsax.element_2,
                 label: 'Back Office'.tr,
                 onTap: controller.openBackOffice,
-              ),
-              SizedBox(height: 12.h),
-              MoreMenuTile(
-                icon: Iconsax.mobile,
-                label: 'Apps Integration'.tr,
-                onTap: controller.openAppsIntegration,
               ),
               SizedBox(height: 12.h),
               MoreMenuTile(

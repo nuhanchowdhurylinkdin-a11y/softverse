@@ -8,6 +8,8 @@ import '../../../core/utils/helpers/app_helper.dart';
 
 class BillSummaryCard extends StatelessWidget {
   final double subtotal;
+  final double discount;
+  final String? discountLabel;
   final double tax;
   final double taxRate;
   final double totalAmount;
@@ -18,6 +20,8 @@ class BillSummaryCard extends StatelessWidget {
   const BillSummaryCard({
     super.key,
     required this.subtotal,
+    this.discount = 0,
+    this.discountLabel,
     required this.tax,
     required this.taxRate,
     required this.totalAmount,
@@ -49,6 +53,13 @@ class BillSummaryCard extends StatelessWidget {
             label: 'Subtotal',
             value: '\$${AppHelperFunctions.getFormattedMoney(subtotal)}',
           ),
+          if (discount > 0) ...[
+            SizedBox(height: 8.h),
+            _Row(
+              label: discountLabel ?? 'Discount',
+              value: '-\$${AppHelperFunctions.getFormattedMoney(discount)}',
+            ),
+          ],
           SizedBox(height: 8.h),
           _Row(
             label: 'TAX (${(taxRate * 100).toStringAsFixed(1)}%)',

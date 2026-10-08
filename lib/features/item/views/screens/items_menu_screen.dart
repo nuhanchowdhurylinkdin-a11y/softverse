@@ -80,57 +80,6 @@ class ItemsMenuScreen extends GetView<ItemsMenuController> {
                 label: 'Discounts',
                 onTap: controller.openDiscounts,
               ),
-              SizedBox(height: 8.h),
-              Container(
-                padding: EdgeInsets.all(20.w),
-                decoration: BoxDecoration(
-                  color: AppColors.chipBackground,
-                  border: Border.all(color: AppColors.cardBorder),
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      'Extended item settings are available in the Back Office',
-                      style: getTextStyle(
-                        fontSize: 16.4,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.chipInactiveText,
-                      ),
-                    ),
-                    SizedBox(height: 18.h),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        GestureDetector(
-                          onTap: controller.goToBackOffice,
-                          child: Text(
-                            'GO TO BACK OFFICE',
-                            style: getTextStyle(
-                              fontSize: 16.4,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.onboardingBackground,
-                            ).copyWith(letterSpacing: 0.16),
-                          ),
-                        ),
-                        SizedBox(width: 24.w),
-                        GestureDetector(
-                          onTap: controller.dismissHint,
-                          child: Text(
-                            'GOT IT',
-                            style: getTextStyle(
-                              fontSize: 16.4,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.onboardingBackground,
-                            ).copyWith(letterSpacing: 0.16),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
         ),

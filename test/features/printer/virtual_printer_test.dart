@@ -151,8 +151,9 @@ void main() {
       subtotal: 200,
       tax: 0,
       totalAmount: 200,
-      amountReceived: 200,
+      amountReceived: 0,
       changeToReturn: 0,
+      amountDue: 200,
       paymentLabel: 'Due Payment',
     );
 

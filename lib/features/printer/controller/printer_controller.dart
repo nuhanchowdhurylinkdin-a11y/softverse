@@ -144,11 +144,7 @@ class PrinterController extends GetxController {
   /// like the button did nothing. Explain why and send the user straight
   /// to where they can fix it instead of leaving them to guess.
   void _warnNoPrinterConfigured() {
-    AppHelperFunctions.showSnackBarWithTitle(
-      'No receipt printer set up',
-      'Add a printer and mark it as your default receipt printer to enable printing.',
-      type: AppSnackBarType.warning,
-    );
+    AppHelperFunctions.showWarningSnackBar('Set up a receipt printer first');
     Get.toNamed(AppRoute.getPrinterListScreen());
   }
 
@@ -240,7 +236,7 @@ class PrinterController extends GetxController {
     final isDark = printer.printDensity == 'Dark';
 
     final bytes = <int>[
-      ...await _businessHeaderBytes(generator),
+      ...await _businessHeaderBytes(generator, paperSize),
       ...generator.text(
         printer.printerModel,
         styles: const PosStyles(align: PosAlign.center),
@@ -263,7 +259,7 @@ class PrinterController extends GetxController {
 
     final sent = await _writePrinterBytesWithReconnect(printer, bytes);
     if (sent) {
-      AppHelperFunctions.showSuccessSnackBar('Test page sent to printer.');
+      AppHelperFunctions.showSuccessSnackBar('Test page printed');
     } else {
       AppHelperFunctions.showErrorSnackBar('Failed to send test page.');
     }
@@ -277,10 +273,12 @@ class PrinterController extends GetxController {
     required DateTime dateTime,
     required List<CartItem> items,
     required double subtotal,
+    double discount = 0,
     required double tax,
     required double totalAmount,
     required double amountReceived,
     required double changeToReturn,
+    double amountDue = 0,
     required String paymentLabel,
   }) async {
     final printer = receiptPrinter;
@@ -300,10 +298,12 @@ class PrinterController extends GetxController {
             dateTime: dateTime,
             items: items,
             subtotal: subtotal,
+            discount: discount,
             tax: tax,
             totalAmount: totalAmount,
             amountReceived: amountReceived,
             changeToReturn: changeToReturn,
+            amountDue: amountDue,
             paymentLabel: paymentLabel,
           ),
         ),
@@ -325,7 +325,7 @@ class PrinterController extends GetxController {
     final isDark = printer.printDensity == 'Dark';
 
     final bytes = <int>[
-      ...await _businessHeaderBytes(generator),
+      ...await _businessHeaderBytes(generator, paperSize),
       ...generator.text(
         'Receipt',
         styles: const PosStyles(align: PosAlign.center),
@@ -354,6 +354,7 @@ class PrinterController extends GetxController {
       ],
       ...generator.hr(),
       ...generator.text('Subtotal: ${_money(subtotal)}'),
+      if (discount > 0) ...generator.text('Discount: -${_money(discount)}'),
       ...generator.text('Tax: ${_money(tax)}'),
       ...generator.text(
         'Total: ${_money(totalAmount)}',
@@ -362,8 +363,10 @@ class PrinterController extends GetxController {
       // A due/credit sale hasn't actually received anything yet - showing
       // "Received"/"Change" on it would make it look already paid in full.
       if (paymentLabel == 'Due Payment') ...[
+        if (amountReceived > 0)
+          ...generator.text('Paid so far: ${_money(amountReceived)}'),
         ...generator.text(
-          'Amount due: ${_money(totalAmount)}',
+          'Amount due: ${_money(amountDue)}',
           styles: PosStyles(bold: isDark),
         ),
       ] else ...[
@@ -377,10 +380,77 @@ class PrinterController extends GetxController {
 
     final sent = await _writePrinterBytesWithReconnect(printer, bytes);
     if (sent) {
-      AppHelperFunctions.showSuccessSnackBar('Receipt sent to printer.');
+      AppHelperFunctions.showSuccessSnackBar('Printed');
     } else {
       AppHelperFunctions.showErrorSnackBar('Failed to print receipt.');
     }
+    return sent;
+  }
+
+  /// Proof of a due-payment collection: what was owed, what was just paid,
+  /// and what's left - not the original sale's receipt.
+  Future<bool> printPaymentReceipt({
+    required String orderNumber,
+    required String customerName,
+    required DateTime dateTime,
+    required double previousDue,
+    required double amountPaid,
+    required double remainingDue,
+  }) async {
+    final printer = receiptPrinter;
+    if (printer == null || printer.isVirtual) return false;
+
+    final connected = await connectToPrinter(printer);
+    if (!connected) {
+      AppHelperFunctions.showErrorSnackBar('Could not connect to printer.');
+      return false;
+    }
+
+    final profile = await CapabilityProfile.load();
+    final paperSize = printer.paperSize == '58mm'
+        ? PaperSize.mm58
+        : PaperSize.mm80;
+    final generator = Generator(paperSize, profile);
+    final isDark = printer.printDensity == 'Dark';
+
+    final bytes = <int>[
+      ...await _businessHeaderBytes(generator, paperSize),
+      ...generator.text(
+        'PAYMENT RECEIPT',
+        styles: const PosStyles(align: PosAlign.center, bold: true),
+      ),
+      ...generator.text('Order: $orderNumber'),
+      ...generator.text(
+        AppHelperFunctions.getFormattedDate(
+          dateTime,
+          format: 'dd MMM yyyy, hh:mm a',
+        ),
+      ),
+      ...generator.text('Customer: $customerName'),
+      ...generator.hr(),
+      ...generator.text('Previous due: ${_money(previousDue)}'),
+      ...generator.text(
+        'Paid now: ${_money(amountPaid)}',
+        styles: PosStyles(bold: isDark),
+      ),
+      ...generator.hr(),
+      if (remainingDue > 0)
+        ...generator.text(
+          'Remaining due: ${_money(remainingDue)}',
+          styles: const PosStyles(bold: true),
+        )
+      else
+        ...generator.text(
+          'PAID IN FULL',
+          styles: const PosStyles(align: PosAlign.center, bold: true),
+        ),
+      ..._businessFooterBytes(generator),
+      ...generator.feed(2),
+      if (printer.autoCut) ...generator.cut(),
+    ];
+
+    final sent = await _writePrinterBytesWithReconnect(printer, bytes);
+    if (sent) AppHelperFunctions.showSuccessSnackBar('Printed');
     return sent;
   }
 
@@ -414,7 +484,7 @@ class PrinterController extends GetxController {
     final isDark = printer.printDensity == 'Dark';
 
     final bytes = <int>[
-      ...await _businessHeaderBytes(generator),
+      ...await _businessHeaderBytes(generator, paperSize),
       ...generator.text(
         'ESTIMATE (not a receipt)',
         styles: const PosStyles(align: PosAlign.center),
@@ -444,7 +514,7 @@ class PrinterController extends GetxController {
 
     final sent = await _writePrinterBytesWithReconnect(printer, bytes);
     if (sent) {
-      AppHelperFunctions.showSuccessSnackBar('Estimate sent to printer.');
+      AppHelperFunctions.showSuccessSnackBar('Estimate printed');
     } else {
       AppHelperFunctions.showErrorSnackBar('Failed to print estimate.');
     }
@@ -455,7 +525,10 @@ class PrinterController extends GetxController {
   /// every real print - pulled from [BusinessProfileService] instead of a
   /// hardcoded "Softverse POS" so receipts reflect what the merchant
   /// actually entered on the Business Admin dashboard.
-  Future<List<int>> _businessHeaderBytes(Generator generator) async {
+  Future<List<int>> _businessHeaderBytes(
+    Generator generator,
+    PaperSize paperSize,
+  ) async {
     final bytes = <int>[];
     bytes.addAll(
       generator.text(
@@ -470,19 +543,27 @@ class PrinterController extends GetxController {
     );
     final logo = await BusinessProfileService.loadLogoImage();
     if (logo != null) {
-      final resized = logo.width > 300 ? img.copyResize(logo, width: 300) : logo;
-      // A logo exported with transparency often has black (or garbage)
-      // RGB underneath the transparent pixels - the printer only sees RGB
-      // and has no idea alpha exists, so it dithered every "invisible"
-      // pixel as solid black instead of leaving it white. Flattening onto
-      // a white background first makes transparent areas actually white.
-      final flattened = img.Image(
-        width: resized.width,
+      final maxLogoWidth = (paperSize.width * 0.6).round();
+      final resized = logo.width > maxLogoWidth
+          ? img.copyResize(logo, width: maxLogoWidth)
+          : logo;
+      // Two printer quirks handled at once: a transparent logo's hidden RGB
+      // dithers to a solid black box (so flatten onto white), and many
+      // cheap printers ignore the "center" alignment command for bit
+      // images and print them flush left. Placing the logo in the middle of
+      // a full paper-width white canvas centers it no matter what the
+      // printer does with alignment.
+      final canvas = img.Image(
+        width: paperSize.width,
         height: resized.height,
         numChannels: 3,
       )..clear(img.ColorRgb8(255, 255, 255));
-      img.compositeImage(flattened, resized);
-      bytes.addAll(generator.image(flattened));
+      img.compositeImage(
+        canvas,
+        resized,
+        dstX: ((paperSize.width - resized.width) / 2).round(),
+      );
+      bytes.addAll(generator.image(canvas));
     }
     // The logo sits between the business name and the header message -
     // the client specifically wants the header to print after the logo,
@@ -631,10 +712,12 @@ Virtual printer is ready.
     required DateTime dateTime,
     required List<CartItem> items,
     required double subtotal,
+    double discount = 0,
     required double tax,
     required double totalAmount,
     required double amountReceived,
     required double changeToReturn,
+    double amountDue = 0,
     required String paymentLabel,
   }) {
     final output = StringBuffer()
@@ -659,11 +742,16 @@ Virtual printer is ready.
     }
     output
       ..writeln('--------------------------------')
-      ..writeln('Subtotal: ${_money(subtotal)}')
+      ..writeln('Subtotal: ${_money(subtotal)}');
+    if (discount > 0) output.writeln('Discount: -${_money(discount)}');
+    output
       ..writeln('Tax: ${_money(tax)}')
       ..writeln('Total: ${_money(totalAmount)}');
     if (paymentLabel == 'Due Payment') {
-      output.writeln('Amount due: ${_money(totalAmount)}');
+      if (amountReceived > 0) {
+        output.writeln('Paid so far: ${_money(amountReceived)}');
+      }
+      output.writeln('Amount due: ${_money(amountDue)}');
     } else {
       output
         ..writeln('Received: ${_money(amountReceived)}')

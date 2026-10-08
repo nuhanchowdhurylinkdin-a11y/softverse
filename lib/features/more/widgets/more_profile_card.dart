@@ -3,11 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/common/styles/global_text_style.dart';
 import '../../../core/common/widgets/primary_button.dart';
-import '../../../core/common/widgets/product_image.dart';
 import '../../../core/utils/constants/colors.dart';
 
 class MoreProfileCard extends StatelessWidget {
-  final String imageUrl;
   final String name;
   final String role;
   final String posLabel;
@@ -15,7 +13,6 @@ class MoreProfileCard extends StatelessWidget {
 
   const MoreProfileCard({
     super.key,
-    required this.imageUrl,
     required this.name,
     required this.role,
     required this.posLabel,
@@ -42,7 +39,24 @@ class MoreProfileCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          ProductImage(imageUrl: imageUrl, size: 60, borderRadius: 30),
+          // Initials instead of a stock photo of a stranger.
+          Container(
+            width: 60.w,
+            height: 60.w,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              _initials(name),
+              style: getTextStyle(
+                fontSize: 21.9,
+                fontWeight: FontWeight.w700,
+                color: AppColors.onboardingBackground,
+              ),
+            ),
+          ),
           SizedBox(width: 12.w),
           Expanded(
             child: Column(
@@ -79,5 +93,11 @@ class MoreProfileCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _initials(String value) {
+    final parts = value.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
+    final letters = parts.take(2).map((p) => p[0].toUpperCase()).join();
+    return letters.isEmpty ? '?' : letters;
   }
 }

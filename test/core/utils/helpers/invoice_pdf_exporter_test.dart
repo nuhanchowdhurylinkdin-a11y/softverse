@@ -60,13 +60,15 @@ void main() {
       subtotal: 200,
       tax: 0,
       totalAmount: 200,
-      amountReceived: 200,
+      amountReceived: 50,
       changeToReturn: 0,
+      amountDue: 150,
       paymentLabel: 'Due Payment',
     );
 
     final text = latin1.decode(await file.readAsBytes(), allowInvalid: true);
-    expect(text, contains('Amount Due: \$200.00'));
+    expect(text, contains('Paid so far: \$50.00'));
+    expect(text, contains('Amount Due: \$150.00'));
     expect(text, isNot(contains('Amount Received')));
     expect(text, isNot(contains('Change to Return')));
     expect(text, contains('@ \$100.00'));

@@ -36,9 +36,8 @@ class DiscountController extends GetxController {
     discounts.assignAll(
       raw is List
           ? raw.whereType<Map>().map(
-              (value) => DiscountRuleModel.fromJson(
-                Map<String, dynamic>.from(value),
-              ),
+              (value) =>
+                  DiscountRuleModel.fromJson(Map<String, dynamic>.from(value)),
             )
           : const <DiscountRuleModel>[],
     );

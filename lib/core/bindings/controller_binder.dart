@@ -16,6 +16,8 @@ import '../../features/pos_device/controller/pos_device_controller.dart';
 import '../../features/printer/controller/printer_controller.dart';
 import '../../features/shift/controller/shift_controller.dart';
 import '../../features/splash/controller/splash_controller.dart';
+import '../../features/store/controller/store_controller.dart';
+import '../../features/support/controller/support_controller.dart';
 import '../../features/tax/controller/tax_controller.dart';
 import '../../features/transaction/controller/transaction_controller.dart';
 import '../../features/walkthrough/controller/walkthrough_controller.dart';
@@ -60,5 +62,7 @@ class ControllerBinder extends Bindings {
     Get.lazyPut<AppsController>(() => AppsController(), fenix: true);
     Get.lazyPut<TaxController>(() => TaxController(), fenix: true);
     Get.lazyPut<GeneralController>(() => GeneralController(), fenix: true);
+    Get.lazyPut<SupportController>(() => SupportController(), fenix: true);
+    Get.lazyPut<StoreController>(() => StoreController(), fenix: true);
   }
 }

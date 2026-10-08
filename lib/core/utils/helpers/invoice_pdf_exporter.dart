@@ -18,10 +18,12 @@ class InvoicePdfExporter {
     required DateTime dateTime,
     required List<CartItem> items,
     required double subtotal,
+    double discount = 0,
     required double tax,
     required double totalAmount,
     required double amountReceived,
     required double changeToReturn,
+    double amountDue = 0,
     required String paymentLabel,
     String businessName = 'Softverse POS',
     String businessAddress = '',
@@ -39,10 +41,12 @@ class InvoicePdfExporter {
         dateTime: dateTime,
         items: items,
         subtotal: subtotal,
+        discount: discount,
         tax: tax,
         totalAmount: totalAmount,
         amountReceived: amountReceived,
         changeToReturn: changeToReturn,
+        amountDue: amountDue,
         paymentLabel: paymentLabel,
         businessName: businessName,
         businessAddress: businessAddress,
@@ -83,10 +87,12 @@ class InvoicePdfExporter {
     required DateTime dateTime,
     required List<CartItem> items,
     required double subtotal,
+    required double discount,
     required double tax,
     required double totalAmount,
     required double amountReceived,
     required double changeToReturn,
+    required double amountDue,
     required String paymentLabel,
     required String businessName,
     required String businessAddress,
@@ -109,13 +115,17 @@ class InvoicePdfExporter {
       ],
       '',
       'Subtotal: \$${AppHelperFunctions.getFormattedMoney(subtotal)}',
+      if (discount > 0)
+        'Discount: -\$${AppHelperFunctions.getFormattedMoney(discount)}',
       'Tax: \$${AppHelperFunctions.getFormattedMoney(tax)}',
       'Total: \$${AppHelperFunctions.getFormattedMoney(totalAmount)}',
       // A due/credit sale hasn't actually received anything yet - showing
       // "Amount Received"/"Change" on it would make it look already paid.
-      if (isDue)
-        'Amount Due: \$${AppHelperFunctions.getFormattedMoney(totalAmount)}'
-      else ...[
+      if (isDue) ...[
+        if (amountReceived > 0)
+          'Paid so far: \$${AppHelperFunctions.getFormattedMoney(amountReceived)}',
+        'Amount Due: \$${AppHelperFunctions.getFormattedMoney(amountDue)}',
+      ] else ...[
         'Amount Received: \$${AppHelperFunctions.getFormattedMoney(amountReceived)}',
         'Change to Return: \$${AppHelperFunctions.getFormattedMoney(changeToReturn)}',
       ],

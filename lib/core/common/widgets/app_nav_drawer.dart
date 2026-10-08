@@ -6,6 +6,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import '../../../features/main_nav/controller/main_nav_controller.dart';
 import '../../utils/constants/colors.dart';
 import '../styles/global_text_style.dart';
+import 'till_identity_title.dart';
 
 class _NavDrawerItem {
   final String label;
@@ -36,14 +37,9 @@ class AppNavDrawer extends GetView<MainNavController> {
             children: [
               Padding(
                 padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 24.h),
-                child: Text(
-                  'POS-1',
-                  style: getTextStyle(
-                    fontSize: 21.9,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.onboardingBackground,
-                    textAlign: TextAlign.left,
-                  ),
+                child: const TillIdentityTitle(
+                  color: AppColors.onboardingBackground,
+                  subtitleColor: AppColors.chipInactiveText,
                 ),
               ),
               for (var i = 0; i < _items.length; i++) _buildTile(context, i),

@@ -13,7 +13,9 @@ import '../../../core/services/offline_database_service.dart';
 import '../../../core/services/sync_service.dart';
 import '../../../core/utils/constants/api_constants.dart';
 import '../../../core/utils/helpers/app_helper.dart';
+import '../../../core/services/storage_service.dart';
 import '../../../routes/app_routes.dart';
+import '../../store/controller/store_controller.dart';
 import '../../customer/controller/customer_controller.dart';
 import '../../customer/models/customer_model.dart';
 import '../../home/controller/home_controller.dart';
@@ -24,13 +26,18 @@ import '../../printer/controller/printer_controller.dart';
 import '../../tax/controller/tax_controller.dart';
 import '../../tax/models/tax_model.dart';
 import '../../transaction/controller/transaction_controller.dart';
+import '../../../core/services/permission_service.dart';
+import '../../item/data/discount_repository.dart';
+import '../../item/models/discount_rule_model.dart';
 import '../models/cart_item.dart';
+import '../widgets/discount_picker_sheet.dart';
 import '../models/payment_method.dart';
 
 enum PriceAdjustmentMode { modifier, discount }
 
 class CheckoutController extends GetxController {
   final NetworkCaller _networkCaller = NetworkCaller();
+  final DiscountRepository _discountRepository = HttpDiscountRepository();
   final KdsOrderSender _kdsOrderSender = KdsOrderSender();
   final CdsCartSender _cdsCartSender = CdsCartSender();
   final activeOrderId = RxnString();
@@ -55,7 +62,7 @@ class CheckoutController extends GetxController {
   final cartItems = <CartItem>[].obs;
 
   String get orderId => activeOrderNumber.value.isEmpty
-      ? 'POS-1 Order-1'
+      ? 'New order'
       : activeOrderNumber.value;
 
   static const _defaultPaymentMethods = [
@@ -139,7 +146,22 @@ class CheckoutController extends GetxController {
 
   double get taxRate => subtotal == 0 ? 0 : tax / subtotal;
 
-  double get totalAmount => subtotal + tax;
+  /// Order-level discount picked from the business's discount catalog.
+  final appliedDiscount = Rxn<DiscountRuleModel>();
+
+  /// Value typed at the till for a catalog discount created without a fixed
+  /// amount ("seller decides at the time of sale").
+  final appliedDiscountValue = 0.0.obs;
+
+  double get discountAmount {
+    final discount = appliedDiscount.value;
+    if (discount == null || subtotal <= 0) return 0;
+    final value = appliedDiscountValue.value;
+    final raw = discount.type == 'amount' ? value : subtotal * value / 100;
+    return double.parse(raw.clamp(0, subtotal).toStringAsFixed(2));
+  }
+
+  double get totalAmount => subtotal - discountAmount + tax;
 
   double get changeToReturn => amountReceived.value - totalAmount;
 
@@ -196,8 +218,102 @@ class CheckoutController extends GetxController {
   void selectModifier() =>
       priceAdjustmentMode.value = PriceAdjustmentMode.modifier;
 
-  void selectDiscount() =>
-      priceAdjustmentMode.value = PriceAdjustmentMode.discount;
+  void selectDiscount() {
+    priceAdjustmentMode.value = PriceAdjustmentMode.discount;
+    _openDiscountPicker();
+  }
+
+  Future<void> _openDiscountPicker() async {
+    final response = await _discountRepository.fetchDiscountRules();
+    if (!response.isSuccess || response.responseData is! Map) {
+      AppHelperFunctions.showErrorSnackBar(response.errorMessage);
+      return;
+    }
+    final raw = (response.responseData as Map)['discounts'];
+    final storeId = StorageService.storeId;
+    final discounts = (raw is List ? raw : const [])
+        .whereType<Map>()
+        .map((json) => DiscountRuleModel.fromJson(Map<String, dynamic>.from(json)))
+        .where(
+          (d) =>
+              d.isActive &&
+              (d.storeId == null || storeId == null || d.storeId == storeId),
+        )
+        .toList();
+
+    final picked = await Get.bottomSheet<DiscountRuleModel>(
+      DiscountPickerSheet(
+        discounts: discounts,
+        appliedId: appliedDiscount.value?.id,
+        onRemove: () {
+          removeDiscount();
+          Get.back();
+        },
+      ),
+      isScrollControlled: true,
+    );
+    if (picked != null) await _applyDiscount(picked);
+  }
+
+  void removeDiscount() {
+    appliedDiscount.value = null;
+    appliedDiscountValue.value = 0;
+    _syncAmountReceivedWithTotal();
+    _syncCds();
+  }
+
+  Future<void> _applyDiscount(DiscountRuleModel discount) async {
+    if (discount.restrictedAccess &&
+        !PermissionService.has(AppPermission.giveDiscount)) {
+      AppHelperFunctions.showErrorSnackBar(
+        'You are not allowed to apply this discount.',
+      );
+      return;
+    }
+    var value = discount.value;
+    if (value <= 0) {
+      final entered = await _askDiscountValue(discount);
+      if (entered == null || entered <= 0) return;
+      value = entered;
+    }
+    appliedDiscount.value = discount;
+    appliedDiscountValue.value = value;
+    _syncAmountReceivedWithTotal();
+    _syncCds();
+  }
+
+  Future<double?> _askDiscountValue(DiscountRuleModel discount) async {
+    final input = TextEditingController();
+    final result = await Get.dialog<double>(
+      AlertDialog(
+        title: Text(discount.name),
+        content: TextField(
+          controller: input,
+          autofocus: true,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: InputDecoration(
+            labelText: discount.type == 'amount' ? 'Amount' : 'Percentage',
+            suffixText: discount.type == 'amount' ? null : '%',
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: Get.back, child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Get.back(
+              result: double.tryParse(input.text.trim().replaceAll(',', '')),
+            ),
+            child: const Text('Apply'),
+          ),
+        ],
+      ),
+    );
+    input.dispose();
+    if (result != null && discount.type != 'amount' && result > 100) {
+      AppHelperFunctions.showWarningSnackBar('Percentage cannot exceed 100.');
+      return null;
+    }
+    return result;
+  }
 
   void setAmountReceived(String value) {
     amountEditedManually.value = true;
@@ -283,6 +399,8 @@ class CheckoutController extends GetxController {
     selectedCustomerId.value = '';
     customerName.value = 'Not Registered';
     amountEditedManually.value = false;
+    appliedDiscount.value = null;
+    appliedDiscountValue.value = 0;
     _syncAmountReceivedWithTotal(force: true);
     if (!silent && FeatureSettings.isEnabled('customer_displays')) {
       _cdsCartSender.clear();
@@ -370,7 +488,7 @@ class CheckoutController extends GetxController {
       await Get.find<SyncService>().syncPendingActions();
     }
     await fetchOrders();
-    AppHelperFunctions.showSuccessSnackBar('Checkout data synced.');
+    AppHelperFunctions.showSuccessSnackBar('Synced');
   }
 
   Future<void> fetchOrders() async {
@@ -637,6 +755,13 @@ class CheckoutController extends GetxController {
     if (response != null &&
         response.statusCode != 0 &&
         response.statusCode != 408) {
+      if (response.errorMessage.contains('storeId is required')) {
+        // The business now has several stores - ask which one this till
+        // sells from instead of leaving every sale stuck on this error.
+        AppHelperFunctions.showWarningSnackBar('Choose a store first.');
+        await Get.find<StoreController>().ensureSelected(forcePicker: true);
+        return;
+      }
       AppHelperFunctions.showErrorSnackBar(response.errorMessage);
       return;
     }
@@ -680,8 +805,9 @@ class CheckoutController extends GetxController {
           : customerName.value,
       'items': _cartItemsPayload(),
       'taxAmount': _money(tax),
-      'discountAmount': 0,
+      'discountAmount': _money(discountAmount),
       'amountReceived': _money(amountReceived.value),
+      'storeId': ?StorageService.storeId,
       'payment': {
         'cash': selectedPaymentMethod.value == 'cash',
         'card': selectedPaymentMethod.value == 'card',
@@ -706,13 +832,14 @@ class CheckoutController extends GetxController {
           ? null
           : customerName.value,
       'items': _cartItemsPayload(),
-      'discountAmount': 0,
+      'discountAmount': _money(discountAmount),
     };
   }
 
   Map<String, dynamic> _paymentPayload({String? tableId, String? tableName}) {
     return {
       'amountReceived': _money(amountReceived.value),
+      'storeId': ?StorageService.storeId,
       'payment': {
         'cash': selectedPaymentMethod.value == 'cash',
         'card': selectedPaymentMethod.value == 'card',
