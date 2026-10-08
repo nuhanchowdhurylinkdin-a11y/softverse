@@ -43,7 +43,6 @@ app.*.map.json
 /android/app/release
 
 # Environment
-.env
 
 
 # Python Virtual Environments
@@ -63,3 +62,5 @@ temp_interactive_push.bat
 # Python tooling from an unrelated task, never meant to live in this repo.
 graphify-out/
 requirements.txt
+config.bat
+node_modules
