@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -19,6 +20,7 @@ class StorageService {
   // the device itself, not of whoever happens to be logged in right now, so
   // (like theme/language) this deliberately survives logoutUser().
   static const String _posDeviceIdKey = 'posDeviceId';
+  static const String _terminalIdKey = 'terminalId';
   static const String _posDeviceNameKey = 'posDeviceName';
   // The store sales on this till are attributed to - also device-level, and
   // remembered per business so logging into another business never reuses
@@ -142,6 +144,20 @@ class StorageService {
   }
 
   static String? get posDeviceId => _preferences?.getString(_posDeviceIdKey);
+
+  /// Random id of this physical till, kept across logins - identifies the
+  /// terminal in the super manager's connection analytics.
+  static String get terminalId {
+    final existing = _preferences?.getString(_terminalIdKey);
+    if (existing != null && existing.isNotEmpty) return existing;
+    final random = Random.secure();
+    final id = List.generate(
+      16,
+      (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0'),
+    ).join();
+    _preferences?.setString(_terminalIdKey, id);
+    return id;
+  }
   static String? get posDeviceName =>
       _preferences?.getString(_posDeviceNameKey);
 
