@@ -24,6 +24,8 @@ class ApiConstants {
   static String get helpFaqs => '$baseUrl/business-admin-dashboard/help/faqs';
   static String get helpContact =>
       '$baseUrl/business-admin-dashboard/help/contact';
+  static String get kitchenPrinterGroups =>
+      '$baseUrl/business-admin-dashboard/settings/kitchen-printers';
   static String get posDevices =>
       '$baseUrl/business-admin-dashboard/settings/pos-devices';
   static String posDevice(String id) =>

@@ -19,6 +19,7 @@ import '../../store/controller/store_controller.dart';
 import '../../customer/controller/customer_controller.dart';
 import '../../customer/models/customer_model.dart';
 import '../../home/controller/home_controller.dart';
+import '../../home/models/product.dart';
 import '../../home/models/table_order.dart';
 import '../../invoice/controller/invoice_controller.dart';
 import '../../main_nav/controller/main_nav_controller.dart';
@@ -136,8 +137,7 @@ class CheckoutController extends GetxController {
       final rate = taxes
           .where(
             (tax) =>
-                tax.type == TaxType.addedAtCheckout &&
-                tax.appliedItemIds.contains(itemId),
+                tax.type == TaxType.addedAtCheckout && tax.appliesTo(itemId),
           )
           .fold(0.0, (total, tax) => total + tax.ratePercent);
       return sum + (item.lineSubtotal * rate / 100);
@@ -450,7 +450,7 @@ class CheckoutController extends GetxController {
     final customer = Get.find<CustomerController>().customer.value;
     if (totalAmount > customer.creditLimit) {
       AppHelperFunctions.showErrorSnackBar(
-        'Credit sale denied. ${customer.name} has a \$${AppHelperFunctions.getFormattedMoney(customer.creditLimit)} credit limit.',
+        'Credit sale denied. ${customer.name} has a ${AppHelperFunctions.formatCurrency(customer.creditLimit)} credit limit.',
       );
       return;
     }
@@ -609,6 +609,29 @@ class CheckoutController extends GetxController {
     }
   }
 
+  Future<void> _printKitchenTicketsIfEnabled({
+    required Map<String, dynamic> order,
+    String? tableName,
+  }) async {
+    if (!FeatureSettings.isEnabled('kitchen_printers')) return;
+    if (!Get.isRegistered<PrinterController>()) return;
+    final products = Get.isRegistered<HomeController>()
+        ? Get.find<HomeController>().products
+        : const <Product>[];
+    final categoryById = <String?, String?>{
+      for (final product in products) product.id: product.categoryId,
+    };
+    await Get.find<PrinterController>().printKitchenTickets(
+      orderLabel:
+          order['orderNumber']?.toString() ??
+          (activeOrderNumber.value.isEmpty ? orderId : activeOrderNumber.value),
+      tableName: tableName ?? order['tableName']?.toString() ?? 'No table',
+      customerName: customerName.value,
+      items: cartItems.toList(),
+      categoryOf: (itemId) => categoryById[itemId],
+    );
+  }
+
   void _syncCds() {
     if (!FeatureSettings.isEnabled('customer_displays')) return;
     _cdsCartSender.update(_cdsCartSnapshot());
@@ -722,6 +745,12 @@ class CheckoutController extends GetxController {
         tableId: tableId,
         tableName: tableName,
       );
+      // Kitchen tickets go out once per order: when it's sent to a table,
+      // or when a new counter sale is paid straight away. Paying an order
+      // that was already sent must not re-print it.
+      if (sendToTable || (!saveOrder && currentOrderId == null)) {
+        await _printKitchenTicketsIfEnabled(order: order, tableName: tableName);
+      }
       if (!saveOrder && !sendToTable) {
         if (FeatureSettings.isEnabled('customer_displays')) {
           _cdsCartSender.complete(_cdsCartSnapshot(paid: true));

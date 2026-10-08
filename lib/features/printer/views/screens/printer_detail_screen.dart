@@ -154,6 +154,41 @@ class PrinterDetailScreen extends GetView<PrinterController> {
                         onChanged: (_) =>
                             controller.togglePrintOrders(printer.id),
                       ),
+                      if (printer.printOrders) ...[
+                        SizedBox(height: 8.h),
+                        PrinterSelectRow(
+                          label: 'Kitchen printer group',
+                          value: controller.kitchenGroupName(
+                            printer.kitchenGroupId,
+                          ),
+                          onTap: () async {
+                            await controller.fetchKitchenGroups();
+                            if (!context.mounted) return;
+                            final groups = controller.kitchenGroups;
+                            final selected = await showPrinterOptionPicker(
+                              context: context,
+                              title: 'Kitchen printer group',
+                              options: [
+                                'All items',
+                                ...groups.map((group) => group.name),
+                              ],
+                              selected: controller.kitchenGroupName(
+                                printer.kitchenGroupId,
+                              ),
+                            );
+                            if (selected == null) return;
+                            controller.setKitchenGroup(
+                              printer.id,
+                              groups
+                                      .firstWhereOrNull(
+                                        (group) => group.name == selected,
+                                      )
+                                      ?.id ??
+                                  '',
+                            );
+                          },
+                        ),
+                      ],
                       SizedBox(height: 8.h),
                       PrinterSelectRow(
                         label: 'Paper size',

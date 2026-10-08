@@ -150,7 +150,7 @@ class _Row extends StatelessWidget {
           ),
         ),
         Text(
-          '\$${AppHelperFunctions.getFormattedMoney(value)}',
+          AppHelperFunctions.formatCurrency(value),
           style: getTextStyle(
             fontSize: 14.6,
             color: AppColors.onboardingBackground,

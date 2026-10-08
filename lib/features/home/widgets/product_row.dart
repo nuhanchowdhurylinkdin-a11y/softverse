@@ -56,7 +56,7 @@ class ProductRow extends StatelessWidget {
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    '\$${AppHelperFunctions.getFormattedMoney(product.price)}',
+                    AppHelperFunctions.formatCurrency(product.price),
                     style: getTextStyle(
                       fontSize: 16.4,
                       fontWeight: FontWeight.w500,

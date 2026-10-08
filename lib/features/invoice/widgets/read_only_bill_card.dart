@@ -45,32 +45,32 @@ class ReadOnlyBillCard extends StatelessWidget {
         children: [
           _Row(
             label: 'Subtotal',
-            value: '\$${AppHelperFunctions.getFormattedMoney(subtotal)}',
+            value: AppHelperFunctions.formatCurrency(subtotal),
           ),
           SizedBox(height: 8.h),
           _Row(
             label: 'TAX (${(taxRate * 100).toStringAsFixed(1)}%)',
-            value: '\$${AppHelperFunctions.getFormattedMoney(tax)}',
+            value: AppHelperFunctions.formatCurrency(tax),
           ),
           SizedBox(height: 12.h),
           const DashedDivider(),
           SizedBox(height: 12.h),
           _Row(
             label: 'Total Amount',
-            value: '\$${AppHelperFunctions.getFormattedMoney(totalAmount)}',
+            value: AppHelperFunctions.formatCurrency(totalAmount),
             emphasize: true,
           ),
           SizedBox(height: 8.h),
           _Row(
             label: 'Amount Received',
-            value: '\$${AppHelperFunctions.getFormattedMoney(amountReceived)}',
+            value: AppHelperFunctions.formatCurrency(amountReceived),
           ),
           SizedBox(height: 12.h),
           const DashedDivider(),
           SizedBox(height: 12.h),
           _Row(
             label: 'Change to Return',
-            value: '\$${AppHelperFunctions.getFormattedMoney(changeToReturn)}',
+            value: AppHelperFunctions.formatCurrency(changeToReturn),
             emphasize: true,
           ),
         ],

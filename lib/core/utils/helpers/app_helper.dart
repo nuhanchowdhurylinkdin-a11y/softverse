@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
+import '../../services/business_profile_service.dart';
+
 import '../constants/colors.dart';
 
 enum AppSnackBarType { success, failure, warning, notice }
@@ -112,5 +114,10 @@ class AppHelperFunctions {
 
   static String getFormattedMoney(double value) {
     return NumberFormat('#,##0.00').format(value);
+  }
+
+  /// Amount with the business currency symbol, e.g. "\$1,250.00".
+  static String formatCurrency(double value) {
+    return '${BusinessProfileService.currencySymbol}${getFormattedMoney(value)}';
   }
 }

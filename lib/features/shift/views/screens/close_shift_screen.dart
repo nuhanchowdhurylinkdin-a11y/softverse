@@ -74,7 +74,7 @@ class CloseShiftScreen extends GetView<CloseShiftController> {
                     _Row(
                       label: 'Expected cash amount',
                       value:
-                          '\$${AppHelperFunctions.getFormattedMoney(controller.shift.expectedCashAmount)}',
+                          AppHelperFunctions.formatCurrency(controller.shift.expectedCashAmount),
                     ),
                     SizedBox(height: 6.h),
                     const DashedDivider(),
@@ -95,7 +95,7 @@ class CloseShiftScreen extends GetView<CloseShiftController> {
                           alignment: Alignment.center,
                           color: Colors.white,
                           child: Text(
-                            '\$${AppHelperFunctions.getFormattedMoney(controller.shift.expectedCashAmount)}',
+                            AppHelperFunctions.formatCurrency(controller.shift.expectedCashAmount),
                             style: getTextStyle(
                               fontSize: 14.6,
                               color: AppColors.authTextDark,
@@ -110,7 +110,7 @@ class CloseShiftScreen extends GetView<CloseShiftController> {
                     _Row(
                       label: 'Difference',
                       value:
-                          '\$${AppHelperFunctions.getFormattedMoney(controller.difference)}',
+                          AppHelperFunctions.formatCurrency(controller.difference),
                       emphasize: true,
                     ),
                   ],

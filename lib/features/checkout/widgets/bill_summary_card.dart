@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/common/styles/global_text_style.dart';
+import '../../../core/services/business_profile_service.dart';
 import '../../../core/common/widgets/dashed_divider.dart';
 import '../../../core/utils/constants/colors.dart';
 import '../../../core/utils/helpers/app_helper.dart';
@@ -51,26 +52,26 @@ class BillSummaryCard extends StatelessWidget {
         children: [
           _Row(
             label: 'Subtotal',
-            value: '\$${AppHelperFunctions.getFormattedMoney(subtotal)}',
+            value: AppHelperFunctions.formatCurrency(subtotal),
           ),
           if (discount > 0) ...[
             SizedBox(height: 8.h),
             _Row(
               label: discountLabel ?? 'Discount',
-              value: '-\$${AppHelperFunctions.getFormattedMoney(discount)}',
+              value: '-${AppHelperFunctions.formatCurrency(discount)}',
             ),
           ],
           SizedBox(height: 8.h),
           _Row(
             label: 'TAX (${(taxRate * 100).toStringAsFixed(1)}%)',
-            value: '\$${AppHelperFunctions.getFormattedMoney(tax)}',
+            value: AppHelperFunctions.formatCurrency(tax),
           ),
           SizedBox(height: 12.h),
           const DashedDivider(),
           SizedBox(height: 12.h),
           _Row(
             label: 'Total Amount',
-            value: '\$${AppHelperFunctions.getFormattedMoney(totalAmount)}',
+            value: AppHelperFunctions.formatCurrency(totalAmount),
             emphasize: true,
           ),
           SizedBox(height: 12.h),
@@ -98,13 +99,13 @@ class BillSummaryCard extends StatelessWidget {
                     fontSize: 14.6,
                     color: AppColors.authTextDark,
                   ),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     isDense: true,
                     contentPadding: EdgeInsets.zero,
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,
-                    prefixText: '\$',
+                    prefixText: BusinessProfileService.currencySymbol,
                   ),
                 ),
               ),
@@ -115,7 +116,7 @@ class BillSummaryCard extends StatelessWidget {
           SizedBox(height: 12.h),
           _Row(
             label: 'Change to Return',
-            value: '\$${AppHelperFunctions.getFormattedMoney(changeToReturn)}',
+            value: AppHelperFunctions.formatCurrency(changeToReturn),
             emphasize: true,
           ),
         ],

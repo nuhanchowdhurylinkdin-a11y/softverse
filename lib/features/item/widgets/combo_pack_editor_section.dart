@@ -151,7 +151,7 @@ class ComboPackEditorSection extends StatelessWidget {
                           ),
                           SizedBox(width: 12.w),
                           Text(
-                            '\$${AppHelperFunctions.getFormattedMoney(product.price)}',
+                            AppHelperFunctions.formatCurrency(product.price),
                             style: getTextStyle(
                               fontSize: 14.2,
                               fontWeight: FontWeight.w500,

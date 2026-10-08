@@ -52,7 +52,9 @@ class BusinessProfileService {
     }
     if (cached?['printedReceiptLogoRemoved'] == true) return '';
     final raw = cached?['businessLogoUrl']?.toString().trim();
-    return (raw == null || raw.isEmpty) ? '' : ApiConstants.resolveAssetUrl(raw);
+    return (raw == null || raw.isEmpty)
+        ? ''
+        : ApiConstants.resolveAssetUrl(raw);
   }
 
   static String get header {
@@ -63,6 +65,38 @@ class BusinessProfileService {
   static String get footer {
     _version.value;
     return _cached()?['receiptFooter']?.toString().trim() ?? '';
+  }
+
+  /// Business currency chosen on the website (Settings → Profile).
+  static String get currency {
+    _version.value;
+    final value = _cached()?['currency']?.toString().trim();
+    return (value == null || value.isEmpty) ? 'Dollar' : value;
+  }
+
+  /// On-screen symbol for [currency].
+  static String get currencySymbol => switch (currency) {
+    'Dollar' => '\$',
+    'Euro' => '€',
+    'Pound' => '£',
+    'Taka' => 'Tk ',
+    final other => '$other ',
+  };
+
+  /// Printer-safe symbol - thermal printers' default code page has no €/£.
+  static String get printCurrencySymbol => switch (currency) {
+    'Dollar' => '\$',
+    'Euro' => 'EUR ',
+    'Pound' => 'GBP ',
+    'Taka' => 'Tk ',
+    final other => '$other ',
+  };
+
+  /// Receipt language from the website's Receipt settings ("english", ...).
+  static String get receiptLanguage {
+    _version.value;
+    return _cached()?['receiptLanguage']?.toString().trim().toLowerCase() ??
+        'english';
   }
 
   static Map<String, dynamic>? _cached() =>
@@ -81,7 +115,9 @@ class BusinessProfileService {
     final merged = <String, dynamic>{};
     final profileResponse = responses[0];
     if (profileResponse.isSuccess && profileResponse.responseData is Map) {
-      merged.addAll(Map<String, dynamic>.from(profileResponse.responseData as Map));
+      merged.addAll(
+        Map<String, dynamic>.from(profileResponse.responseData as Map),
+      );
     }
     final receiptResponse = responses[1];
     if (receiptResponse.isSuccess && receiptResponse.responseData is Map) {
@@ -91,7 +127,9 @@ class BusinessProfileService {
       merged['receiptHeader'] = receipt['header'];
       merged['receiptFooter'] = receipt['footer'];
       merged['printedReceiptLogoUrl'] = receipt['printedReceiptLogoUrl'];
-      merged['printedReceiptLogoRemoved'] = receipt['printedReceiptLogoRemoved'];
+      merged['printedReceiptLogoRemoved'] =
+          receipt['printedReceiptLogoRemoved'];
+      merged['receiptLanguage'] = receipt['language'];
     }
     if (merged.isEmpty) return;
 

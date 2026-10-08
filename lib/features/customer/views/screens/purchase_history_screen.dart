@@ -132,7 +132,7 @@ class _PurchaseHistoryTile extends StatelessWidget {
             ),
           ),
           Text(
-            '${isRefunded ? '-' : ''}\$${AppHelperFunctions.getFormattedMoney(entry.totalAmount)}',
+            '${isRefunded ? '-' : ''}${AppHelperFunctions.formatCurrency(entry.totalAmount)}',
             style: getTextStyle(
               fontSize: 16.4,
               fontWeight: FontWeight.w500,

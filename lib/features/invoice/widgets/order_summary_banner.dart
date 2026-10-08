@@ -60,7 +60,7 @@ class OrderSummaryBanner extends StatelessWidget {
             ),
           ),
           Text(
-            '\$ ${AppHelperFunctions.getFormattedMoney(price)}',
+            AppHelperFunctions.formatCurrency(price),
             style: getTextStyle(
               fontSize: 21.9,
               fontWeight: FontWeight.w500,

@@ -83,7 +83,7 @@ class ProductGridCard extends StatelessWidget {
               SizedBox(height: 4.h),
             ],
             Text(
-              '\$${AppHelperFunctions.getFormattedMoney(product.price)}',
+              AppHelperFunctions.formatCurrency(product.price),
               style: getTextStyle(
                 fontSize: 14.6,
                 fontWeight: FontWeight.w500,

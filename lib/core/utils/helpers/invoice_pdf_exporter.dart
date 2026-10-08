@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../features/checkout/models/cart_item.dart';
+import '../../services/business_profile_service.dart';
 import 'app_helper.dart';
 
 class InvoicePdfExporter {
@@ -110,24 +111,24 @@ class InvoicePdfExporter {
       '',
       'Items',
       for (final item in items) ...[
-        '${item.name}  x${item.quantity}    \$${AppHelperFunctions.getFormattedMoney(item.price * item.quantity)}',
-        '  @ \$${AppHelperFunctions.getFormattedMoney(item.price)}',
+        '${item.name}  x${item.quantity}    ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(item.price * item.quantity)}',
+        '  @ ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(item.price)}',
       ],
       '',
-      'Subtotal: \$${AppHelperFunctions.getFormattedMoney(subtotal)}',
+      'Subtotal: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(subtotal)}',
       if (discount > 0)
-        'Discount: -\$${AppHelperFunctions.getFormattedMoney(discount)}',
-      'Tax: \$${AppHelperFunctions.getFormattedMoney(tax)}',
-      'Total: \$${AppHelperFunctions.getFormattedMoney(totalAmount)}',
+        'Discount: -${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(discount)}',
+      'Tax: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(tax)}',
+      'Total: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(totalAmount)}',
       // A due/credit sale hasn't actually received anything yet - showing
       // "Amount Received"/"Change" on it would make it look already paid.
       if (isDue) ...[
         if (amountReceived > 0)
-          'Paid so far: \$${AppHelperFunctions.getFormattedMoney(amountReceived)}',
-        'Amount Due: \$${AppHelperFunctions.getFormattedMoney(amountDue)}',
+          'Paid so far: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(amountReceived)}',
+        'Amount Due: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(amountDue)}',
       ] else ...[
-        'Amount Received: \$${AppHelperFunctions.getFormattedMoney(amountReceived)}',
-        'Change to Return: \$${AppHelperFunctions.getFormattedMoney(changeToReturn)}',
+        'Amount Received: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(amountReceived)}',
+        'Change to Return: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(changeToReturn)}',
       ],
     ];
 
