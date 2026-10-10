@@ -313,7 +313,7 @@ class _ItemRow extends StatelessWidget {
         ),
         SizedBox(width: 8.w),
         Text(
-          '\$${AppHelperFunctions.getFormattedMoney(amount)}',
+          AppHelperFunctions.formatCurrency(amount),
           style: getTextStyle(
             fontSize: 13.2,
             fontWeight: FontWeight.w500,
@@ -352,7 +352,7 @@ class _AmountRow extends StatelessWidget {
             ),
           ),
           Text(
-            '\$${AppHelperFunctions.getFormattedMoney(value)}',
+            AppHelperFunctions.formatCurrency(value),
             style: getTextStyle(
               fontSize: emphasize ? 15.8 : 13.2,
               fontWeight: emphasize ? FontWeight.w600 : FontWeight.w500,

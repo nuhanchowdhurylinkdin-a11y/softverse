@@ -64,7 +64,7 @@ class OrderSummaryCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '\$ ${AppHelperFunctions.getFormattedMoney(total)}',
+                AppHelperFunctions.formatCurrency(total),
                 style: getTextStyle(
                   fontSize: 21.9,
                   fontWeight: FontWeight.w500,

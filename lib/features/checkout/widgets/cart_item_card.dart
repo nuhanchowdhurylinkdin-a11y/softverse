@@ -63,7 +63,7 @@ class CartItemCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '\$${AppHelperFunctions.getFormattedMoney(item.lineSubtotal)}',
+                AppHelperFunctions.formatCurrency(item.lineSubtotal),
                 style: getTextStyle(
                   fontSize: 14.6,
                   color: AppColors.onboardingBackground,
@@ -117,7 +117,7 @@ class _InfoRow extends StatelessWidget {
           ),
         ),
         Text(
-          '\$${AppHelperFunctions.getFormattedMoney(value)}',
+          AppHelperFunctions.formatCurrency(value),
           style: getTextStyle(
             fontSize: emphasize ? 16.4 : 14.6,
             fontWeight: emphasize ? FontWeight.w500 : FontWeight.w400,

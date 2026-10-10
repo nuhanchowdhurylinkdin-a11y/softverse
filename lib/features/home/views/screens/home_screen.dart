@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
+import '../../../../core/common/widgets/till_identity_title.dart';
+
 import '../../../../core/common/styles/global_text_style.dart';
 import '../../../../core/common/widgets/app_nav_drawer.dart';
 import '../../../../core/common/widgets/floating_icon_button.dart';
@@ -44,14 +46,7 @@ class HomeScreen extends GetView<HomeController> {
             ),
           ),
         ),
-        title: Text(
-          'POS-1',
-          style: getTextStyle(
-            fontSize: 21.9,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-          ),
-        ),
+        title: const TillIdentityTitle(),
         actions: [
           Obx(
             () => FeatureSettings.isEnabled('open_order')

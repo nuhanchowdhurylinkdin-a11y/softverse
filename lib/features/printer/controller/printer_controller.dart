@@ -6,10 +6,14 @@ import 'package:image/image.dart' as img;
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 
 import '../../../core/services/business_profile_service.dart';
+import '../../../core/utils/helpers/receipt_labels.dart';
+import '../../../core/services/network_caller.dart';
 import '../../../core/services/offline_database_service.dart';
+import '../../../core/utils/constants/api_constants.dart';
 import '../../../core/utils/helpers/app_helper.dart';
 import '../../../routes/app_routes.dart';
 import '../../checkout/models/cart_item.dart';
+import '../models/kitchen_group.dart';
 import '../models/printer_model.dart';
 
 class VirtualPrintDocument {
@@ -24,6 +28,7 @@ typedef VirtualPrintPresenter =
 
 class PrinterController extends GetxController {
   static const _cacheKey = 'saved_printers';
+  static const _kitchenGroupsCacheKey = 'kitchen_printer_groups';
   static const _bleChannel = MethodChannel('softverse/ble_printer');
 
   final VirtualPrintPresenter? _virtualPrintPresenter;
@@ -33,11 +38,54 @@ class PrinterController extends GetxController {
 
   final printers = <PrinterModel>[].obs;
 
+  /// Printer groups set up on the website (Settings → Kitchen printers).
+  final kitchenGroups = <KitchenGroup>[].obs;
+
   @override
   void onInit() {
     super.onInit();
     _loadPrinters();
+    _loadKitchenGroups();
+    fetchKitchenGroups();
   }
+
+  void _loadKitchenGroups() {
+    final cached = OfflineDatabaseService.readCache<List<dynamic>>(
+      _kitchenGroupsCacheKey,
+    );
+    if (cached == null) return;
+    kitchenGroups.assignAll(
+      cached.whereType<Map>().map(
+        (json) => KitchenGroup.fromJson(Map<String, dynamic>.from(json)),
+      ),
+    );
+  }
+
+  Future<void> fetchKitchenGroups() async {
+    final response = await NetworkCaller().getRequest(
+      ApiConstants.kitchenPrinterGroups,
+    );
+    final data = response.responseData;
+    if (!response.isSuccess || data is! Map || data['groups'] is! List) return;
+    final groups = (data['groups'] as List)
+        .whereType<Map>()
+        .map((json) => Map<String, dynamic>.from(json))
+        .where((json) => json['isActive'] != false)
+        .map(KitchenGroup.fromJson)
+        .toList();
+    kitchenGroups.assignAll(groups);
+    await OfflineDatabaseService.saveCache(
+      _kitchenGroupsCacheKey,
+      groups.map((group) => group.toJson()).toList(),
+    );
+  }
+
+  void setKitchenGroup(String id, String groupId) =>
+      _update(id, (p) => p.copyWith(kitchenGroupId: groupId));
+
+  String kitchenGroupName(String groupId) =>
+      kitchenGroups.firstWhereOrNull((group) => group.id == groupId)?.name ??
+      'All items';
 
   int _indexOf(String id) => printers.indexWhere((p) => p.id == id);
 
@@ -144,11 +192,7 @@ class PrinterController extends GetxController {
   /// like the button did nothing. Explain why and send the user straight
   /// to where they can fix it instead of leaving them to guess.
   void _warnNoPrinterConfigured() {
-    AppHelperFunctions.showSnackBarWithTitle(
-      'No receipt printer set up',
-      'Add a printer and mark it as your default receipt printer to enable printing.',
-      type: AppSnackBarType.warning,
-    );
+    AppHelperFunctions.showWarningSnackBar('Set up a receipt printer first');
     Get.toNamed(AppRoute.getPrinterListScreen());
   }
 
@@ -240,7 +284,7 @@ class PrinterController extends GetxController {
     final isDark = printer.printDensity == 'Dark';
 
     final bytes = <int>[
-      ...await _businessHeaderBytes(generator),
+      ...await _businessHeaderBytes(generator, paperSize),
       ...generator.text(
         printer.printerModel,
         styles: const PosStyles(align: PosAlign.center),
@@ -263,7 +307,7 @@ class PrinterController extends GetxController {
 
     final sent = await _writePrinterBytesWithReconnect(printer, bytes);
     if (sent) {
-      AppHelperFunctions.showSuccessSnackBar('Test page sent to printer.');
+      AppHelperFunctions.showSuccessSnackBar('Test page printed');
     } else {
       AppHelperFunctions.showErrorSnackBar('Failed to send test page.');
     }
@@ -277,10 +321,12 @@ class PrinterController extends GetxController {
     required DateTime dateTime,
     required List<CartItem> items,
     required double subtotal,
+    double discount = 0,
     required double tax,
     required double totalAmount,
     required double amountReceived,
     required double changeToReturn,
+    double amountDue = 0,
     required String paymentLabel,
   }) async {
     final printer = receiptPrinter;
@@ -300,10 +346,12 @@ class PrinterController extends GetxController {
             dateTime: dateTime,
             items: items,
             subtotal: subtotal,
+            discount: discount,
             tax: tax,
             totalAmount: totalAmount,
             amountReceived: amountReceived,
             changeToReturn: changeToReturn,
+            amountDue: amountDue,
             paymentLabel: paymentLabel,
           ),
         ),
@@ -325,22 +373,25 @@ class PrinterController extends GetxController {
     final isDark = printer.printDensity == 'Dark';
 
     final bytes = <int>[
-      ...await _businessHeaderBytes(generator),
+      ...await _businessHeaderBytes(generator, paperSize),
       ...generator.text(
-        'Receipt',
+        ReceiptLabels.t('Receipt'),
         styles: const PosStyles(align: PosAlign.center),
       ),
-      ...generator.text('Order: $invoiceNumber'),
+      ...generator.text('${ReceiptLabels.t('Order')}: $invoiceNumber'),
       ...generator.text(
         AppHelperFunctions.getFormattedDate(
           dateTime,
           format: 'dd MMM yyyy, hh:mm a',
         ),
       ),
-      ...generator.text('Customer: $customerName'),
-      ...generator.text('Payment: $paymentLabel'),
+      ...generator.text('${ReceiptLabels.t('Customer')}: $customerName'),
+      ...generator.text('${ReceiptLabels.t('Payment')}: $paymentLabel'),
       ...generator.hr(),
-      ...generator.text('Items', styles: PosStyles(bold: isDark)),
+      ...generator.text(
+        ReceiptLabels.t('Items'),
+        styles: PosStyles(bold: isDark),
+      ),
       for (final item in items) ...[
         ...generator.text('${item.name}  x${item.quantity}'),
         ...generator.text(
@@ -353,22 +404,34 @@ class PrinterController extends GetxController {
         ),
       ],
       ...generator.hr(),
-      ...generator.text('Subtotal: ${_money(subtotal)}'),
-      ...generator.text('Tax: ${_money(tax)}'),
+      ...generator.text('${ReceiptLabels.t('Subtotal')}: ${_money(subtotal)}'),
+      if (discount > 0)
+        ...generator.text(
+          '${ReceiptLabels.t('Discount')}: -${_money(discount)}',
+        ),
+      ...generator.text('${ReceiptLabels.t('Tax')}: ${_money(tax)}'),
       ...generator.text(
-        'Total: ${_money(totalAmount)}',
+        '${ReceiptLabels.t('Total')}: ${_money(totalAmount)}',
         styles: PosStyles(bold: isDark),
       ),
       // A due/credit sale hasn't actually received anything yet - showing
       // "Received"/"Change" on it would make it look already paid in full.
       if (paymentLabel == 'Due Payment') ...[
+        if (amountReceived > 0)
+          ...generator.text(
+            '${ReceiptLabels.t('Paid so far')}: ${_money(amountReceived)}',
+          ),
         ...generator.text(
-          'Amount due: ${_money(totalAmount)}',
+          '${ReceiptLabels.t('Amount due')}: ${_money(amountDue)}',
           styles: PosStyles(bold: isDark),
         ),
       ] else ...[
-        ...generator.text('Received: ${_money(amountReceived)}'),
-        ...generator.text('Change: ${_money(changeToReturn)}'),
+        ...generator.text(
+          '${ReceiptLabels.t('Received')}: ${_money(amountReceived)}',
+        ),
+        ...generator.text(
+          '${ReceiptLabels.t('Change')}: ${_money(changeToReturn)}',
+        ),
       ],
       ..._businessFooterBytes(generator),
       ...generator.feed(2),
@@ -377,11 +440,177 @@ class PrinterController extends GetxController {
 
     final sent = await _writePrinterBytesWithReconnect(printer, bytes);
     if (sent) {
-      AppHelperFunctions.showSuccessSnackBar('Receipt sent to printer.');
+      AppHelperFunctions.showSuccessSnackBar('Printed');
     } else {
       AppHelperFunctions.showErrorSnackBar('Failed to print receipt.');
     }
     return sent;
+  }
+
+  /// Proof of a due-payment collection: what was owed, what was just paid,
+  /// and what's left - not the original sale's receipt.
+  Future<bool> printPaymentReceipt({
+    required String orderNumber,
+    required String customerName,
+    required DateTime dateTime,
+    required double previousDue,
+    required double amountPaid,
+    required double remainingDue,
+  }) async {
+    final printer = receiptPrinter;
+    if (printer == null || printer.isVirtual) return false;
+
+    final connected = await connectToPrinter(printer);
+    if (!connected) {
+      AppHelperFunctions.showErrorSnackBar('Could not connect to printer.');
+      return false;
+    }
+
+    final profile = await CapabilityProfile.load();
+    final paperSize = printer.paperSize == '58mm'
+        ? PaperSize.mm58
+        : PaperSize.mm80;
+    final generator = Generator(paperSize, profile);
+    final isDark = printer.printDensity == 'Dark';
+
+    final bytes = <int>[
+      ...await _businessHeaderBytes(generator, paperSize),
+      ...generator.text(
+        ReceiptLabels.t('PAYMENT RECEIPT'),
+        styles: const PosStyles(align: PosAlign.center, bold: true),
+      ),
+      ...generator.text('${ReceiptLabels.t('Order')}: $orderNumber'),
+      ...generator.text(
+        AppHelperFunctions.getFormattedDate(
+          dateTime,
+          format: 'dd MMM yyyy, hh:mm a',
+        ),
+      ),
+      ...generator.text('${ReceiptLabels.t('Customer')}: $customerName'),
+      ...generator.hr(),
+      ...generator.text(
+        '${ReceiptLabels.t('Previous due')}: ${_money(previousDue)}',
+      ),
+      ...generator.text(
+        '${ReceiptLabels.t('Paid now')}: ${_money(amountPaid)}',
+        styles: PosStyles(bold: isDark),
+      ),
+      ...generator.hr(),
+      if (remainingDue > 0)
+        ...generator.text(
+          '${ReceiptLabels.t('Remaining due')}: ${_money(remainingDue)}',
+          styles: const PosStyles(bold: true),
+        )
+      else
+        ...generator.text(
+          'PAID IN FULL',
+          styles: const PosStyles(align: PosAlign.center, bold: true),
+        ),
+      ..._businessFooterBytes(generator),
+      ...generator.feed(2),
+      if (printer.autoCut) ...generator.cut(),
+    ];
+
+    final sent = await _writePrinterBytesWithReconnect(printer, bytes);
+    if (sent) AppHelperFunctions.showSuccessSnackBar('Printed');
+    return sent;
+  }
+
+  /// Prints a kitchen ticket on every printer with "Print orders" on. A
+  /// printer tied to a website printer group only gets the items from that
+  /// group's categories, so the bar never receives the grill's tickets.
+  /// [categoryOf] maps an item id to its category id.
+  Future<void> printKitchenTickets({
+    required String orderLabel,
+    required String tableName,
+    required String customerName,
+    required List<CartItem> items,
+    required String? Function(String? itemId) categoryOf,
+  }) async {
+    final kitchenPrinters = printers.where((p) => p.printOrders).toList();
+    for (final printer in kitchenPrinters) {
+      final group = kitchenGroups.firstWhereOrNull(
+        (g) => g.id == printer.kitchenGroupId,
+      );
+      final ticketItems = group == null
+          ? items
+          : items
+                .where(
+                  (item) => group.categoryIds.contains(categoryOf(item.itemId)),
+                )
+                .toList();
+      if (ticketItems.isEmpty) continue;
+
+      final time = AppHelperFunctions.getFormattedDate(
+        DateTime.now(),
+        format: 'dd MMM yyyy, hh:mm a',
+      );
+      if (printer.isVirtual) {
+        final preview = StringBuffer()
+          ..writeln('KITCHEN ORDER${group == null ? '' : ' - ${group.name}'}')
+          ..writeln('${ReceiptLabels.t('Order')}: $orderLabel')
+          ..writeln('Table: $tableName')
+          ..writeln('${ReceiptLabels.t('Customer')}: $customerName')
+          ..writeln(time)
+          ..writeln('--------------------------------');
+        for (final item in ticketItems) {
+          preview.writeln('${item.quantity} x ${item.name}');
+        }
+        await _showVirtualPrint(
+          VirtualPrintDocument(
+            title: 'Kitchen ticket $orderLabel',
+            content: preview.toString().trim(),
+          ),
+        );
+        continue;
+      }
+
+      if (!await connectToPrinter(printer)) {
+        AppHelperFunctions.showWarningSnackBar(
+          'Kitchen printer "${printer.name}" not reachable',
+        );
+        continue;
+      }
+      final profile = await CapabilityProfile.load();
+      final generator = Generator(
+        printer.paperSize == '58mm' ? PaperSize.mm58 : PaperSize.mm80,
+        profile,
+      );
+      final bytes = <int>[
+        ...generator.text(
+          'KITCHEN ORDER',
+          styles: const PosStyles(
+            align: PosAlign.center,
+            bold: true,
+            height: PosTextSize.size2,
+            width: PosTextSize.size2,
+          ),
+        ),
+        if (group != null)
+          ...generator.text(
+            group.name,
+            styles: const PosStyles(align: PosAlign.center),
+          ),
+        ...generator.text('${ReceiptLabels.t('Order')}: $orderLabel'),
+        ...generator.text('Table: $tableName'),
+        ...generator.text('${ReceiptLabels.t('Customer')}: $customerName'),
+        ...generator.text(time),
+        ...generator.hr(),
+        for (final item in ticketItems)
+          ...generator.text(
+            '${item.quantity} x ${item.name}',
+            styles: const PosStyles(bold: true, height: PosTextSize.size2),
+          ),
+        ...generator.feed(2),
+        if (printer.autoCut) ...generator.cut(),
+      ];
+      final sent = await _writePrinterBytesWithReconnect(printer, bytes);
+      if (!sent) {
+        AppHelperFunctions.showWarningSnackBar(
+          'Kitchen ticket not printed on "${printer.name}"',
+        );
+      }
+    }
   }
 
   /// Prints a pre-payment estimate for an in-progress order — same layout as
@@ -414,15 +643,18 @@ class PrinterController extends GetxController {
     final isDark = printer.printDensity == 'Dark';
 
     final bytes = <int>[
-      ...await _businessHeaderBytes(generator),
+      ...await _businessHeaderBytes(generator, paperSize),
       ...generator.text(
         'ESTIMATE (not a receipt)',
         styles: const PosStyles(align: PosAlign.center),
       ),
       ...generator.text(orderId),
-      ...generator.text('Customer: $customerName'),
+      ...generator.text('${ReceiptLabels.t('Customer')}: $customerName'),
       ...generator.hr(),
-      ...generator.text('Items', styles: PosStyles(bold: isDark)),
+      ...generator.text(
+        ReceiptLabels.t('Items'),
+        styles: PosStyles(bold: isDark),
+      ),
       for (final item in items) ...[
         ...generator.text('${item.name} x${item.quantity}'),
         ...generator.text(
@@ -431,10 +663,10 @@ class PrinterController extends GetxController {
         ),
       ],
       ...generator.hr(),
-      ...generator.text('Subtotal: ${_money(subtotal)}'),
-      ...generator.text('Tax: ${_money(tax)}'),
+      ...generator.text('${ReceiptLabels.t('Subtotal')}: ${_money(subtotal)}'),
+      ...generator.text('${ReceiptLabels.t('Tax')}: ${_money(tax)}'),
       ...generator.text(
-        'Total: ${_money(totalAmount)}',
+        '${ReceiptLabels.t('Total')}: ${_money(totalAmount)}',
         styles: PosStyles(bold: isDark),
       ),
       ..._businessFooterBytes(generator),
@@ -444,7 +676,7 @@ class PrinterController extends GetxController {
 
     final sent = await _writePrinterBytesWithReconnect(printer, bytes);
     if (sent) {
-      AppHelperFunctions.showSuccessSnackBar('Estimate sent to printer.');
+      AppHelperFunctions.showSuccessSnackBar('Estimate printed');
     } else {
       AppHelperFunctions.showErrorSnackBar('Failed to print estimate.');
     }
@@ -455,7 +687,10 @@ class PrinterController extends GetxController {
   /// every real print - pulled from [BusinessProfileService] instead of a
   /// hardcoded "Softverse POS" so receipts reflect what the merchant
   /// actually entered on the Business Admin dashboard.
-  Future<List<int>> _businessHeaderBytes(Generator generator) async {
+  Future<List<int>> _businessHeaderBytes(
+    Generator generator,
+    PaperSize paperSize,
+  ) async {
     final bytes = <int>[];
     bytes.addAll(
       generator.text(
@@ -470,19 +705,27 @@ class PrinterController extends GetxController {
     );
     final logo = await BusinessProfileService.loadLogoImage();
     if (logo != null) {
-      final resized = logo.width > 300 ? img.copyResize(logo, width: 300) : logo;
-      // A logo exported with transparency often has black (or garbage)
-      // RGB underneath the transparent pixels - the printer only sees RGB
-      // and has no idea alpha exists, so it dithered every "invisible"
-      // pixel as solid black instead of leaving it white. Flattening onto
-      // a white background first makes transparent areas actually white.
-      final flattened = img.Image(
-        width: resized.width,
+      final maxLogoWidth = (paperSize.width * 0.6).round();
+      final resized = logo.width > maxLogoWidth
+          ? img.copyResize(logo, width: maxLogoWidth)
+          : logo;
+      // Two printer quirks handled at once: a transparent logo's hidden RGB
+      // dithers to a solid black box (so flatten onto white), and many
+      // cheap printers ignore the "center" alignment command for bit
+      // images and print them flush left. Placing the logo in the middle of
+      // a full paper-width white canvas centers it no matter what the
+      // printer does with alignment.
+      final canvas = img.Image(
+        width: paperSize.width,
         height: resized.height,
         numChannels: 3,
       )..clear(img.ColorRgb8(255, 255, 255));
-      img.compositeImage(flattened, resized);
-      bytes.addAll(generator.image(flattened));
+      img.compositeImage(
+        canvas,
+        resized,
+        dstX: ((paperSize.width - resized.width) / 2).round(),
+      );
+      bytes.addAll(generator.image(canvas));
     }
     // The logo sits between the business name and the header message -
     // the client specifically wants the header to print after the logo,
@@ -524,7 +767,8 @@ class PrinterController extends GetxController {
     );
   }
 
-  String _money(double value) => '\$${value.toStringAsFixed(2)}';
+  String _money(double value) =>
+      '${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(value)}';
 
   Future<bool> _bleConnectionStatus() async {
     try {
@@ -616,8 +860,10 @@ Virtual printer is ready.
   String _businessHeaderPreview() {
     final lines = [
       BusinessProfileService.name,
-      if (BusinessProfileService.header.isNotEmpty) BusinessProfileService.header,
-      if (BusinessProfileService.address.isNotEmpty) BusinessProfileService.address,
+      if (BusinessProfileService.header.isNotEmpty)
+        BusinessProfileService.header,
+      if (BusinessProfileService.address.isNotEmpty)
+        BusinessProfileService.address,
       if (BusinessProfileService.phone.isNotEmpty)
         'Tel: ${BusinessProfileService.phone}',
     ];
@@ -631,26 +877,28 @@ Virtual printer is ready.
     required DateTime dateTime,
     required List<CartItem> items,
     required double subtotal,
+    double discount = 0,
     required double tax,
     required double totalAmount,
     required double amountReceived,
     required double changeToReturn,
+    double amountDue = 0,
     required String paymentLabel,
   }) {
     final output = StringBuffer()
       ..writeln(_businessHeaderPreview())
-      ..writeln('Receipt')
-      ..writeln('Order: $invoiceNumber')
+      ..writeln(ReceiptLabels.t('Receipt'))
+      ..writeln('${ReceiptLabels.t('Order')}: $invoiceNumber')
       ..writeln(
         AppHelperFunctions.getFormattedDate(
           dateTime,
           format: 'dd MMM yyyy, hh:mm a',
         ),
       )
-      ..writeln('Customer: $customerName')
-      ..writeln('Payment: $paymentLabel')
+      ..writeln('${ReceiptLabels.t('Customer')}: $customerName')
+      ..writeln('${ReceiptLabels.t('Payment')}: $paymentLabel')
       ..writeln('--------------------------------')
-      ..writeln('Items');
+      ..writeln(ReceiptLabels.t('Items'));
     for (final item in items) {
       output
         ..writeln('${item.name}  x${item.quantity}')
@@ -659,15 +907,24 @@ Virtual printer is ready.
     }
     output
       ..writeln('--------------------------------')
-      ..writeln('Subtotal: ${_money(subtotal)}')
-      ..writeln('Tax: ${_money(tax)}')
-      ..writeln('Total: ${_money(totalAmount)}');
+      ..writeln('${ReceiptLabels.t('Subtotal')}: ${_money(subtotal)}');
+    if (discount > 0) {
+      output.writeln('${ReceiptLabels.t('Discount')}: -${_money(discount)}');
+    }
+    output
+      ..writeln('${ReceiptLabels.t('Tax')}: ${_money(tax)}')
+      ..writeln('${ReceiptLabels.t('Total')}: ${_money(totalAmount)}');
     if (paymentLabel == 'Due Payment') {
-      output.writeln('Amount due: ${_money(totalAmount)}');
+      if (amountReceived > 0) {
+        output.writeln(
+          '${ReceiptLabels.t('Paid so far')}: ${_money(amountReceived)}',
+        );
+      }
+      output.writeln('${ReceiptLabels.t('Amount due')}: ${_money(amountDue)}');
     } else {
       output
-        ..writeln('Received: ${_money(amountReceived)}')
-        ..writeln('Change: ${_money(changeToReturn)}');
+        ..writeln('${ReceiptLabels.t('Received')}: ${_money(amountReceived)}')
+        ..writeln('${ReceiptLabels.t('Change')}: ${_money(changeToReturn)}');
     }
     if (BusinessProfileService.footer.isNotEmpty) {
       output.writeln(BusinessProfileService.footer);

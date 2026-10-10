@@ -6,6 +6,7 @@ import 'package:softverse/core/services/offline_database_service.dart';
 import 'package:softverse/core/services/storage_service.dart';
 import 'package:softverse/features/checkout/models/cart_item.dart';
 import 'package:softverse/features/printer/controller/printer_controller.dart';
+import 'package:softverse/features/printer/models/kitchen_group.dart';
 import 'package:softverse/features/printer/models/printer_model.dart';
 
 void main() {
@@ -151,8 +152,9 @@ void main() {
       subtotal: 200,
       tax: 0,
       totalAmount: 200,
-      amountReceived: 200,
+      amountReceived: 0,
       changeToReturn: 0,
+      amountDue: 200,
       paymentLabel: 'Due Payment',
     );
 
@@ -194,6 +196,50 @@ void main() {
     // The client wants the header message printed after the business
     // name/logo, not before it.
     final content = documents.single.content;
-    expect(content.indexOf('Louis Cafe'), lessThan(content.indexOf('Welcome!')));
+    expect(
+      content.indexOf('Louis Cafe'),
+      lessThan(content.indexOf('Welcome!')),
+    );
+  });
+
+  test('kitchen ticket only carries the printer group categories', () async {
+    final documents = <VirtualPrintDocument>[];
+    final controller =
+        PrinterController(
+            virtualPrintPresenter: (document) async => documents.add(document),
+          )
+          ..kitchenGroups.add(
+            const KitchenGroup(id: 'bar', name: 'Bar', categoryIds: ['drinks']),
+          )
+          ..printers.add(
+            virtualPrinter.copyWith(printOrders: true, kitchenGroupId: 'bar'),
+          );
+
+    await controller.printKitchenTickets(
+      orderLabel: 'INV-2001',
+      tableName: 'T1',
+      customerName: 'Walk-in Customer',
+      items: const [
+        CartItem(
+          itemId: 'cola',
+          name: 'Cola',
+          price: 2,
+          imageUrl: '',
+          quantity: 2,
+        ),
+        CartItem(
+          itemId: 'burger',
+          name: 'Burger',
+          price: 8,
+          imageUrl: '',
+          quantity: 1,
+        ),
+      ],
+      categoryOf: (itemId) => itemId == 'cola' ? 'drinks' : 'food',
+    );
+
+    expect(documents, hasLength(1));
+    expect(documents.single.content, contains('2 x Cola'));
+    expect(documents.single.content, isNot(contains('Burger')));
   });
 }

@@ -295,7 +295,7 @@ class _CustomerDetails extends GetView<CustomerController> {
           CustomerDetailRow(
             icon: Iconsax.dollar_circle,
             text:
-                'Credit Limit: \$${AppHelperFunctions.getFormattedMoney(customer.creditLimit)}',
+                'Credit Limit: ${AppHelperFunctions.formatCurrency(customer.creditLimit)}',
           ),
           SizedBox(height: 16.h),
           Text(
@@ -328,7 +328,7 @@ class _CustomerDetails extends GetView<CustomerController> {
           CustomerDetailRow(
             icon: Iconsax.wallet,
             text:
-                'Total Spent: \$${AppHelperFunctions.getFormattedMoney(customer.totalSpent)}',
+                'Total Spent: ${AppHelperFunctions.formatCurrency(customer.totalSpent)}',
           ),
           SizedBox(height: 16.h),
           CustomerDetailRow(

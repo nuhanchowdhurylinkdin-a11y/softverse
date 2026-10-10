@@ -51,7 +51,7 @@ class LoginScreen extends GetView<AuthController> {
                 ),
                 SizedBox(height: 11.h),
                 AppTextField(
-                  label: 'Password',
+                  label: 'Password or PIN',
                   controller: controller.passwordController,
                   obscureText: true,
                   backgroundColor: AppColors.fieldBackground,

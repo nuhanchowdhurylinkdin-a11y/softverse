@@ -104,7 +104,7 @@ class InventoryProductRow extends StatelessWidget {
                   ),
                 if (product.trackStock) SizedBox(height: 8.h),
                 Text(
-                  '\$${AppHelperFunctions.getFormattedMoney(product.price)}',
+                  AppHelperFunctions.formatCurrency(product.price),
                   style: getTextStyle(
                     fontSize: 16.4,
                     fontWeight: FontWeight.w500,

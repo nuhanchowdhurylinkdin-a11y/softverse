@@ -20,6 +20,10 @@ class PrinterModel {
   final String printDensity;
   final bool autoCut;
 
+  /// Website printer group (Settings → Kitchen printers) whose categories
+  /// this printer's kitchen tickets are limited to; empty = every item.
+  final String kitchenGroupId;
+
   bool get isVirtual => connectionType == virtualConnection;
   bool get isBle => connectionType == bleConnection;
 
@@ -39,6 +43,7 @@ class PrinterModel {
     required this.paperSize,
     required this.printDensity,
     required this.autoCut,
+    this.kitchenGroupId = '',
   });
 
   factory PrinterModel.fromJson(Map<String, dynamic> json) {
@@ -58,6 +63,7 @@ class PrinterModel {
       paperSize: json['paperSize']?.toString() ?? '80mm',
       printDensity: json['printDensity']?.toString() ?? 'Medium',
       autoCut: json['autoCut'] == true,
+      kitchenGroupId: json['kitchenGroupId']?.toString() ?? '',
     );
   }
 
@@ -78,6 +84,7 @@ class PrinterModel {
       'paperSize': paperSize,
       'printDensity': printDensity,
       'autoCut': autoCut,
+      'kitchenGroupId': kitchenGroupId,
     };
   }
 
@@ -97,6 +104,7 @@ class PrinterModel {
     String? paperSize,
     String? printDensity,
     bool? autoCut,
+    String? kitchenGroupId,
   }) {
     return PrinterModel(
       id: id ?? this.id,
@@ -114,6 +122,7 @@ class PrinterModel {
       paperSize: paperSize ?? this.paperSize,
       printDensity: printDensity ?? this.printDensity,
       autoCut: autoCut ?? this.autoCut,
+      kitchenGroupId: kitchenGroupId ?? this.kitchenGroupId,
     );
   }
 }

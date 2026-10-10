@@ -4,6 +4,7 @@ import '../../../core/services/network_caller.dart';
 import '../../../core/services/storage_service.dart';
 import '../../../core/utils/constants/api_constants.dart';
 import '../../../core/utils/helpers/app_helper.dart';
+import '../../store/controller/store_controller.dart';
 import '../models/pos_device_model.dart';
 
 /// Backs the "Switch POS" screen - lets an owner/manager pick which of the
@@ -73,6 +74,17 @@ class PosDeviceController extends GetxController {
     }
 
     await StorageService.setPosDevice(id: device.id, name: device.name);
+    // A POS device belongs to exactly one store, so pairing it decides which
+    // store this till's sales are attributed to as well.
+    if (device.storeId.isNotEmpty) {
+      await StorageService.setStore(
+        id: device.storeId,
+        name: device.storeName ?? '',
+      );
+    }
+    if (Get.isRegistered<StoreController>()) {
+      Get.find<StoreController>().refreshCurrent();
+    }
     _refreshSelection();
     AppHelperFunctions.showSuccessSnackBar(
       'This device is now set up as "${device.name}".',

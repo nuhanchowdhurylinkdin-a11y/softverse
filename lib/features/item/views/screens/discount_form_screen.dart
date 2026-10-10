@@ -38,9 +38,7 @@ class DiscountFormScreen extends GetView<DiscountFormController> {
         Obx(
           () => TextField(
             controller: controller.valueController,
-            keyboardType: const TextInputType.numberWithOptions(
-              decimal: true,
-            ),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: InputDecoration(
               labelText: controller.isPercentage.value
                   ? 'Discount percentage'

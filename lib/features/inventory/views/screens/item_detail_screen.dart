@@ -98,12 +98,12 @@ class ItemDetailScreen extends GetView<ItemDetailController> {
               LabeledRow(
                 label: 'Price',
                 value:
-                    '\$${AppHelperFunctions.getFormattedMoney(controller.product.price)}',
+                    AppHelperFunctions.formatCurrency(controller.product.price),
               ),
               LabeledRow(
                 label: 'Cost',
                 value:
-                    '\$${AppHelperFunctions.getFormattedMoney(controller.product.cost)}',
+                    AppHelperFunctions.formatCurrency(controller.product.cost),
               ),
               SizedBox(height: 10.h),
               Row(

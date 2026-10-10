@@ -30,13 +30,21 @@ class TaxModel {
   final TaxType type;
   final List<String> appliedItemIds;
 
+  /// Set on the website's "apply to all/new items" option - the backend then
+  /// charges this tax on every item, so the till has to as well.
+  final bool applyToNewItems;
+
   const TaxModel({
     required this.id,
     required this.name,
     required this.ratePercent,
     required this.type,
     this.appliedItemIds = const [],
+    this.applyToNewItems = false,
   });
+
+  bool appliesTo(String itemId) =>
+      applyToNewItems || appliedItemIds.contains(itemId);
 
   factory TaxModel.fromApi(Map<String, dynamic> json) {
     return TaxModel(
@@ -47,6 +55,7 @@ class TaxModel {
       appliedItemIds: List<dynamic>.from(
         json['itemIds'] ?? [],
       ).map((id) => id.toString()).toList(),
+      applyToNewItems: json['applyToNewItems'] == true,
     );
   }
 
@@ -73,6 +82,7 @@ class TaxModel {
       ratePercent: ratePercent ?? this.ratePercent,
       type: type ?? this.type,
       appliedItemIds: appliedItemIds ?? this.appliedItemIds,
+      applyToNewItems: applyToNewItems,
     );
   }
 }

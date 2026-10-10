@@ -16,7 +16,6 @@ class MoreController extends GetxController {
   String get profileName => StorageService.fullName ?? 'Softverse User';
   String get profileRole => _capitalize(StorageService.role);
   final posLabel = 'Switch POS'.obs;
-  final profileImageUrl = 'https://randomuser.me/api/portraits/men/32.jpg';
 
   String _capitalize(String? value) {
     if (value == null || value.isEmpty) return '';
@@ -72,9 +71,7 @@ class MoreController extends GetxController {
 
   void openBackOffice() => Get.toNamed(AppRoute.getFeatureSettingsScreen());
 
-  void openAppsIntegration() {}
-
-  void openSupport() {}
+  void openSupport() => Get.toNamed(AppRoute.getSupportScreen());
 
   Future<void> switchPos() async {
     await Get.toNamed(AppRoute.getPosDeviceScreen());

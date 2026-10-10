@@ -142,7 +142,7 @@ class _Row extends StatelessWidget {
           ),
         ),
         Text(
-          '\$${AppHelperFunctions.getFormattedMoney(value)}',
+          AppHelperFunctions.formatCurrency(value),
           style: getTextStyle(
             fontSize: emphasize ? 16.4 : 14.6,
             fontWeight: emphasize ? FontWeight.w500 : FontWeight.w400,

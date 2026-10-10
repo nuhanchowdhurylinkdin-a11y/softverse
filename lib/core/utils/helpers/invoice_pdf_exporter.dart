@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../features/checkout/models/cart_item.dart';
+import '../../services/business_profile_service.dart';
 import 'app_helper.dart';
 
 class InvoicePdfExporter {
@@ -18,10 +19,12 @@ class InvoicePdfExporter {
     required DateTime dateTime,
     required List<CartItem> items,
     required double subtotal,
+    double discount = 0,
     required double tax,
     required double totalAmount,
     required double amountReceived,
     required double changeToReturn,
+    double amountDue = 0,
     required String paymentLabel,
     String businessName = 'Softverse POS',
     String businessAddress = '',
@@ -39,10 +42,12 @@ class InvoicePdfExporter {
         dateTime: dateTime,
         items: items,
         subtotal: subtotal,
+        discount: discount,
         tax: tax,
         totalAmount: totalAmount,
         amountReceived: amountReceived,
         changeToReturn: changeToReturn,
+        amountDue: amountDue,
         paymentLabel: paymentLabel,
         businessName: businessName,
         businessAddress: businessAddress,
@@ -83,10 +88,12 @@ class InvoicePdfExporter {
     required DateTime dateTime,
     required List<CartItem> items,
     required double subtotal,
+    required double discount,
     required double tax,
     required double totalAmount,
     required double amountReceived,
     required double changeToReturn,
+    required double amountDue,
     required String paymentLabel,
     required String businessName,
     required String businessAddress,
@@ -104,20 +111,24 @@ class InvoicePdfExporter {
       '',
       'Items',
       for (final item in items) ...[
-        '${item.name}  x${item.quantity}    \$${AppHelperFunctions.getFormattedMoney(item.price * item.quantity)}',
-        '  @ \$${AppHelperFunctions.getFormattedMoney(item.price)}',
+        '${item.name}  x${item.quantity}    ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(item.price * item.quantity)}',
+        '  @ ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(item.price)}',
       ],
       '',
-      'Subtotal: \$${AppHelperFunctions.getFormattedMoney(subtotal)}',
-      'Tax: \$${AppHelperFunctions.getFormattedMoney(tax)}',
-      'Total: \$${AppHelperFunctions.getFormattedMoney(totalAmount)}',
+      'Subtotal: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(subtotal)}',
+      if (discount > 0)
+        'Discount: -${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(discount)}',
+      'Tax: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(tax)}',
+      'Total: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(totalAmount)}',
       // A due/credit sale hasn't actually received anything yet - showing
       // "Amount Received"/"Change" on it would make it look already paid.
-      if (isDue)
-        'Amount Due: \$${AppHelperFunctions.getFormattedMoney(totalAmount)}'
-      else ...[
-        'Amount Received: \$${AppHelperFunctions.getFormattedMoney(amountReceived)}',
-        'Change to Return: \$${AppHelperFunctions.getFormattedMoney(changeToReturn)}',
+      if (isDue) ...[
+        if (amountReceived > 0)
+          'Paid so far: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(amountReceived)}',
+        'Amount Due: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(amountDue)}',
+      ] else ...[
+        'Amount Received: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(amountReceived)}',
+        'Change to Return: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(changeToReturn)}',
       ],
     ];
 

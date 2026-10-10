@@ -5,10 +5,7 @@ import '../../../core/utils/constants/api_constants.dart';
 abstract interface class DiscountRepository {
   Future<ResponseData> fetchDiscountRules();
   Future<ResponseData> createDiscountRule(Map<String, dynamic> body);
-  Future<ResponseData> updateDiscountRule(
-    String id,
-    Map<String, dynamic> body,
-  );
+  Future<ResponseData> updateDiscountRule(String id, Map<String, dynamic> body);
   Future<ResponseData> deleteDiscountRule(String id);
 }
 
@@ -20,7 +17,7 @@ class HttpDiscountRepository implements DiscountRepository {
 
   @override
   Future<ResponseData> fetchDiscountRules() =>
-      _networkCaller.getRequest(ApiConstants.discountRules);
+      _networkCaller.getRequest('${ApiConstants.discountRules}?limit=100');
 
   @override
   Future<ResponseData> createDiscountRule(Map<String, dynamic> body) =>

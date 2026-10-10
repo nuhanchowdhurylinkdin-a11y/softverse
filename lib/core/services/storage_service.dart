@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -19,7 +20,14 @@ class StorageService {
   // the device itself, not of whoever happens to be logged in right now, so
   // (like theme/language) this deliberately survives logoutUser().
   static const String _posDeviceIdKey = 'posDeviceId';
+  static const String _terminalIdKey = 'terminalId';
   static const String _posDeviceNameKey = 'posDeviceName';
+  // The store sales on this till are attributed to - also device-level, and
+  // remembered per business so logging into another business never reuses
+  // a store that doesn't belong to it.
+  static const String _storeIdKey = 'storeId';
+  static const String _storeNameKey = 'storeName';
+  static const String _storeBusinessIdKey = 'storeBusinessId';
 
   static SharedPreferences? _preferences;
 
@@ -136,6 +144,20 @@ class StorageService {
   }
 
   static String? get posDeviceId => _preferences?.getString(_posDeviceIdKey);
+
+  /// Random id of this physical till, kept across logins - identifies the
+  /// terminal in the super manager's connection analytics.
+  static String get terminalId {
+    final existing = _preferences?.getString(_terminalIdKey);
+    if (existing != null && existing.isNotEmpty) return existing;
+    final random = Random.secure();
+    final id = List.generate(
+      16,
+      (_) => random.nextInt(256).toRadixString(16).padLeft(2, '0'),
+    ).join();
+    _preferences?.setString(_terminalIdKey, id);
+    return id;
+  }
   static String? get posDeviceName =>
       _preferences?.getString(_posDeviceNameKey);
 
@@ -150,5 +172,35 @@ class StorageService {
   static Future<void> clearPosDevice() async {
     await _preferences?.remove(_posDeviceIdKey);
     await _preferences?.remove(_posDeviceNameKey);
+  }
+
+  static bool get _storeMatchesBusiness {
+    final current = businessId;
+    return current != null &&
+        current.isNotEmpty &&
+        _preferences?.getString(_storeBusinessIdKey) == current;
+  }
+
+  static String? get storeId =>
+      _storeMatchesBusiness ? _preferences?.getString(_storeIdKey) : null;
+  static String? get storeName =>
+      _storeMatchesBusiness ? _preferences?.getString(_storeNameKey) : null;
+
+  static Future<void> setStore({
+    required String id,
+    required String name,
+  }) async {
+    await _preferences?.setString(_storeIdKey, id);
+    await _preferences?.setString(_storeNameKey, name);
+    final current = businessId;
+    if (current != null) {
+      await _preferences?.setString(_storeBusinessIdKey, current);
+    }
+  }
+
+  static Future<void> clearStore() async {
+    await _preferences?.remove(_storeIdKey);
+    await _preferences?.remove(_storeNameKey);
+    await _preferences?.remove(_storeBusinessIdKey);
   }
 }

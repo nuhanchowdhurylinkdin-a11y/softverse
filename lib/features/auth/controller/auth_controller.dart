@@ -9,6 +9,7 @@ import '../../../core/services/storage_service.dart';
 import '../../../core/utils/constants/api_constants.dart';
 import '../../../core/utils/helpers/app_helper.dart';
 import '../../../routes/app_routes.dart';
+import '../../store/controller/store_controller.dart';
 
 enum OtpFlow { signup, resetPassword }
 
@@ -62,14 +63,17 @@ class AuthController extends GetxController {
     final email = emailController.text.trim();
     final password = passwordController.text;
     if (email.isEmpty || password.isEmpty) {
-      AppHelperFunctions.showErrorSnackBar('Email and password are required.');
+      AppHelperFunctions.showErrorSnackBar(
+        'Email and password or PIN are required.',
+      );
       return;
     }
 
     isLoginSubmitting.value = true;
+    // 'pos' lets employees sign in with the POS PIN set on the Employees page.
     final response = await _networkCaller.postRequest(
       ApiConstants.login,
-      body: {'email': email, 'password': password},
+      body: {'email': email, 'password': password, 'access': 'pos'},
       token: '',
     );
     isLoginSubmitting.value = false;
@@ -282,6 +286,7 @@ class AuthController extends GetxController {
       return;
     }
     Get.offAllNamed(AppRoute.getHomeScreen());
+    Get.find<StoreController>().ensureSelected();
   }
 
   void _startOtpFlow(OtpFlow flow, String email) {

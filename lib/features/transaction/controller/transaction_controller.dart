@@ -70,7 +70,7 @@ class TransactionController extends GetxController {
     _applyTransactions(data);
 
     if (showMessage) {
-      AppHelperFunctions.showSuccessSnackBar('Transactions synced.');
+      AppHelperFunctions.showSuccessSnackBar('Synced');
     }
   }
 
