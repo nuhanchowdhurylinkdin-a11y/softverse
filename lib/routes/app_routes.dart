@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../features/app_lock/views/screens/app_lock_screen.dart';
 
 import '../features/apps/views/screens/app_device_list_screen.dart';
 import '../features/apps/views/screens/apps_menu_screen.dart';
@@ -119,6 +120,8 @@ class AppRoute {
   static String homeScreenItemLayoutScreen = "/homeScreenItemLayoutScreen";
   static String addTableScreen = "/addTableScreen";
 
+  static String appLockScreen = "/appLockScreen";
+  static String getAppLockScreen() => appLockScreen;
   static String getSplashScreen() => splashScreen;
   static String getOnboardingScreen() => onboardingScreen;
   static String getLoginScreen() => loginScreen;
@@ -170,6 +173,7 @@ class AppRoute {
   static String getAddTableScreen() => addTableScreen;
 
   static List<GetPage> routes = [
+    GetPage(name: appLockScreen, page: () => const AppLockScreen()),
     GetPage(name: splashScreen, page: () => const SplashScreen()),
     GetPage(name: onboardingScreen, page: () => const OnboardingScreen()),
     GetPage(name: loginScreen, page: () => const LoginScreen()),

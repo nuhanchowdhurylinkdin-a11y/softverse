@@ -22,8 +22,7 @@ class PurchaseHistoryEntry {
       date: DateTime.tryParse(json['date']?.toString() ?? ''),
       status: json['status']?.toString() ?? '',
       itemCount: int.tryParse(json['itemCount']?.toString() ?? '') ?? 0,
-      totalAmount:
-          double.tryParse(json['totalAmount']?.toString() ?? '') ?? 0,
+      totalAmount: double.tryParse(json['totalAmount']?.toString() ?? '') ?? 0,
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -62,9 +63,8 @@ class CheckoutController extends GetxController {
 
   final cartItems = <CartItem>[].obs;
 
-  String get orderId => activeOrderNumber.value.isEmpty
-      ? 'New order'
-      : activeOrderNumber.value;
+  String get orderId =>
+      activeOrderNumber.value.isEmpty ? 'New order' : activeOrderNumber.value;
 
   static const _defaultPaymentMethods = [
     PaymentMethod(
@@ -161,7 +161,36 @@ class CheckoutController extends GetxController {
     return double.parse(raw.clamp(0, subtotal).toStringAsFixed(2));
   }
 
-  double get totalAmount => subtotal - discountAmount + tax;
+  /// Loyalty points the customer spends on this sale (1 point = 1 unit).
+  final pointsToUse = 0.0.obs;
+
+  /// Points of the selected customer; usable only on a sale paid now, not
+  /// on paying an order that was saved/sent to a table earlier.
+  double get availablePoints {
+    if (selectedCustomerId.value.isEmpty || activeOrderId.value != null) {
+      return 0;
+    }
+    if (!Get.isRegistered<CustomerController>()) return 0;
+    return Get.find<CustomerController>().customers
+            .firstWhereOrNull((c) => c.id == selectedCustomerId.value)
+            ?.pointsBalance ??
+        0;
+  }
+
+  double get loyaltyDiscount {
+    final room = subtotal - discountAmount;
+    if (room <= 0) return 0;
+    final used = pointsToUse.value.clamp(0, availablePoints).clamp(0, room);
+    return double.parse(used.toStringAsFixed(2));
+  }
+
+  void toggleUsePoints() {
+    pointsToUse.value = pointsToUse.value > 0
+        ? 0
+        : (subtotal - discountAmount).clamp(0, availablePoints).toDouble();
+  }
+
+  double get totalAmount => subtotal - discountAmount - loyaltyDiscount + tax;
 
   double get changeToReturn => amountReceived.value - totalAmount;
 
@@ -233,7 +262,9 @@ class CheckoutController extends GetxController {
     final storeId = StorageService.storeId;
     final discounts = (raw is List ? raw : const [])
         .whereType<Map>()
-        .map((json) => DiscountRuleModel.fromJson(Map<String, dynamic>.from(json)))
+        .map(
+          (json) => DiscountRuleModel.fromJson(Map<String, dynamic>.from(json)),
+        )
         .where(
           (d) =>
               d.isActive &&
@@ -258,6 +289,7 @@ class CheckoutController extends GetxController {
   void removeDiscount() {
     appliedDiscount.value = null;
     appliedDiscountValue.value = 0;
+    pointsToUse.value = 0;
     _syncAmountReceivedWithTotal();
     _syncCds();
   }
@@ -330,6 +362,7 @@ class CheckoutController extends GetxController {
 
   void selectCustomerById(String? id) {
     selectedCustomerId.value = id ?? '';
+    pointsToUse.value = 0;
     if (selectedCustomerId.value.isEmpty) {
       customerName.value = 'Not Registered';
       _syncCds();
@@ -470,7 +503,9 @@ class CheckoutController extends GetxController {
 
   Future<void> printEstimate() async {
     if (cartItems.isEmpty) {
-      AppHelperFunctions.showWarningSnackBar('Add items before printing an estimate.');
+      AppHelperFunctions.showWarningSnackBar(
+        'Add items before printing an estimate.',
+      );
       return;
     }
     await Get.find<PrinterController>().printEstimate(
@@ -732,6 +767,11 @@ class CheckoutController extends GetxController {
           ? Map<String, dynamic>.from(response.responseData as Map)
           : <String, dynamic>{};
       await fetchOrders();
+      // Points earned/used on this sale show on the customer right away.
+      if (selectedCustomerId.value.isNotEmpty &&
+          Get.isRegistered<CustomerController>()) {
+        unawaited(Get.find<CustomerController>().fetchCustomers());
+      }
       if (Get.isRegistered<HomeController>()) {
         await Get.find<HomeController>().fetchTables();
       }
@@ -835,6 +875,8 @@ class CheckoutController extends GetxController {
       'items': _cartItemsPayload(),
       'taxAmount': _money(tax),
       'discountAmount': _money(discountAmount),
+      if (!saveOrder && !sendToTable && loyaltyDiscount > 0)
+        'loyaltyPointsRedeemed': _money(loyaltyDiscount),
       'amountReceived': _money(amountReceived.value),
       'storeId': ?StorageService.storeId,
       'posDeviceId': ?StorageService.posDeviceId,
@@ -962,7 +1004,9 @@ class CheckoutController extends GetxController {
     final rawCustomerName = order['customerName']?.toString().trim() ?? '';
     await Get.find<PrinterController>().printEstimate(
       orderId: order['orderNumber']?.toString() ?? orderId,
-      customerName: rawCustomerName.isEmpty ? 'Not Registered' : rawCustomerName,
+      customerName: rawCustomerName.isEmpty
+          ? 'Not Registered'
+          : rawCustomerName,
       items: _cartItemsFromOrderJson(order),
       subtotal: double.tryParse(order['subtotal']?.toString() ?? '') ?? 0,
       tax: double.tryParse(order['taxAmount']?.toString() ?? '') ?? 0,

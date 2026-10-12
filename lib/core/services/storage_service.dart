@@ -188,6 +188,18 @@ class StorageService {
     }
   }
 
+  /// Salted hash of this user's PIN, so the app lock still opens offline.
+  static String? get localPinHash {
+    final id = userId;
+    return id == null ? null : _preferences?.getString('pinHash_$id');
+  }
+
+  static Future<void> setLocalPinHash(String hash) async {
+    final id = userId;
+    if (id == null) return;
+    await _preferences?.setString('pinHash_$id', hash);
+  }
+
   static Future<void> clearStore() async {
     await _preferences?.remove(_storeIdKey);
     await _preferences?.remove(_storeNameKey);

@@ -205,9 +205,7 @@ class _PendingOrderTile extends GetView<CheckoutController> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete order?'),
-        content: const Text(
-          'This pending order will be permanently removed.',
-        ),
+        content: const Text('This pending order will be permanently removed.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -258,7 +256,11 @@ class _ActionIcon extends StatelessWidget {
       child: IconButton(
         onPressed: onTap,
         tooltip: tooltip,
-        icon: Icon(icon, size: 18.sp, color: color ?? AppColors.onboardingBackground),
+        icon: Icon(
+          icon,
+          size: 18.sp,
+          color: color ?? AppColors.onboardingBackground,
+        ),
         constraints: BoxConstraints.tight(Size(34.w, 34.w)),
         padding: EdgeInsets.zero,
       ),

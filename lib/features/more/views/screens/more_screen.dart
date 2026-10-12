@@ -169,6 +169,12 @@ class MoreScreen extends GetView<MoreController> {
               ),
               SizedBox(height: 56.h),
               MoreMenuTile(
+                icon: Iconsax.key,
+                label: 'PIN lock'.tr,
+                onTap: controller.openPinSettings,
+              ),
+              SizedBox(height: 12.h),
+              MoreMenuTile(
                 icon: Iconsax.headphone,
                 label: 'Supports'.tr,
                 onTap: controller.openSupport,

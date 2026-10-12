@@ -16,6 +16,9 @@ class CustomerModel {
   final String lastVisitDate;
   final double totalSpent;
 
+  /// Spendable loyalty points (1 point = 1 currency unit at checkout).
+  final double pointsBalance;
+
   const CustomerModel({
     this.id = '',
     required this.name,
@@ -33,6 +36,7 @@ class CustomerModel {
     this.visitCount = 0,
     this.lastVisitDate = '',
     this.totalSpent = 0,
+    this.pointsBalance = 0,
   });
 
   factory CustomerModel.fromJson(Map<String, dynamic> json) {
@@ -53,6 +57,7 @@ class CustomerModel {
       visitCount: int.tryParse(json['visitCount']?.toString() ?? '') ?? 0,
       lastVisitDate: json['lastVisitDate']?.toString() ?? '',
       totalSpent: _doubleFrom(json['totalSpent']),
+      pointsBalance: _doubleFrom(json['pointsBalance']),
     );
   }
 
@@ -122,6 +127,7 @@ class CustomerModel {
       visitCount: visitCount,
       lastVisitDate: lastVisitDate,
       totalSpent: totalSpent,
+      pointsBalance: pointsBalance,
     );
   }
 

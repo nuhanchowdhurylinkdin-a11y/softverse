@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 
 import '../../../core/services/feature_settings.dart';
 import '../../../core/services/storage_service.dart';
+import '../../app_lock/controller/app_lock_controller.dart';
 import '../../auth/controller/auth_controller.dart';
 import '../../customer/controller/customer_controller.dart';
 import '../../store/controller/store_controller.dart';
@@ -52,6 +53,8 @@ class MoreController extends GetxController {
       Get.toNamed(AppRoute.getGeneralSettingsScreen());
 
   void openTaxesSettings() => Get.toNamed(AppRoute.getTaxListScreen());
+
+  void openPinSettings() => Get.find<AppLockController>().openChangePin();
 
   void openSupport() => Get.toNamed(AppRoute.getSupportScreen());
 

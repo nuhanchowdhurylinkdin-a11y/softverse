@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'core/bindings/controller_binder.dart';
+import 'features/app_lock/controller/app_lock_controller.dart';
 import 'core/localization/app_translations.dart';
 import 'core/services/storage_service.dart';
 import 'core/utils/theme/theme.dart';
@@ -31,6 +32,16 @@ class MyApp extends StatelessWidget {
           initialRoute: AppRoute.getSplashScreen(),
           getPages: AppRoute.routes,
           initialBinding: ControllerBinder(),
+          // Every touch keeps the app lock's idle timer from running out.
+          builder: (context, child) => Listener(
+            behavior: HitTestBehavior.translucent,
+            onPointerDown: (_) {
+              if (Get.isRegistered<AppLockController>()) {
+                Get.find<AppLockController>().touch();
+              }
+            },
+            child: child,
+          ),
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: _initialThemeMode(),

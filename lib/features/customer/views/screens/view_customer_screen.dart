@@ -331,6 +331,27 @@ class _CustomerDetails extends GetView<CustomerController> {
                 'Total Spent: ${AppHelperFunctions.formatCurrency(customer.totalSpent)}',
           ),
           SizedBox(height: 16.h),
+          Row(
+            children: [
+              Expanded(
+                child: CustomerDetailRow(
+                  icon: Iconsax.gift,
+                  text:
+                      'Loyalty points: ${customer.pointsBalance.toStringAsFixed(2)}',
+                ),
+              ),
+              if (controller.canEditPoints)
+                IconButton(
+                  onPressed: () => _editPoints(customer),
+                  icon: Icon(
+                    Iconsax.edit_2,
+                    size: 20.sp,
+                    color: AppColors.onboardingBackground,
+                  ),
+                ),
+            ],
+          ),
+          SizedBox(height: 16.h),
           CustomerDetailRow(
             icon: Iconsax.activity,
             text: '${customer.visitCount} times Visit',
@@ -350,6 +371,33 @@ class _CustomerDetails extends GetView<CustomerController> {
                 fontWeight: FontWeight.w500,
                 color: AppColors.onboardingBackground,
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _editPoints(CustomerModel customer) {
+    controller.pointsController.text = customer.pointsBalance.toStringAsFixed(
+      2,
+    );
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Loyalty points'),
+        content: TextField(
+          controller: controller.pointsController,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: const InputDecoration(labelText: 'New balance'),
+        ),
+        actions: [
+          TextButton(onPressed: Get.back, child: const Text('Cancel')),
+          Obx(
+            () => TextButton(
+              onPressed: controller.isSavingPoints.value
+                  ? null
+                  : controller.savePoints,
+              child: const Text('Save'),
             ),
           ),
         ],
