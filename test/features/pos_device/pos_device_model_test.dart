@@ -2,30 +2,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:softverse/features/pos_device/models/pos_device_model.dart';
 
 void main() {
-  test('parses an activated device from the API response', () {
+  test('parses a POS device from the login picker endpoint', () {
     final device = PosDeviceModel.fromApi({
-      'id': 'device-a',
-      'name': 'POS 01',
-      'storeId': 'store-a',
-      'storeName': 'Downtown',
-      'status': 'activated',
-      'statusLabel': 'Activated',
+      'id': 'pos-1',
+      'name': 'Counter 1',
+      'storeId': 'store-1',
+      'inUse': true,
     });
 
-    expect(device.id, 'device-a');
-    expect(device.name, 'POS 01');
-    expect(device.storeName, 'Downtown');
-    expect(device.isActivated, isTrue);
+    expect(device.id, 'pos-1');
+    expect(device.name, 'Counter 1');
+    expect(device.storeId, 'store-1');
+    expect(device.inUse, isTrue);
   });
 
-  test('a not-yet-activated device is not marked activated', () {
-    final device = PosDeviceModel.fromApi({
-      'id': 'device-b',
-      'name': 'POS 02',
-      'storeId': 'store-a',
-      'status': 'not_activated',
-    });
+  test('a device is free unless the server says otherwise', () {
+    final device = PosDeviceModel.fromApi({'id': 'pos-2', 'name': 'Counter 2'});
 
-    expect(device.isActivated, isFalse);
+    expect(device.inUse, isFalse);
   });
 }

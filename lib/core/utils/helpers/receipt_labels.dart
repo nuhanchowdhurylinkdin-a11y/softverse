@@ -8,6 +8,8 @@ class ReceiptLabels {
 
   static const _labels = <String, Map<String, String>>{
     'spanish': {
+      'Branch': 'Sucursal',
+      'Served by': 'Atendido por',
       'Receipt': 'Recibo',
       'Order': 'Pedido',
       'Customer': 'Cliente',
@@ -30,6 +32,8 @@ class ReceiptLabels {
       'Tel': 'Tel',
     },
     'french': {
+      'Branch': 'Succursale',
+      'Served by': 'Servi par',
       'Receipt': 'Recu',
       'Order': 'Commande',
       'Customer': 'Client',
@@ -52,6 +56,8 @@ class ReceiptLabels {
       'Tel': 'Tel',
     },
     'german': {
+      'Branch': 'Filiale',
+      'Served by': 'Bedient von',
       'Receipt': 'Beleg',
       'Order': 'Bestellung',
       'Customer': 'Kunde',

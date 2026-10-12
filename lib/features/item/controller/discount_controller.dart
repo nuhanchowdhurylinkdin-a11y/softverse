@@ -138,7 +138,10 @@ class DiscountFormController extends GetxController {
 
   Map<String, dynamic>? buildPayload() {
     final name = nameController.text.trim();
-    final value = double.tryParse(valueController.text.trim());
+    // An empty value is allowed (same as the website): the discount is
+    // then given a value at checkout.
+    final raw = valueController.text.trim();
+    final value = raw.isEmpty ? 0.0 : double.tryParse(raw);
     if (name.isEmpty || value == null || value < 0) return null;
     return {
       'name': name,
@@ -160,7 +163,7 @@ class DiscountFormController extends GetxController {
     final payload = buildPayload();
     if (payload == null) {
       AppHelperFunctions.showWarningSnackBar(
-        'Enter a discount name and a valid value.',
+        'Enter a discount name (the value may be left empty).',
       );
       return;
     }

@@ -40,7 +40,10 @@ class PrinterFormField extends StatelessWidget {
           hintColor: AppColors.chipInactiveText,
           textColor: AppColors.chipInactiveText,
           fontSize: 16.4,
-          contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 16.w,
+            vertical: 16.h,
+          ),
         ),
       ],
     );

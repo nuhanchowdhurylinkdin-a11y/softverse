@@ -2,21 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/common/styles/global_text_style.dart';
-import '../../../core/common/widgets/primary_button.dart';
 import '../../../core/utils/constants/colors.dart';
 
 class MoreProfileCard extends StatelessWidget {
   final String name;
   final String role;
+  /// The POS device chosen at login - shown, not switchable from here.
   final String posLabel;
-  final VoidCallback onSwitchPos;
 
   const MoreProfileCard({
     super.key,
     required this.name,
     required this.role,
     required this.posLabel,
-    required this.onSwitchPos,
   });
 
   @override
@@ -78,18 +76,22 @@ class MoreProfileCard extends StatelessWidget {
               ],
             ),
           ),
-          PrimaryButton(
-            label: posLabel,
-            onPressed: onSwitchPos,
-            backgroundColor: Colors.white,
-            textColor: AppColors.onboardingBackground,
-            width: 120.w,
-            height: 40,
-            fontSize: 16.4,
-            fontWeight: FontWeight.w500,
-            letterSpacing: 0.16,
-            borderRadius: 999,
-          ),
+          if (posLabel.isNotEmpty)
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                posLabel,
+                style: getTextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.onboardingBackground,
+                ),
+              ),
+            ),
         ],
       ),
     );

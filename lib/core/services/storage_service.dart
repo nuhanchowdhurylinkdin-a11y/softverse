@@ -58,10 +58,6 @@ class StorageService {
 
   static bool get isOnboardingComplete =>
       _preferences?.getBool(_onboardingCompleteKey) ?? false;
-  static bool get isFeatureSettingsComplete {
-    final key = _featureSettingsKey;
-    return key == null ? false : (_preferences?.getBool(key) ?? false);
-  }
 
   static String? get _featureSettingsKey {
     final currentBusinessId = businessId?.trim();
@@ -122,12 +118,6 @@ class StorageService {
 
   static Future<void> setOnboardingComplete(bool value) async {
     await _preferences?.setBool(_onboardingCompleteKey, value);
-  }
-
-  static Future<void> setFeatureSettingsComplete(bool value) async {
-    final key = _featureSettingsKey;
-    if (key == null) return;
-    await _preferences?.setBool(key, value);
   }
 
   static String get themeMode =>

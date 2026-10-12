@@ -66,7 +66,6 @@ import '../features/tax/views/screens/edit_tax_screen.dart';
 import '../features/tax/views/screens/tax_list_screen.dart';
 import '../features/tables/controller/add_table_controller.dart';
 import '../features/tables/views/screens/add_table_screen.dart';
-import '../features/walkthrough/views/screens/feature_settings_screen.dart';
 import '../features/walkthrough/views/screens/walkthrough_screen.dart';
 
 class AppRoute {
@@ -78,7 +77,6 @@ class AppRoute {
   static String enterOtpScreen = "/enterOtpScreen";
   static String resetPasswordScreen = "/resetPasswordScreen";
   static String walkthroughScreen = "/walkthroughScreen";
-  static String featureSettingsScreen = "/featureSettingsScreen";
   static String homeScreen = "/homeScreen";
   static String invoiceScreen = "/invoiceScreen";
   static String pendingOrdersScreen = "/pendingOrdersScreen";
@@ -129,7 +127,6 @@ class AppRoute {
   static String getEnterOtpScreen() => enterOtpScreen;
   static String getResetPasswordScreen() => resetPasswordScreen;
   static String getWalkthroughScreen() => walkthroughScreen;
-  static String getFeatureSettingsScreen() => featureSettingsScreen;
   static String getHomeScreen() => homeScreen;
   static String getInvoiceScreen() => invoiceScreen;
   static String getPendingOrdersScreen() => pendingOrdersScreen;
@@ -184,10 +181,6 @@ class AppRoute {
     GetPage(name: enterOtpScreen, page: () => const EnterOtpScreen()),
     GetPage(name: resetPasswordScreen, page: () => const ResetPasswordScreen()),
     GetPage(name: walkthroughScreen, page: () => const WalkthroughScreen()),
-    GetPage(
-      name: featureSettingsScreen,
-      page: () => const FeatureSettingsScreen(),
-    ),
     GetPage(name: homeScreen, page: () => const MainNavScreen()),
     GetPage(name: invoiceScreen, page: () => const InvoiceScreen()),
     GetPage(name: pendingOrdersScreen, page: () => const PendingOrdersScreen()),

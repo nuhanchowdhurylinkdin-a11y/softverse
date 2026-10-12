@@ -837,6 +837,7 @@ class CheckoutController extends GetxController {
       'discountAmount': _money(discountAmount),
       'amountReceived': _money(amountReceived.value),
       'storeId': ?StorageService.storeId,
+      'posDeviceId': ?StorageService.posDeviceId,
       'payment': {
         'cash': selectedPaymentMethod.value == 'cash',
         'card': selectedPaymentMethod.value == 'card',
@@ -869,6 +870,7 @@ class CheckoutController extends GetxController {
     return {
       'amountReceived': _money(amountReceived.value),
       'storeId': ?StorageService.storeId,
+      'posDeviceId': ?StorageService.posDeviceId,
       'payment': {
         'cash': selectedPaymentMethod.value == 'cash',
         'card': selectedPaymentMethod.value == 'card',

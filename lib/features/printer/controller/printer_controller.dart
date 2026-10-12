@@ -9,6 +9,7 @@ import '../../../core/services/business_profile_service.dart';
 import '../../../core/utils/helpers/receipt_labels.dart';
 import '../../../core/services/network_caller.dart';
 import '../../../core/services/offline_database_service.dart';
+import '../../../core/services/storage_service.dart';
 import '../../../core/utils/constants/api_constants.dart';
 import '../../../core/utils/helpers/app_helper.dart';
 import '../../../routes/app_routes.dart';
@@ -328,18 +329,28 @@ class PrinterController extends GetxController {
     required double changeToReturn,
     double amountDue = 0,
     required String paymentLabel,
+    String? branchName,
+    String? servedBy,
+    String? posName,
   }) async {
     final printer = receiptPrinter;
     if (printer == null) {
       _warnNoPrinterConfigured();
       return false;
     }
+    // A reprint passes the order's own values; a fresh sale uses this till.
+    final saleInfo = _saleInfoLines(
+      branchName: branchName ?? StorageService.storeName,
+      servedBy: servedBy ?? StorageService.fullName,
+      posName: posName ?? StorageService.posDeviceName,
+    );
 
     if (printer.isVirtual) {
       await _showVirtualPrint(
         VirtualPrintDocument(
           title: 'Receipt $invoiceNumber',
           content: _receiptPreview(
+            saleInfo: saleInfo,
             invoiceNumber: invoiceNumber,
             customerName: customerName,
             orderId: orderId,
@@ -387,6 +398,7 @@ class PrinterController extends GetxController {
       ),
       ...generator.text('${ReceiptLabels.t('Customer')}: $customerName'),
       ...generator.text('${ReceiptLabels.t('Payment')}: $paymentLabel'),
+      for (final line in saleInfo) ...generator.text(line),
       ...generator.hr(),
       ...generator.text(
         ReceiptLabels.t('Items'),
@@ -487,6 +499,12 @@ class PrinterController extends GetxController {
         ),
       ),
       ...generator.text('${ReceiptLabels.t('Customer')}: $customerName'),
+      for (final line in _saleInfoLines(
+        branchName: StorageService.storeName,
+        servedBy: StorageService.fullName,
+        posName: StorageService.posDeviceName,
+      ))
+        ...generator.text(line),
       ...generator.hr(),
       ...generator.text(
         '${ReceiptLabels.t('Previous due')}: ${_money(previousDue)}',
@@ -691,18 +709,8 @@ class PrinterController extends GetxController {
     Generator generator,
     PaperSize paperSize,
   ) async {
+    // Always LOGO -> NAME -> HEADER NOTE, for every user and every print.
     final bytes = <int>[];
-    bytes.addAll(
-      generator.text(
-        BusinessProfileService.name,
-        styles: PosStyles(
-          align: PosAlign.center,
-          bold: true,
-          height: PosTextSize.size2,
-          width: PosTextSize.size2,
-        ),
-      ),
-    );
     final logo = await BusinessProfileService.loadLogoImage();
     if (logo != null) {
       final maxLogoWidth = (paperSize.width * 0.6).round();
@@ -727,9 +735,16 @@ class PrinterController extends GetxController {
       );
       bytes.addAll(generator.image(canvas));
     }
-    // The logo sits between the business name and the header message -
-    // the client specifically wants the header to print after the logo,
-    // not before it.
+    bytes.addAll(
+      generator.text(
+        BusinessProfileService.name,
+        styles: const PosStyles(
+          align: PosAlign.center,
+          bold: true,
+          height: PosTextSize.size2,
+        ),
+      ),
+    );
     if (BusinessProfileService.header.isNotEmpty) {
       bytes.addAll(
         generator.text(
@@ -766,6 +781,19 @@ class PrinterController extends GetxController {
       styles: const PosStyles(align: PosAlign.center),
     );
   }
+
+  /// Branch, employee and till lines the client wants on every invoice.
+  List<String> _saleInfoLines({
+    String? branchName,
+    String? servedBy,
+    String? posName,
+  }) => [
+    if (branchName?.trim().isNotEmpty == true)
+      '${ReceiptLabels.t('Branch')}: ${branchName!.trim()}',
+    if (servedBy?.trim().isNotEmpty == true)
+      '${ReceiptLabels.t('Served by')}: ${servedBy!.trim()}',
+    if (posName?.trim().isNotEmpty == true) 'POS: ${posName!.trim()}',
+  ];
 
   String _money(double value) =>
       '${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(value)}';
@@ -859,6 +887,7 @@ Virtual printer is ready.
 
   String _businessHeaderPreview() {
     final lines = [
+      if (BusinessProfileService.logoUrl.isNotEmpty) '[LOGO]',
       BusinessProfileService.name,
       if (BusinessProfileService.header.isNotEmpty)
         BusinessProfileService.header,
@@ -871,6 +900,7 @@ Virtual printer is ready.
   }
 
   String _receiptPreview({
+    List<String> saleInfo = const [],
     required String invoiceNumber,
     required String customerName,
     required String orderId,
@@ -897,6 +927,7 @@ Virtual printer is ready.
       )
       ..writeln('${ReceiptLabels.t('Customer')}: $customerName')
       ..writeln('${ReceiptLabels.t('Payment')}: $paymentLabel')
+      ..writeAll(saleInfo.map((line) => '$line\n'))
       ..writeln('--------------------------------')
       ..writeln(ReceiptLabels.t('Items'));
     for (final item in items) {

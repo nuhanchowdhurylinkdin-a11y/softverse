@@ -1,21 +1,20 @@
 import 'package:get/get.dart';
 
 import '../../../core/services/feature_settings.dart';
-import '../../../core/services/network_caller.dart';
-import '../../../core/services/offline_database_service.dart';
 import '../../../core/services/storage_service.dart';
-import '../../../core/utils/constants/api_constants.dart';
 import '../../auth/controller/auth_controller.dart';
 import '../../customer/controller/customer_controller.dart';
+import '../../store/controller/store_controller.dart';
 import '../../../routes/app_routes.dart';
 
 class MoreController extends GetxController {
-  final NetworkCaller _networkCaller = NetworkCaller();
-
   // The logged-in staff member, not a hardcoded placeholder profile.
   String get profileName => StorageService.fullName ?? 'Softverse User';
   String get profileRole => _capitalize(StorageService.role);
-  final posLabel = 'Switch POS'.obs;
+  /// Live POS device name - follows renames made on the website.
+  String get posLabel => Get.isRegistered<StoreController>()
+      ? Get.find<StoreController>().currentPosName.value ?? ''
+      : StorageService.posDeviceName ?? '';
 
   String _capitalize(String? value) {
     if (value == null || value.isEmpty) return '';
@@ -25,25 +24,12 @@ class MoreController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _refreshPosLabel();
     loadFeatureVisibility();
   }
 
-  void _refreshPosLabel() {
-    posLabel.value = StorageService.posDeviceName ?? 'Switch POS';
-  }
-
-  // Refreshes the cache; the More screen reads FeatureSettings.isEnabled(...)
-  // directly inside Obx(), so it updates the moment the cache does.
-  Future<void> loadFeatureVisibility() async {
-    final response = await _networkCaller.getRequest(
-      ApiConstants.featureSettings,
-    );
-    if (!response.isSuccess || response.responseData is! Map) return;
-    final data = Map<String, dynamic>.from(response.responseData as Map);
-    await OfflineDatabaseService.saveCache('feature_settings', data);
-    FeatureSettings.notifyChanged();
-  }
+  // The More screen reads FeatureSettings.isEnabled(...) inside Obx(), so
+  // it updates the moment the cache does.
+  Future<void> loadFeatureVisibility() => FeatureSettings.refresh();
 
   void openShift() => Get.toNamed(AppRoute.getShiftManagementScreen());
 
@@ -58,8 +44,6 @@ class MoreController extends GetxController {
     Get.toNamed(AppRoute.getViewCustomerScreen());
   }
 
-  void openDueBalances() => Get.toNamed(AppRoute.getCustomerDueListScreen());
-
   void openPrinterSettings() => Get.toNamed(AppRoute.getPrinterListScreen());
 
   void openAppsSettings() => Get.toNamed(AppRoute.getAppsMenuScreen());
@@ -69,14 +53,7 @@ class MoreController extends GetxController {
 
   void openTaxesSettings() => Get.toNamed(AppRoute.getTaxListScreen());
 
-  void openBackOffice() => Get.toNamed(AppRoute.getFeatureSettingsScreen());
-
   void openSupport() => Get.toNamed(AppRoute.getSupportScreen());
-
-  Future<void> switchPos() async {
-    await Get.toNamed(AppRoute.getPosDeviceScreen());
-    _refreshPosLabel();
-  }
 
   void openNotifications() {}
 

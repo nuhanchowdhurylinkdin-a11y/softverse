@@ -1,6 +1,10 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img;
+import 'package:path_provider/path_provider.dart';
 
 import '../utils/constants/api_constants.dart';
 import 'network_caller.dart';
@@ -135,27 +139,56 @@ class BusinessProfileService {
 
     await OfflineDatabaseService.saveCache(_cacheKey, merged);
     _version.value++;
+    // Have the logo ready before the first receipt of the session.
+    unawaited(loadLogoImage());
   }
 
-  /// Downloads and decodes the logo for thermal printing, caching the
-  /// decoded image in memory so a receipt never re-downloads it - a slow or
-  /// unreachable logo URL must never delay or break printing at the till.
+  /// Downloads and decodes the logo for thermal printing. It's kept in
+  /// memory and in a file on the device, so a slow or unreachable network
+  /// never prints a receipt without its logo (or delays printing).
   static Future<img.Image?> loadLogoImage() async {
     final url = logoUrl;
     if (url.isEmpty) return null;
     if (_logoImage != null && _logoImageUrl == url) return _logoImage;
+
+    final file = await _logoFile();
+    final savedUrl = OfflineDatabaseService.readCache<String>(_logoUrlCacheKey);
+    if (file != null && savedUrl == url && await file.exists()) {
+      final decoded = img.decodeImage(await file.readAsBytes());
+      if (decoded != null) return _remember(decoded, url);
+    }
+
     try {
       final response = await http
           .get(Uri.parse(url))
-          .timeout(const Duration(seconds: 3));
+          .timeout(const Duration(seconds: 5));
       if (response.statusCode != 200) return null;
       final decoded = img.decodeImage(response.bodyBytes);
       if (decoded == null) return null;
-      _logoImage = decoded;
-      _logoImageUrl = url;
-      return decoded;
+      if (file != null) {
+        await file.writeAsBytes(response.bodyBytes, flush: true);
+        await OfflineDatabaseService.saveCache(_logoUrlCacheKey, url);
+      }
+      return _remember(decoded, url);
     } catch (_) {
       return null;
+    }
+  }
+
+  static const _logoUrlCacheKey = 'receipt_logo_url';
+
+  static img.Image _remember(img.Image image, String url) {
+    _logoImage = image;
+    _logoImageUrl = url;
+    return image;
+  }
+
+  static Future<File?> _logoFile() async {
+    try {
+      final dir = await getApplicationSupportDirectory();
+      return File('${dir.path}/receipt_logo');
+    } catch (_) {
+      return null; // No file system (e.g. tests) - memory cache only.
     }
   }
 }
