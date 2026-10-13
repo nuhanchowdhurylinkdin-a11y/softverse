@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:get/get.dart';
 
 import '../utils/constants/api_constants.dart';
+import 'business_profile_service.dart';
 import 'network_caller.dart';
 import 'storage_service.dart';
 import '../../features/store/controller/store_controller.dart';
@@ -53,6 +54,9 @@ class TerminalHeartbeatService extends GetxService {
     } catch (_) {
       // Offline or server down - the next beat simply starts a new session.
     }
+    // Receipt language, header/footer, logo and currency changed on the
+    // website reach the till within a minute instead of at the next login.
+    unawaited(BusinessProfileService.fetch());
   }
 
   /// Keeps this till's POS device in step with the website: a rename shows

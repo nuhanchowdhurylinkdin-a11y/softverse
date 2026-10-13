@@ -10,6 +10,7 @@ class ReceiptLabels {
     'spanish': {
       'Branch': 'Sucursal',
       'Served by': 'Atendido por',
+      'Invoice': 'Factura',
       'Receipt': 'Recibo',
       'Order': 'Pedido',
       'Customer': 'Cliente',
@@ -34,6 +35,7 @@ class ReceiptLabels {
     'french': {
       'Branch': 'Succursale',
       'Served by': 'Servi par',
+      'Invoice': 'Facture',
       'Receipt': 'Recu',
       'Order': 'Commande',
       'Customer': 'Client',
@@ -58,6 +60,7 @@ class ReceiptLabels {
     'german': {
       'Branch': 'Filiale',
       'Served by': 'Bedient von',
+      'Invoice': 'Rechnung',
       'Receipt': 'Beleg',
       'Order': 'Bestellung',
       'Customer': 'Kunde',
