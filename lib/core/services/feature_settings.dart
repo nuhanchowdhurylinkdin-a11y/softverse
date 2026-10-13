@@ -1,9 +1,12 @@
 import 'package:get/get.dart';
 
+import '../utils/constants/api_constants.dart';
+import 'network_caller.dart';
 import 'offline_database_service.dart';
 
-/// Reads the cached `/feature-settings` response (see [WalkthroughController]
-/// for the fetch/save side) to check whether a feature toggle is on.
+/// The features the business manager switched on in the website's
+/// Settings → Features. Every user of the business gets the same set - a
+/// cashier can't (and doesn't need to) change them from the till.
 class FeatureSettings {
   FeatureSettings._();
 
@@ -31,4 +34,17 @@ class FeatureSettings {
 
   /// Call after writing a fresh feature-settings response to the cache.
   static void notifyChanged() => _version.value++;
+
+  /// Re-reads the business's features from the server into the cache.
+  static Future<void> refresh() async {
+    final response = await NetworkCaller().getRequest(
+      ApiConstants.featureSettings,
+    );
+    if (!response.isSuccess || response.responseData is! Map) return;
+    await OfflineDatabaseService.saveCache(
+      'feature_settings',
+      Map<String, dynamic>.from(response.responseData as Map),
+    );
+    notifyChanged();
+  }
 }

@@ -58,10 +58,6 @@ class StorageService {
 
   static bool get isOnboardingComplete =>
       _preferences?.getBool(_onboardingCompleteKey) ?? false;
-  static bool get isFeatureSettingsComplete {
-    final key = _featureSettingsKey;
-    return key == null ? false : (_preferences?.getBool(key) ?? false);
-  }
 
   static String? get _featureSettingsKey {
     final currentBusinessId = businessId?.trim();
@@ -122,12 +118,6 @@ class StorageService {
 
   static Future<void> setOnboardingComplete(bool value) async {
     await _preferences?.setBool(_onboardingCompleteKey, value);
-  }
-
-  static Future<void> setFeatureSettingsComplete(bool value) async {
-    final key = _featureSettingsKey;
-    if (key == null) return;
-    await _preferences?.setBool(key, value);
   }
 
   static String get themeMode =>
@@ -196,6 +186,18 @@ class StorageService {
     if (current != null) {
       await _preferences?.setString(_storeBusinessIdKey, current);
     }
+  }
+
+  /// Salted hash of this user's PIN, so the app lock still opens offline.
+  static String? get localPinHash {
+    final id = userId;
+    return id == null ? null : _preferences?.getString('pinHash_$id');
+  }
+
+  static Future<void> setLocalPinHash(String hash) async {
+    final id = userId;
+    if (id == null) return;
+    await _preferences?.setString('pinHash_$id', hash);
   }
 
   static Future<void> clearStore() async {

@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 
+import '../../../core/services/feature_settings.dart';
+
 import '../../../core/services/storage_service.dart';
 import '../../../routes/app_routes.dart';
 import '../../store/controller/store_controller.dart';
@@ -21,10 +23,7 @@ class SplashController extends GetxController {
       Get.offAllNamed(AppRoute.getLoginScreen());
       return;
     }
-    if (!StorageService.isFeatureSettingsComplete) {
-      Get.offAllNamed(AppRoute.getFeatureSettingsScreen());
-      return;
-    }
+    FeatureSettings.refresh();
     Get.offAllNamed(AppRoute.getHomeScreen());
     // A store may have been added since the last session.
     Get.find<StoreController>().ensureSelected();

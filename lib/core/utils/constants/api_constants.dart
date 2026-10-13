@@ -24,7 +24,12 @@ class ApiConstants {
   static String get helpFaqs => '$baseUrl/business-admin-dashboard/help/faqs';
   static String get helpContact =>
       '$baseUrl/business-admin-dashboard/help/contact';
+  static String get myPin => '$baseUrl/auth/me/pin';
+  static String get verifyMyPin => '$baseUrl/auth/me/pin/verify';
   static String get terminalHeartbeat => '$baseUrl/terminals/heartbeat';
+  static String get terminalEnd => '$baseUrl/terminals/end';
+  static String terminalPosDevices(String storeId, String terminalId) =>
+      '$baseUrl/terminals/pos-devices?storeId=$storeId&terminalId=$terminalId';
   static String get kitchenPrinterGroups =>
       '$baseUrl/business-admin-dashboard/settings/kitchen-printers';
   static String get posDevices =>
@@ -45,6 +50,7 @@ class ApiConstants {
   static String category(String id) => '$baseUrl/categories/$id';
   static String get customers => '$baseUrl/customers';
   static String customer(String id) => '$baseUrl/customers/$id';
+  static String customerPoints(String id) => '$baseUrl/customers/$id/points';
   static String customerPurchaseHistory(String id) =>
       '$baseUrl/customers/$id/purchase-history';
   static String customersSearch(String query) =>

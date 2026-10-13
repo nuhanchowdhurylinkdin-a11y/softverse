@@ -1,176 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 import '../../../core/services/feature_settings.dart';
-import '../../../core/services/network_caller.dart';
-import '../../../core/services/offline_database_service.dart';
-import '../../../core/services/storage_service.dart';
-import '../../../core/services/sync_service.dart';
-import '../../../core/utils/constants/api_constants.dart';
-import '../../../core/utils/helpers/app_helper.dart';
 import '../../../routes/app_routes.dart';
 import '../../main_nav/controller/main_nav_controller.dart';
-import '../models/feature_toggle_item.dart';
 
+/// The intro slides shown after sign-up. Features are no longer switched on
+/// here: the business manager sets them on the website (Settings →
+/// Features) and every till simply follows that.
 class WalkthroughController extends GetxController {
-  final NetworkCaller _networkCaller = NetworkCaller();
   final pageController = PageController();
   final currentPage = 0.obs;
-  final isSavingFeatures = false.obs;
 
   static const slideCount = 3;
-
-  final features = <FeatureToggleItem>[
-    const FeatureToggleItem(
-      key: 'shifts',
-      title: 'Shifts',
-      subtitle: 'Track cash that goes in and out of your drawer',
-      icon: Iconsax.clock,
-    ),
-    const FeatureToggleItem(
-      key: 'open_order',
-      title: 'Open Order',
-      subtitle: 'Allow to save and edit orders before completing a payment',
-      icon: Iconsax.ticket,
-    ),
-    const FeatureToggleItem(
-      key: 'kitchen_printers',
-      title: 'Kitchen printers',
-      subtitle: 'Send orders to kitchen printer or display',
-      icon: Iconsax.printer,
-    ),
-    const FeatureToggleItem(
-      key: 'customer_displays',
-      title: 'Customer displays',
-      subtitle:
-          'Display order information to customers at the time of purchase',
-      icon: Iconsax.monitor,
-    ),
-    const FeatureToggleItem(
-      key: 'table_options',
-      title: 'Table options',
-      subtitle:
-          'Require a table before payment. Keep this off for retail checkout',
-      icon: Iconsax.reserve,
-    ),
-    const FeatureToggleItem(
-      key: 'low_stock_notifications',
-      title: 'Low stock notifications',
-      subtitle: 'Get daily email on items that are low or out of stock',
-      icon: Iconsax.notification,
-    ),
-    const FeatureToggleItem(
-      key: 'negative_stock_alerts',
-      title: 'Negative stock alerts',
-      subtitle:
-          'Warn cashiers attempting to sell more inventory than available in stock',
-      icon: Iconsax.document,
-    ),
-    const FeatureToggleItem(
-      key: 'credit_sales',
-      title: 'Credit Sales',
-      subtitle:
-          'Credit sales allow businesses to sell now and receive payment later.',
-      icon: Iconsax.tag,
-    ),
-    const FeatureToggleItem(
-      key: 'payment_in_installments',
-      title: 'Payment in Installments',
-      subtitle:
-          'It offers a convenient installment payment system to help manage your finances.',
-      icon: Iconsax.wallet,
-    ),
-    const FeatureToggleItem(
-      key: 'product_expiration_information',
-      title: 'Product Expiration Information',
-      subtitle:
-          'Expiration Alerts: Keep track of your purchases and access exclusive deals!',
-      icon: Iconsax.calendar,
-    ),
-  ];
-
-  late final featureToggles = List.generate(features.length, (_) => false.obs);
-
-  @override
-  void onInit() {
-    super.onInit();
-    loadFeatureSettings();
-  }
-
-  /// Persists immediately via PATCH /feature-settings/{feature} — Back
-  /// Office is reachable any time now, so a toggle should take effect (and
-  /// survive a restart) on its own, not wait for the batch Save button.
-  Future<void> toggleFeature(int index) async {
-    final newValue = !featureToggles[index].value;
-    featureToggles[index].value = newValue;
-
-    final online = Get.isRegistered<SyncService>()
-        ? Get.find<SyncService>().isOnline.value
-        : true;
-    if (!online) {
-      // Every FeatureSettings.isEnabled(...) check elsewhere in the app
-      // reads this cache, not featureToggles — without writing it here too,
-      // the toggle looks flipped on this screen but has no effect anywhere
-      // else until the next successful online fetch.
-      await _cacheCurrentToggleState();
-      await OfflineDatabaseService.enqueue(
-        type: OfflineActionType.updateFeatureSettings,
-        payload: {_fieldForFeature(features[index].key): newValue},
-      );
-      AppHelperFunctions.showWarningSnackBar(
-        'Saved offline. It will sync when internet is back.',
-      );
-      return;
-    }
-
-    final response = await _networkCaller.patchRequest(
-      ApiConstants.toggleFeature(features[index].key),
-      body: {'enabled': newValue},
-    );
-
-    if (!response.isSuccess) {
-      featureToggles[index].value = !newValue;
-      AppHelperFunctions.showErrorSnackBar('Could not update this feature.');
-      return;
-    }
-
-    if (response.responseData is Map) {
-      final data = Map<String, dynamic>.from(response.responseData as Map);
-      await OfflineDatabaseService.saveCache('feature_settings', data);
-      _applySettings(data);
-    } else {
-      // Unexpected response shape — fall back to caching the toggle we know
-      // succeeded, so the rest of the app doesn't silently keep reading the
-      // pre-toggle value.
-      await _cacheCurrentToggleState();
-    }
-    FeatureSettings.notifyChanged();
-  }
-
-  Future<void> _cacheCurrentToggleState() async {
-    await OfflineDatabaseService.saveCache('feature_settings', {
-      'features': features
-          .asMap()
-          .entries
-          .map(
-            (entry) => {
-              'key': entry.value.key,
-              'label': entry.value.title,
-              'description': entry.value.subtitle,
-              'enabled': featureToggles[entry.key].value,
-            },
-          )
-          .toList(),
-    });
-    FeatureSettings.notifyChanged();
-  }
 
   void onPageChanged(int index) => currentPage.value = index;
 
   void nextPage() {
     if (currentPage.value == slideCount - 1) {
-      Get.toNamed(AppRoute.getFeatureSettingsScreen());
+      finish();
     } else {
       pageController.nextPage(
         duration: const Duration(milliseconds: 300),
@@ -186,106 +34,15 @@ class WalkthroughController extends GetxController {
     );
   }
 
-  Future<void> loadFeatureSettings() async {
-    final cached = OfflineDatabaseService.readCache<Map<String, dynamic>>(
-      'feature_settings',
-    );
-    if (cached != null) _applySettings(cached);
-
-    final response = await _networkCaller.getRequest(
-      ApiConstants.featureSettings,
-    );
-    if (!response.isSuccess || response.responseData is! Map) return;
-    final data = Map<String, dynamic>.from(response.responseData as Map);
-    await OfflineDatabaseService.saveCache('feature_settings', data);
-    FeatureSettings.notifyChanged();
-    _applySettings(data);
-  }
-
-  Future<void> saveFeatureSettings() async {
-    final payload = _payloadFromToggles();
-    isSavingFeatures.value = true;
-    final online = Get.isRegistered<SyncService>()
-        ? Get.find<SyncService>().isOnline.value
-        : true;
-    final response = online
-        ? await _networkCaller.patchRequest(
-            ApiConstants.featureSettings,
-            body: payload,
-          )
-        : null;
-
-    if (response != null && response.isSuccess) {
-      await OfflineDatabaseService.saveCache(
-        'feature_settings',
-        response.responseData,
-      );
-    } else {
-      await _cacheCurrentToggleState();
-      await OfflineDatabaseService.enqueue(
-        type: OfflineActionType.updateFeatureSettings,
-        payload: payload,
-      );
-      AppHelperFunctions.showWarningSnackBar(
-        'Saved offline. It will sync when internet is back.',
-      );
-    }
-
-    FeatureSettings.notifyChanged();
-    isSavingFeatures.value = false;
-    await StorageService.setFeatureSettingsComplete(true);
-    _goHome();
-  }
-
-  Future<void> skipFeatureSettings() async {
-    await StorageService.setFeatureSettingsComplete(true);
-    _goHome();
-  }
-
   // MainNavController.currentIndex is a persistent singleton, not reset by
-  // navigating to the /homeScreen route — without this, closing this screen
-  // from anywhere but the Home tab leaves you on whatever tab you came from.
-  void _goHome() {
+  // navigating to the /homeScreen route.
+  void finish() {
+    FeatureSettings.refresh();
     if (Get.isRegistered<MainNavController>()) {
       Get.find<MainNavController>().changeTab(0);
     }
     Get.offAllNamed(AppRoute.getHomeScreen());
   }
-
-  Map<String, dynamic> _payloadFromToggles() {
-    final payload = <String, dynamic>{};
-    for (var index = 0; index < features.length; index++) {
-      payload[_fieldForFeature(features[index].key)] =
-          featureToggles[index].value;
-    }
-    return payload;
-  }
-
-  void _applySettings(Map<String, dynamic> data) {
-    final rawFeatures = data['features'];
-    if (rawFeatures is! List) return;
-    for (final raw in rawFeatures) {
-      if (raw is! Map) continue;
-      final key = raw['key']?.toString();
-      final index = features.indexWhere((feature) => feature.key == key);
-      if (index >= 0) {
-        featureToggles[index].value = raw['enabled'] == true;
-      }
-    }
-  }
-
-  String _fieldForFeature(String key) => switch (key) {
-    'open_order' => 'openOrder',
-    'kitchen_printers' => 'kitchenPrinters',
-    'customer_displays' => 'customerDisplays',
-    'table_options' => 'tableOptions',
-    'low_stock_notifications' => 'lowStockNotifications',
-    'negative_stock_alerts' => 'negativeStockAlerts',
-    'credit_sales' => 'creditSales',
-    'payment_in_installments' => 'paymentInInstallments',
-    'product_expiration_information' => 'productExpirationInformation',
-    _ => key,
-  };
 
   @override
   void onClose() {

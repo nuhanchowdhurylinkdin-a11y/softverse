@@ -61,8 +61,7 @@ class MoreScreen extends GetView<MoreController> {
                 () => MoreProfileCard(
                   name: controller.profileName,
                   role: controller.profileRole,
-                  posLabel: controller.posLabel.value,
-                  onSwitchPos: controller.switchPos,
+                  posLabel: controller.posLabel,
                 ),
               ),
               SizedBox(height: 16.h),
@@ -104,12 +103,6 @@ class MoreScreen extends GetView<MoreController> {
                 icon: Iconsax.user,
                 label: 'Customer'.tr,
                 onTap: controller.openCustomer,
-              ),
-              SizedBox(height: 12.h),
-              MoreMenuTile(
-                icon: Iconsax.wallet_2,
-                label: 'Due Balances'.tr,
-                onTap: controller.openDueBalances,
               ),
               SizedBox(height: 24.h),
               Row(
@@ -176,9 +169,9 @@ class MoreScreen extends GetView<MoreController> {
               ),
               SizedBox(height: 56.h),
               MoreMenuTile(
-                icon: Iconsax.element_2,
-                label: 'Back Office'.tr,
-                onTap: controller.openBackOffice,
+                icon: Iconsax.key,
+                label: 'PIN lock'.tr,
+                onTap: controller.openPinSettings,
               ),
               SizedBox(height: 12.h),
               MoreMenuTile(

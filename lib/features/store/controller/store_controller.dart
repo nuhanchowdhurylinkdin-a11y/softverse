@@ -5,6 +5,7 @@ import '../../../core/services/storage_service.dart';
 import '../../../core/utils/constants/api_constants.dart';
 import '../../../core/utils/helpers/app_helper.dart';
 import '../../../routes/app_routes.dart';
+import '../../pos_device/controller/pos_device_controller.dart';
 
 class StoreOption {
   final String id;
@@ -77,12 +78,21 @@ class StoreController extends GetxController {
 
     if (stores.length == 1) {
       if (!stillValid) await select(stores.first);
-      return;
-    }
-    if (stores.isEmpty) return;
-    if (forcePicker || !stillValid) {
+    } else if (stores.isNotEmpty && (forcePicker || !stillValid)) {
       await Get.toNamed(AppRoute.getStoreSelectScreen());
     }
+    // Then the POS device of that store.
+    if (StorageService.storeId != null) await ensureDevice();
+  }
+
+  /// Asks for this till's POS device (after the store) unless it's still
+  /// valid and free - also used when the website disconnects a device.
+  Future<void> ensureDevice() {
+    return Get.find<PosDeviceController>().ensureSelected(
+      openPicker: () async {
+        await Get.toNamed(AppRoute.getPosDeviceScreen());
+      },
+    );
   }
 
   Future<void> pick(StoreOption store) async {

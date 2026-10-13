@@ -1,14 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../features/checkout/models/cart_item.dart';
 import '../../services/business_profile_service.dart';
 import 'app_helper.dart';
+import 'receipt_labels.dart';
 
 class InvoicePdfExporter {
   InvoicePdfExporter._();
@@ -29,6 +30,9 @@ class InvoicePdfExporter {
     String businessName = 'Softverse POS',
     String businessAddress = '',
     String businessPhone = '',
+    String? branchName,
+    String? servedBy,
+    String? posName,
   }) async {
     final fileName = '${invoiceNumber.replaceAll(' ', '_')}.pdf';
     // The documents directory persists across app restarts and OS cache
@@ -52,21 +56,46 @@ class InvoicePdfExporter {
         businessName: businessName,
         businessAddress: businessAddress,
         businessPhone: businessPhone,
+        saleInfo: [
+          if (branchName?.trim().isNotEmpty == true)
+            'Branch: ${branchName!.trim()}',
+          if (servedBy?.trim().isNotEmpty == true)
+            'Served by: ${servedBy!.trim()}',
+          if (posName?.trim().isNotEmpty == true) 'POS: ${posName!.trim()}',
+        ],
       ),
       flush: true,
     );
     return file;
   }
 
-  /// Opens the native "Save As" dialog (Storage Access Framework on Android,
-  /// the document picker on iOS) so the user picks exactly where the PDF
-  /// lands on their device — e.g. Downloads — rather than just sharing it
-  /// to another app. Returns true if the user actually saved it somewhere.
+  static const _downloads = MethodChannel('softverse/downloads');
+
+  /// Saves the PDF like a browser download: on Android it goes straight
+  /// into Downloads with a "download complete" notification that opens it.
+  /// iOS (no Downloads folder) and Android 9 and older fall back to the
+  /// native "Save as" dialog. Returns true if the file was saved.
   static Future<bool> saveToDevice(File file) async {
     final bytes = await file.readAsBytes();
+    final fileName = file.uri.pathSegments.last;
+    if (Platform.isAndroid) {
+      try {
+        final saved = await _downloads.invokeMethod<bool>('saveToDownloads', {
+          'bytes': bytes,
+          'fileName': fileName,
+          'mimeType': 'application/pdf',
+        });
+        if (saved == true) {
+          AppHelperFunctions.showSuccessSnackBar('Saved to Downloads');
+          return true;
+        }
+      } on PlatformException {
+        // Fall through to the picker.
+      }
+    }
     final savedPath = await FilePicker.platform.saveFile(
       dialogTitle: 'Save invoice PDF',
-      fileName: file.uri.pathSegments.last,
+      fileName: fileName,
       bytes: bytes,
     );
     if (savedPath == null) return false;
@@ -78,7 +107,10 @@ class InvoicePdfExporter {
   /// another app (Drive, Messages, etc.) instead of saving it locally.
   static Future<void> share(File file) async {
     await SharePlus.instance.share(
-      ShareParams(files: [XFile(file.path)], fileNameOverrides: [file.uri.pathSegments.last]),
+      ShareParams(
+        files: [XFile(file.path)],
+        fileNameOverrides: [file.uri.pathSegments.last],
+      ),
     );
   }
 
@@ -98,37 +130,48 @@ class InvoicePdfExporter {
     required String businessName,
     required String businessAddress,
     required String businessPhone,
+    List<String> saleInfo = const [],
   }) {
     final isDue = paymentLabel == 'Due Payment';
+    // Same wording as the printed receipt, in the website's receipt language.
+    String l(String key, [String? english]) {
+      final translated = ReceiptLabels.t(key);
+      return translated == key ? english ?? key : translated;
+    }
+
     final lines = [
       businessName,
       if (businessAddress.isNotEmpty) businessAddress,
-      if (businessPhone.isNotEmpty) 'Tel: $businessPhone',
-      'Invoice: $invoiceNumber',
-      AppHelperFunctions.getFormattedDate(dateTime, format: 'dd MMM yyyy, hh:mm a'),
-      'Customer: $customerName',
-      'Payment: $paymentLabel',
+      if (businessPhone.isNotEmpty) '${l('Tel')}: $businessPhone',
+      '${l('Invoice')}: $invoiceNumber',
+      AppHelperFunctions.getFormattedDate(
+        dateTime,
+        format: 'dd MMM yyyy, hh:mm a',
+      ),
+      '${l('Customer')}: $customerName',
+      '${l('Payment')}: $paymentLabel',
+      ...saleInfo,
       '',
-      'Items',
+      l('Items'),
       for (final item in items) ...[
         '${item.name}  x${item.quantity}    ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(item.price * item.quantity)}',
         '  @ ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(item.price)}',
       ],
       '',
-      'Subtotal: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(subtotal)}',
+      '${l('Subtotal')}: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(subtotal)}',
       if (discount > 0)
-        'Discount: -${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(discount)}',
-      'Tax: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(tax)}',
-      'Total: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(totalAmount)}',
+        '${l('Discount')}: -${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(discount)}',
+      '${l('Tax')}: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(tax)}',
+      '${l('Total')}: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(totalAmount)}',
       // A due/credit sale hasn't actually received anything yet - showing
       // "Amount Received"/"Change" on it would make it look already paid.
       if (isDue) ...[
         if (amountReceived > 0)
-          'Paid so far: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(amountReceived)}',
-        'Amount Due: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(amountDue)}',
+          '${l('Paid so far')}: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(amountReceived)}',
+        '${l('Amount due', 'Amount Due')}: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(amountDue)}',
       ] else ...[
-        'Amount Received: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(amountReceived)}',
-        'Change to Return: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(changeToReturn)}',
+        '${l('Received', 'Amount Received')}: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(amountReceived)}',
+        '${l('Change', 'Change to Return')}: ${BusinessProfileService.printCurrencySymbol}${AppHelperFunctions.getFormattedMoney(changeToReturn)}',
       ],
     ];
 

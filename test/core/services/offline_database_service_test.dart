@@ -60,22 +60,6 @@ void main() {
     expect(OfflineDatabaseService.readCache<List<dynamic>>('items'), isEmpty);
   });
 
-  test('feature completion is owner scoped and cleared at logout', () async {
-    await _saveSession(businessId: 'business-a', userId: 'user-a');
-    await StorageService.setFeatureSettingsComplete(true);
-    expect(StorageService.isFeatureSettingsComplete, isTrue);
-
-    await _saveSession(businessId: 'business-b', userId: 'user-b');
-    expect(StorageService.isFeatureSettingsComplete, isFalse);
-
-    await _saveSession(businessId: 'business-a', userId: 'user-a');
-    expect(StorageService.isFeatureSettingsComplete, isTrue);
-    await StorageService.logoutUser();
-
-    await _saveSession(businessId: 'business-a', userId: 'user-a');
-    expect(StorageService.isFeatureSettingsComplete, isFalse);
-  });
-
   test('cannot enqueue an action without an authenticated owner', () async {
     await StorageService.logoutUser();
 

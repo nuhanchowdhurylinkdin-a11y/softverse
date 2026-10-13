@@ -37,7 +37,10 @@ class DiscountPickerSheet extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
               child: Text(
                 'Apply discount',
-                style: getTextStyle(fontSize: 16.4, fontWeight: FontWeight.w600),
+                style: getTextStyle(
+                  fontSize: 16.4,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
             if (discounts.isEmpty)
@@ -110,7 +113,10 @@ class DiscountPickerSheet extends StatelessWidget {
                 onPressed: onRemove,
                 child: Text(
                   'Remove discount',
-                  style: getTextStyle(fontSize: 14.6, color: AppColors.dangerRed),
+                  style: getTextStyle(
+                    fontSize: 14.6,
+                    color: AppColors.dangerRed,
+                  ),
                 ),
               ),
             SizedBox(height: 8.h),

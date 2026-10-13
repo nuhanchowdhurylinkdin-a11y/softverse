@@ -2,94 +2,101 @@ import 'package:get/get.dart';
 
 import '../../../core/services/network_caller.dart';
 import '../../../core/services/storage_service.dart';
+import '../../../core/services/terminal_heartbeat_service.dart';
 import '../../../core/utils/constants/api_constants.dart';
 import '../../../core/utils/helpers/app_helper.dart';
 import '../../store/controller/store_controller.dart';
 import '../models/pos_device_model.dart';
 
-/// Backs the "Switch POS" screen - lets an owner/manager pick which of the
-/// POS devices configured on the Business Admin dashboard this physical
-/// till actually is. The selection is stored on the device itself (see
-/// [StorageService.setPosDevice]), not tied to whoever is logged in, so it
-/// survives logout and shows up for every cashier who uses this same phone.
+/// Which POS device (set up by the business manager on the website) this
+/// till is signed in as. Chosen at login, after the store; devices another
+/// till is already using can't be picked.
 class PosDeviceController extends GetxController {
   final NetworkCaller _networkCaller = NetworkCaller();
   final devices = <PosDeviceModel>[].obs;
   final isLoading = false.obs;
-  final isSaving = false.obs;
   final selectedDeviceId = Rxn<String>();
-  final currentDeviceLabel = 'Not activated'.obs;
 
   @override
   void onInit() {
     super.onInit();
-    _refreshSelection();
-    fetchDevices();
-  }
-
-  void _refreshSelection() {
     selectedDeviceId.value = StorageService.posDeviceId;
-    currentDeviceLabel.value = StorageService.posDeviceName ?? 'Not activated';
   }
 
   Future<bool> fetchDevices() async {
+    final storeId = StorageService.storeId;
+    if (storeId == null) return false;
     isLoading.value = true;
-    final response = await _networkCaller.getRequest(ApiConstants.posDevices);
+    final response = await _networkCaller.getRequest(
+      ApiConstants.terminalPosDevices(storeId, StorageService.terminalId),
+    );
     isLoading.value = false;
-
-    if (!response.isSuccess || response.responseData is! Map) {
-      if (response.statusCode == 403) {
-        AppHelperFunctions.showErrorSnackBar(
-          'Ask an owner or manager to set up POS devices for this business.',
-        );
-      } else {
-        AppHelperFunctions.showErrorSnackBar(response.errorMessage);
-      }
-      return false;
-    }
-
-    final data = Map<String, dynamic>.from(response.responseData as Map);
-    final rawDevices = data['devices'] is List
-        ? List<dynamic>.from(data['devices'] as List)
-        : <dynamic>[];
+    if (!response.isSuccess || response.responseData is! Map) return false;
+    final raw = (response.responseData as Map)['devices'];
     devices.assignAll(
-      rawDevices.whereType<Map>().map(
-        (json) => PosDeviceModel.fromApi(Map<String, dynamic>.from(json)),
-      ),
+      raw is List
+          ? raw.whereType<Map>().map(
+              (json) => PosDeviceModel.fromApi(Map<String, dynamic>.from(json)),
+            )
+          : const <PosDeviceModel>[],
     );
     return true;
   }
 
-  Future<bool> selectDevice(PosDeviceModel device) async {
-    isSaving.value = true;
-    final response = await _networkCaller.patchRequest(
-      ApiConstants.posDevice(device.id),
-      body: {'status': 'activated'},
+  /// After the store is chosen: keeps this till's device if it's still
+  /// free, picks the only free one automatically, otherwise asks.
+  Future<void> ensureSelected({
+    required Future<void> Function() openPicker,
+  }) async {
+    if (!await fetchDevices()) return;
+    if (devices.isEmpty) {
+      // The store has no POS devices set up - selling still works.
+      await StorageService.clearPosDevice();
+      _refresh();
+      return;
+    }
+    final current = devices.firstWhereOrNull(
+      (d) => d.id == StorageService.posDeviceId,
     );
-    isSaving.value = false;
-
-    if (!response.isSuccess) {
-      AppHelperFunctions.showErrorSnackBar(response.errorMessage);
-      return false;
+    if (current != null && !current.inUse) {
+      await _remember(current);
+      return;
     }
+    final free = devices.where((d) => !d.inUse).toList();
+    if (free.length == 1) {
+      await _remember(free.first);
+      return;
+    }
+    await StorageService.clearPosDevice();
+    _refresh();
+    await openPicker();
+  }
 
-    await StorageService.setPosDevice(id: device.id, name: device.name);
-    // A POS device belongs to exactly one store, so pairing it decides which
-    // store this till's sales are attributed to as well.
-    if (device.storeId.isNotEmpty) {
-      await StorageService.setStore(
-        id: device.storeId,
-        name: device.storeName ?? '',
+  Future<void> select(PosDeviceModel device) async {
+    if (device.inUse) {
+      AppHelperFunctions.showWarningSnackBar(
+        '"${device.name}" is in use on another device',
       );
+      return;
     }
+    await _remember(device);
+    Get.back();
+    AppHelperFunctions.showSuccessSnackBar('POS: ${device.name}');
+  }
+
+  Future<void> _remember(PosDeviceModel device) async {
+    await StorageService.setPosDevice(id: device.id, name: device.name);
+    _refresh();
+    // Claim it on the server straight away so another till sees it in use.
+    if (Get.isRegistered<TerminalHeartbeatService>()) {
+      Get.find<TerminalHeartbeatService>().beat();
+    }
+  }
+
+  void _refresh() {
+    selectedDeviceId.value = StorageService.posDeviceId;
     if (Get.isRegistered<StoreController>()) {
       Get.find<StoreController>().refreshCurrent();
     }
-    _refreshSelection();
-    AppHelperFunctions.showSuccessSnackBar(
-      'This device is now set up as "${device.name}".',
-    );
-    await fetchDevices();
-    return true;
   }
 }

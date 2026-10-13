@@ -11,6 +11,7 @@ class BillSummaryCard extends StatelessWidget {
   final double subtotal;
   final double discount;
   final String? discountLabel;
+  final double loyaltyDiscount;
   final double tax;
   final double taxRate;
   final double totalAmount;
@@ -23,6 +24,7 @@ class BillSummaryCard extends StatelessWidget {
     required this.subtotal,
     this.discount = 0,
     this.discountLabel,
+    this.loyaltyDiscount = 0,
     required this.tax,
     required this.taxRate,
     required this.totalAmount,
@@ -59,6 +61,13 @@ class BillSummaryCard extends StatelessWidget {
             _Row(
               label: discountLabel ?? 'Discount',
               value: '-${AppHelperFunctions.formatCurrency(discount)}',
+            ),
+          ],
+          if (loyaltyDiscount > 0) ...[
+            SizedBox(height: 8.h),
+            _Row(
+              label: 'Loyalty points',
+              value: '-${AppHelperFunctions.formatCurrency(loyaltyDiscount)}',
             ),
           ],
           SizedBox(height: 8.h),

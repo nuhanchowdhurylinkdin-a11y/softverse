@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/services/feature_settings.dart';
 import '../../../core/services/network_caller.dart';
 import '../../../core/services/session_lifecycle_service.dart';
 import '../../../core/services/storage_service.dart';
@@ -247,6 +248,14 @@ class AuthController extends GetxController {
   }
 
   Future<void> logout() async {
+    // Free this till's POS device for others, and make the next login
+    // choose the store and POS device again.
+    await _networkCaller.postRequest(
+      ApiConstants.terminalEnd,
+      body: {'deviceId': StorageService.terminalId},
+    );
+    await StorageService.clearPosDevice();
+    await StorageService.clearStore();
     final refreshToken = StorageService.refreshToken;
     if (refreshToken != null) {
       await _networkCaller.postRequest(
@@ -281,10 +290,7 @@ class AuthController extends GetxController {
       Get.offAllNamed(AppRoute.getWalkthroughScreen());
       return;
     }
-    if (!StorageService.isFeatureSettingsComplete) {
-      Get.offAllNamed(AppRoute.getFeatureSettingsScreen());
-      return;
-    }
+    FeatureSettings.refresh();
     Get.offAllNamed(AppRoute.getHomeScreen());
     Get.find<StoreController>().ensureSelected();
   }

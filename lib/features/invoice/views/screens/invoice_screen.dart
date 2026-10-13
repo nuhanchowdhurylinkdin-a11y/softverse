@@ -289,9 +289,7 @@ void _showCollectDuePaymentDialog(
           TextField(
             controller: amountController,
             autofocus: true,
-            keyboardType: const TextInputType.numberWithOptions(
-              decimal: true,
-            ),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: const InputDecoration(
               labelText: 'Amount received',
               border: OutlineInputBorder(),

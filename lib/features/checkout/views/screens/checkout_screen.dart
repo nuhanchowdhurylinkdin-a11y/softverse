@@ -12,6 +12,7 @@ import '../../controller/checkout_controller.dart';
 import '../../widgets/bill_summary_card.dart';
 import '../../widgets/cart_item_card.dart';
 import '../../widgets/checkout_action_buttons.dart';
+import '../../widgets/loyalty_points_tile.dart';
 import '../../widgets/modifier_discount_toggle.dart';
 import '../../widgets/payment_method_grid.dart';
 
@@ -219,6 +220,19 @@ class CheckoutScreen extends GetView<CheckoutController> {
                               ],
                             ),
                           ),
+                          Obx(() {
+                            final points = controller.availablePoints;
+                            if (points <= 0) return const SizedBox.shrink();
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: 16.h),
+                              child: LoyaltyPointsTile(
+                                availablePoints: points,
+                                isUsing: controller.pointsToUse.value > 0,
+                                usedValue: controller.loyaltyDiscount,
+                                onToggle: controller.toggleUsePoints,
+                              ),
+                            );
+                          }),
                           Text(
                             'Bill Amounts',
                             style: getTextStyle(
@@ -234,6 +248,7 @@ class CheckoutScreen extends GetView<CheckoutController> {
                               discount: controller.discountAmount,
                               discountLabel:
                                   controller.appliedDiscount.value?.name,
+                              loyaltyDiscount: controller.loyaltyDiscount,
                               tax: controller.tax,
                               taxRate: controller.taxRate,
                               totalAmount: controller.totalAmount,

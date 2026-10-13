@@ -16,7 +16,9 @@ class PaymentTypeBadge extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18.r),
         gradient: LinearGradient(
-          colors: paymentType.gradient.map((c) => c.withValues(alpha: 0.2)).toList(),
+          colors: paymentType.gradient
+              .map((c) => c.withValues(alpha: 0.2))
+              .toList(),
         ),
       ),
       child: Text(

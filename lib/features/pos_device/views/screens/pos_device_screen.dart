@@ -18,10 +18,8 @@ class PosDeviceScreen extends GetView<PosDeviceController> {
       appBar: AppBar(
         centerTitle: false,
         toolbarHeight: 55.h,
-        leading: IconButton(
-          onPressed: Get.back,
-          icon: Icon(Icons.arrow_back, color: Colors.white, size: 22.sp),
-        ),
+        // Picking a device is part of signing in - not optional.
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
@@ -38,7 +36,7 @@ class PosDeviceScreen extends GetView<PosDeviceController> {
           ),
         ),
         title: Text(
-          'Switch POS',
+          'Choose POS device',
           style: getTextStyle(
             fontSize: 16.4,
             fontWeight: FontWeight.w500,
@@ -46,48 +44,52 @@ class PosDeviceScreen extends GetView<PosDeviceController> {
           ),
         ),
       ),
-      body: SafeArea(
-        top: false,
-        child: RefreshIndicator(
-          onRefresh: controller.fetchDevices,
-          child: Obx(() {
-            if (controller.isLoading.value && controller.devices.isEmpty) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (controller.devices.isEmpty) {
-              return ListView(
-                padding: EdgeInsets.all(24.w),
-                children: [
-                  SizedBox(height: 80.h),
-                  Text(
-                    'No POS devices have been set up yet.\nAdd one from the Business Admin '
-                    'dashboard under Store settings > POS devices.',
-                    textAlign: TextAlign.center,
-                    style: getTextStyle(
-                      fontSize: 14.4,
-                      color: AppColors.chipInactiveText,
+      body: PopScope(
+        canPop: false,
+        child: SafeArea(
+          top: false,
+          child: RefreshIndicator(
+            onRefresh: controller.fetchDevices,
+            child: Obx(() {
+              if (controller.isLoading.value && controller.devices.isEmpty) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (controller.devices.isEmpty) {
+                return ListView(
+                  padding: EdgeInsets.all(24.w),
+                  children: [
+                    SizedBox(height: 80.h),
+                    Text(
+                      'No active POS devices for this store.\nThe business manager '
+                      'can add one on the website under Settings > POS devices.',
+                      textAlign: TextAlign.center,
+                      style: getTextStyle(
+                        fontSize: 14.4,
+                        color: AppColors.chipInactiveText,
+                      ),
                     ),
-                  ),
-                ],
-              );
-            }
-            return ListView.separated(
-              padding: EdgeInsets.all(16.w),
-              itemCount: controller.devices.length,
-              separatorBuilder: (_, _) => SizedBox(height: 12.h),
-              itemBuilder: (context, index) {
-                final device = controller.devices[index];
-                final isSelected = controller.selectedDeviceId.value == device.id;
-                return _PosDeviceTile(
-                  device: device,
-                  isSelected: isSelected,
-                  onTap: controller.isSaving.value
-                      ? null
-                      : () => controller.selectDevice(device),
+                  ],
                 );
-              },
-            );
-          }),
+              }
+              return ListView.separated(
+                padding: EdgeInsets.all(16.w),
+                itemCount: controller.devices.length,
+                separatorBuilder: (_, _) => SizedBox(height: 12.h),
+                itemBuilder: (context, index) {
+                  final device = controller.devices[index];
+                  final isSelected =
+                      controller.selectedDeviceId.value == device.id;
+                  return _PosDeviceTile(
+                    device: device,
+                    isSelected: isSelected,
+                    onTap: device.inUse
+                        ? null
+                        : () => controller.select(device),
+                  );
+                },
+              );
+            }),
+          ),
         ),
       ),
     );
@@ -107,49 +109,54 @@ class _PosDeviceTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12.r),
-      child: Container(
-        padding: EdgeInsets.all(14.w),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-            color: isSelected ? AppColors.onboardingBackground : AppColors.cardBorder,
-            width: isSelected ? 1.5 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    device.name,
-                    style: getTextStyle(
-                      fontSize: 15.2,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    device.storeName ?? 'Unassigned store',
-                    style: getTextStyle(
-                      fontSize: 12.8,
-                      color: AppColors.chipInactiveText,
-                    ),
-                  ),
-                ],
-              ),
+    return Opacity(
+      opacity: device.inUse ? 0.45 : 1,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12.r),
+        child: Container(
+          padding: EdgeInsets.all(14.w),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12.r),
+            border: Border.all(
+              color: isSelected
+                  ? AppColors.onboardingBackground
+                  : AppColors.cardBorder,
+              width: isSelected ? 1.5 : 1,
             ),
-            if (isSelected)
-              Icon(
-                Iconsax.tick_circle,
-                color: AppColors.onboardingBackground,
-                size: 22.sp,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      device.name,
+                      style: getTextStyle(
+                        fontSize: 15.2,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      device.inUse ? 'In use on another device' : 'Available',
+                      style: getTextStyle(
+                        fontSize: 12.8,
+                        color: AppColors.chipInactiveText,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-          ],
+              if (isSelected)
+                Icon(
+                  Iconsax.tick_circle,
+                  color: AppColors.onboardingBackground,
+                  size: 22.sp,
+                ),
+            ],
+          ),
         ),
       ),
     );

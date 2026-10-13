@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/services/network_caller.dart';
+import '../../../core/services/permission_service.dart';
 import '../../../core/utils/constants/api_constants.dart';
 import '../../../core/utils/helpers/app_helper.dart';
 import '../../../routes/app_routes.dart';
@@ -41,6 +42,7 @@ class CustomerController extends GetxController {
 
   @override
   void onClose() {
+    pointsController.dispose();
     _searchDebounce?.cancel();
     searchController.dispose();
     super.onClose();
@@ -132,6 +134,40 @@ class CustomerController extends GetxController {
     }
     customer.value = updated;
     return true;
+  }
+
+  /// The business manager (anyone allowed to give discounts) can correct
+  /// a customer's loyalty points; cashiers only see them.
+  bool get canEditPoints => PermissionService.has(AppPermission.giveDiscount);
+
+  final pointsController = TextEditingController();
+  final isSavingPoints = false.obs;
+
+  Future<void> savePoints() async {
+    final current = customer.value;
+    final points = double.tryParse(pointsController.text.trim());
+    if (current.id.isEmpty || points == null || points < 0) {
+      AppHelperFunctions.showWarningSnackBar('Enter a valid number of points');
+      return;
+    }
+    isSavingPoints.value = true;
+    final response = await _networkCaller.patchRequest(
+      ApiConstants.customerPoints(current.id),
+      body: {'points': points},
+    );
+    isSavingPoints.value = false;
+    if (!response.isSuccess || response.responseData is! Map) {
+      AppHelperFunctions.showErrorSnackBar(response.errorMessage);
+      return;
+    }
+    final updated = CustomerModel.fromJson(
+      Map<String, dynamic>.from(response.responseData as Map),
+    );
+    final index = customers.indexWhere((item) => item.id == updated.id);
+    if (index != -1) customers[index] = updated;
+    customer.value = updated;
+    Get.back();
+    AppHelperFunctions.showSuccessSnackBar('Points updated');
   }
 
   void selectCustomer(CustomerModel selected) => customer.value = selected;

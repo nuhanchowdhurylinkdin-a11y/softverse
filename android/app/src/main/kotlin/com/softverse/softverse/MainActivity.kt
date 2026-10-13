@@ -21,6 +21,7 @@ class MainActivity : FlutterActivity() {
             this,
             flutterEngine.dartExecutor.binaryMessenger
         )
+        DownloadsBridge(this, flutterEngine.dartExecutor.binaryMessenger)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "softverse/app_settings")
             .setMethodCallHandler { call, result ->
                 when (call.method) {

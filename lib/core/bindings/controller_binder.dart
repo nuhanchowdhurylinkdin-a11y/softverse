@@ -21,6 +21,7 @@ import '../../features/support/controller/support_controller.dart';
 import '../../features/tax/controller/tax_controller.dart';
 import '../../features/transaction/controller/transaction_controller.dart';
 import '../../features/walkthrough/controller/walkthrough_controller.dart';
+import '../../features/app_lock/controller/app_lock_controller.dart';
 import '../services/sync_service.dart';
 import '../services/terminal_heartbeat_service.dart';
 
@@ -29,6 +30,7 @@ class ControllerBinder extends Bindings {
   void dependencies() {
     Get.lazyPut<ThemeController>(() => ThemeController(), fenix: true);
     Get.putAsync<SyncService>(() => SyncService().init(), permanent: true);
+    Get.put<AppLockController>(AppLockController(), permanent: true);
     Get.put<TerminalHeartbeatService>(
       TerminalHeartbeatService(),
       permanent: true,

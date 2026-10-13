@@ -8,6 +8,7 @@ import '../../../core/services/feature_settings.dart';
 import '../../../core/services/network_caller.dart';
 import '../../../core/services/kds_order_sender.dart';
 import '../../../core/services/storage_service.dart';
+import '../../store/controller/store_controller.dart';
 import '../../../core/utils/constants/api_constants.dart';
 import '../../../core/utils/constants/product_images.dart';
 import '../../../core/utils/helpers/app_helper.dart';
@@ -47,6 +48,9 @@ class InvoiceController extends GetxController {
   final amountDueValue = 0.0.obs;
   final isCollectingDuePayment = false.obs;
   final orderCreatedAt = Rxn<DateTime>();
+  final servedBy = RxnString();
+  final posName = RxnString();
+  final branchName = RxnString();
 
   final taxRate = 0.075;
   final _hasOrderData = false.obs;
@@ -118,7 +122,9 @@ class InvoiceController extends GetxController {
     invoiceNumber.value =
         order['orderNumber']?.toString() ?? invoiceNumber.value;
     checkoutOrderId.value = _cleanText(order['id']);
-    orderCreatedAt.value = DateTime.tryParse(order['createdAt']?.toString() ?? '');
+    orderCreatedAt.value = DateTime.tryParse(
+      order['createdAt']?.toString() ?? '',
+    );
     customerName.value =
         order['customerName']?.toString().trim().isNotEmpty == true
         ? order['customerName'].toString()
@@ -132,6 +138,9 @@ class InvoiceController extends GetxController {
     subtotalValue.value = _toDouble(order['subtotal']);
     taxValue.value = _toDouble(order['taxAmount']);
     discountValue.value = _toDouble(order['discountAmount']);
+    servedBy.value = _cleanText(order['createdByName']);
+    posName.value = _cleanText(order['posDeviceName']);
+    branchName.value = _storeName(_cleanText(order['storeId']));
     totalValue.value = _toDouble(order['totalAmount']);
     amountReceivedValue.value = _toDouble(order['amountReceived']);
     changeToReturnValue.value = _toDouble(order['changeToReturn']);
@@ -290,6 +299,17 @@ class InvoiceController extends GetxController {
     }
   }
 
+  String? _storeName(String? storeId) {
+    if (storeId == null) return null;
+    if (Get.isRegistered<StoreController>()) {
+      final match = Get.find<StoreController>().stores.firstWhereOrNull(
+        (store) => store.id == storeId,
+      );
+      if (match != null) return match.name;
+    }
+    return StorageService.storeId == storeId ? StorageService.storeName : null;
+  }
+
   void viewOriginalInvoice() {
     paymentType.value = PaymentType.cash;
     Get.toNamed(AppRoute.getInvoiceScreen());
@@ -321,6 +341,9 @@ class InvoiceController extends GetxController {
       changeToReturn: changeToReturn,
       amountDue: amountDue,
       paymentLabel: _printPaymentLabel,
+      branchName: branchName.value,
+      servedBy: servedBy.value,
+      posName: posName.value,
     );
     isPrinting.value = false;
   }
@@ -425,6 +448,9 @@ class InvoiceController extends GetxController {
       businessName: BusinessProfileService.name,
       businessAddress: BusinessProfileService.address,
       businessPhone: BusinessProfileService.phone,
+      branchName: branchName.value ?? StorageService.storeName,
+      servedBy: servedBy.value ?? StorageService.fullName,
+      posName: posName.value ?? StorageService.posDeviceName,
     );
   }
 

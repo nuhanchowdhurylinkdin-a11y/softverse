@@ -2,15 +2,15 @@ class PosDeviceModel {
   final String id;
   final String name;
   final String storeId;
-  final String? storeName;
-  final bool isActivated;
+
+  /// Another till is signed in as this device right now.
+  final bool inUse;
 
   const PosDeviceModel({
     required this.id,
     required this.name,
     required this.storeId,
-    this.storeName,
-    required this.isActivated,
+    this.inUse = false,
   });
 
   factory PosDeviceModel.fromApi(Map<String, dynamic> json) {
@@ -18,8 +18,7 @@ class PosDeviceModel {
       id: json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
       storeId: json['storeId']?.toString() ?? '',
-      storeName: json['storeName']?.toString(),
-      isActivated: json['status']?.toString() == 'activated',
+      inUse: json['inUse'] == true,
     );
   }
 }
