@@ -7,6 +7,7 @@ import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
 
 import '../utils/constants/api_constants.dart';
+import '../utils/helpers/currency.dart';
 import 'network_caller.dart';
 import 'offline_database_service.dart';
 
@@ -74,27 +75,14 @@ class BusinessProfileService {
   /// Business currency chosen on the website (Settings → Profile).
   static String get currency {
     _version.value;
-    final value = _cached()?['currency']?.toString().trim();
-    return (value == null || value.isEmpty) ? 'Dollar' : value;
+    return currencyCode(_cached()?['currency']?.toString());
   }
 
-  /// On-screen symbol for [currency].
-  static String get currencySymbol => switch (currency) {
-    'Dollar' => '\$',
-    'Euro' => '€',
-    'Pound' => '£',
-    'Taka' => 'Tk ',
-    final other => '$other ',
-  };
+  /// On-screen symbol for [currency] - any of the world's currencies.
+  static String get currencySymbol => currencyDisplaySymbol(currency);
 
-  /// Printer-safe symbol - thermal printers' default code page has no €/£.
-  static String get printCurrencySymbol => switch (currency) {
-    'Dollar' => '\$',
-    'Euro' => 'EUR ',
-    'Pound' => 'GBP ',
-    'Taka' => 'Tk ',
-    final other => '$other ',
-  };
+  /// Printer-safe symbol - thermal printers' default code page has no €/৳.
+  static String get printCurrencySymbol => currencyPrintSymbol(currency);
 
   /// Receipt language from the website's Receipt settings ("english", ...).
   static String get receiptLanguage {
