@@ -13,6 +13,7 @@ import '../../../core/utils/constants/api_constants.dart';
 import '../../../core/utils/constants/product_images.dart';
 import '../../../core/utils/helpers/app_helper.dart';
 import '../../../core/utils/helpers/invoice_pdf_exporter.dart';
+import '../../../core/utils/helpers/payment_receipt.dart';
 import '../../../routes/app_routes.dart';
 import '../../checkout/models/cart_item.dart';
 import '../../transaction/models/transaction_record.dart';
@@ -106,13 +107,16 @@ class InvoiceController extends GetxController {
 
   /// A due sale that's since been fully collected prints as paid - it used
   /// to keep printing "Due Payment" and an amount due forever.
+  /// Due and installment sales are on credit: the rest is collected later.
+  bool get _isCreditSale =>
+      paymentType.value == PaymentType.due ||
+      paymentType.value == PaymentType.installment;
+
   String get _printPaymentLabel =>
-      paymentType.value == PaymentType.due && amountDue <= 0
-      ? 'Paid'
-      : paymentType.value.label;
+      _isCreditSale && amountDue <= 0 ? 'Paid' : paymentType.value.label;
 
   bool get canCollectDuePayment =>
-      paymentType.value == PaymentType.due && amountDue > 0 && !isRefunded;
+      _isCreditSale && amountDue > 0 && !isRefunded;
 
   void loadFromOrder(
     Map<String, dynamic> order, {
@@ -257,46 +261,14 @@ class InvoiceController extends GetxController {
     }
     AppHelperFunctions.showSuccessSnackBar('Payment collected.');
 
-    // Hand the customer proof of payment: on the receipt printer when one
-    // is set up, otherwise the generated PDF via the save/share sheet.
-    final printed =
-        Get.isRegistered<PrinterController>() &&
-        await Get.find<PrinterController>().printPaymentReceipt(
-          orderNumber: invoiceNumber.value,
-          customerName: customerName.value,
-          dateTime: DateTime.now(),
-          previousDue: previousDue,
-          amountPaid: amount,
-          remainingDue: amountDue,
-        );
-    if (printed) return;
-
-    final paymentReceiptUrl = _cleanText(data['paymentReceiptUrl']);
-    if (paymentReceiptUrl != null) {
-      final file = await _downloadPaymentReceipt(paymentReceiptUrl);
-      if (file != null) await InvoicePdfExporter.saveToDevice(file);
-    }
-  }
-
-  /// The payment-collection receipt lives at a plain static URL (like a
-  /// logo/upload, not the auth-gated `/checkout/:id/receipt`), so unlike
-  /// [_downloadBackendReceipt] this needs no bearer token.
-  Future<File?> _downloadPaymentReceipt(String url) async {
-    try {
-      final resolved = Uri.parse(url).isAbsolute
-          ? url
-          : ApiConstants.resolveAssetUrl(url);
-      final response = await http.get(Uri.parse(resolved));
-      if (response.statusCode != 200) return null;
-
-      final filename =
-          'Payment_${invoiceNumber.value.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_')}.pdf';
-      final file = File('${Directory.systemTemp.path}/$filename');
-      await file.writeAsBytes(response.bodyBytes, flush: true);
-      return file;
-    } catch (_) {
-      return null;
-    }
+    await handOverPaymentReceipt(
+      orderNumber: invoiceNumber.value,
+      customerName: customerName.value,
+      previousDue: previousDue,
+      amountPaid: amount,
+      remainingDue: amountDue,
+      paymentReceiptUrl: _cleanText(data['paymentReceiptUrl']),
+    );
   }
 
   String? _storeName(String? storeId) {
