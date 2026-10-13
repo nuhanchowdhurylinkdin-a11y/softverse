@@ -1,7 +1,9 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:softverse/core/models/response_data.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:softverse/core/services/network_caller.dart';
+import 'package:softverse/core/services/storage_service.dart';
 import 'package:softverse/features/home/data/home_repository.dart';
 import 'package:softverse/features/inventory/data/inventory_repository.dart';
 import 'package:softverse/features/item/data/category_repository.dart';
@@ -39,6 +41,28 @@ void main() {
       'https://phase-one.test/inventory?stockStatus=low_stock',
       'https://phase-one.test/inventory?stockStatus=out_of_stock',
     ]);
+  });
+
+  test('item lists ask for this till\'s store only', () async {
+    SharedPreferences.setMockInitialValues({
+      'businessId': 'business-1',
+      'storeId': 'store-1',
+      'storeBusinessId': 'business-1',
+    });
+    await StorageService.init();
+    final network = _RecordingNetworkCaller();
+
+    await HttpHomeRepository(networkCaller: network).fetchItems();
+    await HttpInventoryRepository(
+      networkCaller: network,
+    ).fetchInventory(stockStatus: 'low_stock');
+
+    expect(network.urls, [
+      'https://phase-one.test/inventory?storeId=store-1',
+      'https://phase-one.test/inventory?storeId=store-1&stockStatus=low_stock',
+    ]);
+    SharedPreferences.setMockInitialValues({});
+    await StorageService.init();
   });
 
   test(

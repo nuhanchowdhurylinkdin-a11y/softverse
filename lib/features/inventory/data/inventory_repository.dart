@@ -1,5 +1,6 @@
 import '../../../core/models/response_data.dart';
 import '../../../core/services/network_caller.dart';
+import '../../../core/services/storage_service.dart';
 import '../../../core/utils/constants/api_constants.dart';
 
 abstract interface class InventoryRepository {
@@ -16,11 +17,16 @@ class HttpInventoryRepository implements InventoryRepository {
 
   @override
   Future<ResponseData> fetchInventory({String? stockStatus}) {
+    final query = {
+      'storeId': ?StorageService.storeId,
+      'stockStatus': ?stockStatus,
+    };
     final uri = Uri.parse(ApiConstants.inventory);
-    final url = stockStatus == null
-        ? uri.toString()
-        : uri.replace(queryParameters: {'stockStatus': stockStatus}).toString();
-    return _networkCaller.getRequest(url);
+    return _networkCaller.getRequest(
+      query.isEmpty
+          ? uri.toString()
+          : uri.replace(queryParameters: query).toString(),
+    );
   }
 
   @override
