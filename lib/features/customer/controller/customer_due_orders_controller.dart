@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../core/services/network_caller.dart';
 import '../../../core/utils/constants/api_constants.dart';
 import '../../../core/utils/helpers/app_helper.dart';
+import '../../../core/utils/helpers/payment_receipt.dart';
 import '../models/customer_due_model.dart';
 import '../models/due_order_model.dart';
 
@@ -15,8 +16,9 @@ class CustomerDueOrdersController extends GetxController {
   final isLoading = false.obs;
   final collectingOrderId = RxnString();
 
-  CustomerDueModel? get _due =>
-      Get.arguments is CustomerDueModel ? Get.arguments as CustomerDueModel : null;
+  CustomerDueModel? get _due => Get.arguments is CustomerDueModel
+      ? Get.arguments as CustomerDueModel
+      : null;
 
   /// Walk-in due sales have no customerId at all (no FK, and no name to
   /// even match by) - they're reached through a dedicated "unassigned"
@@ -52,8 +54,7 @@ class CustomerDueOrdersController extends GetxController {
     }
 
     final data = Map<String, dynamic>.from(response.responseData as Map);
-    customerName.value =
-        data['customerName']?.toString() ?? customerName.value;
+    customerName.value = data['customerName']?.toString() ?? customerName.value;
     totalDue.value = double.tryParse(data['totalDue']?.toString() ?? '') ?? 0;
     final raw = data['orders'];
     orders.assignAll(
@@ -93,5 +94,16 @@ class CustomerDueOrdersController extends GetxController {
 
     AppHelperFunctions.showSuccessSnackBar('Payment collected.');
     await fetchDueOrders();
+    final data = response.responseData is Map
+        ? Map<String, dynamic>.from(response.responseData as Map)
+        : const <String, dynamic>{};
+    await handOverPaymentReceipt(
+      orderNumber: order.orderNumber,
+      customerName: customerName.value,
+      previousDue: order.amountDue,
+      amountPaid: amount,
+      remainingDue: order.amountDue - amount,
+      paymentReceiptUrl: data['paymentReceiptUrl']?.toString(),
+    );
   }
 }

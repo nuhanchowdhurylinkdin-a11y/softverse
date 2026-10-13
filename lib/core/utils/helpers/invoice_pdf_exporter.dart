@@ -132,7 +132,9 @@ class InvoicePdfExporter {
     required String businessPhone,
     List<String> saleInfo = const [],
   }) {
-    final isDue = paymentLabel == 'Due Payment';
+    final isDue =
+        paymentLabel == 'Due Payment' ||
+        (paymentLabel == 'Installment' && amountDue > 0);
     // Same wording as the printed receipt, in the website's receipt language.
     String l(String key, [String? english]) {
       final translated = ReceiptLabels.t(key);
