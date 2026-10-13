@@ -251,6 +251,12 @@ class PrinterController extends GetxController {
     return connected;
   }
 
+  /// A sale still on credit - due, or an installment not yet paid off -
+  /// shows what was paid so far and what is still owed, not "Change".
+  static bool _owesBalance(String paymentLabel, double amountDue) =>
+      paymentLabel == 'Due Payment' ||
+      (paymentLabel == 'Installment' && amountDue > 0);
+
   Future<bool> printTest(PrinterModel printer) async {
     if (printer.isVirtual) {
       await _showVirtualPrint(
@@ -428,7 +434,7 @@ class PrinterController extends GetxController {
       ),
       // A due/credit sale hasn't actually received anything yet - showing
       // "Received"/"Change" on it would make it look already paid in full.
-      if (paymentLabel == 'Due Payment') ...[
+      if (_owesBalance(paymentLabel, amountDue)) ...[
         if (amountReceived > 0)
           ...generator.text(
             '${ReceiptLabels.t('Paid so far')}: ${_money(amountReceived)}',
@@ -945,7 +951,7 @@ Virtual printer is ready.
     output
       ..writeln('${ReceiptLabels.t('Tax')}: ${_money(tax)}')
       ..writeln('${ReceiptLabels.t('Total')}: ${_money(totalAmount)}');
-    if (paymentLabel == 'Due Payment') {
+    if (_owesBalance(paymentLabel, amountDue)) {
       if (amountReceived > 0) {
         output.writeln(
           '${ReceiptLabels.t('Paid so far')}: ${_money(amountReceived)}',

@@ -164,8 +164,18 @@ class NetworkCaller {
       final refreshed = await _refreshTokens();
       if (refreshed) return retry();
     }
-    return _handleResponse(response);
+    final result = _handleResponse(response);
+    // The business's Softverse access ended (free period over, or suspended
+    // by Softverse): sign out instead of failing every request from here on.
+    if (response.statusCode == 403 &&
+        result.errorMessage.contains(accessEndedMarker)) {
+      await SessionLifecycleService.endSession();
+    }
+    return result;
   }
+
+  /// Part of the server's message when a business's access has ended.
+  static const accessEndedMarker = 'access has ended';
 
   ResponseData _handleResponse(http.Response response) {
     log('Response Status: ${response.statusCode}');
